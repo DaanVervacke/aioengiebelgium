@@ -1,0 +1,2 @@
+<!-- captured GET https://account.engie.be/authorize/resume -> HTTP 302; content-type: text/html; charset=utf-8; location: /u/mfa-sms-challenge?state=FAKESTATE01xxxxxxxxxxxxxxxxxxxx&ui_locales=nl ; sanitized -->
+<p>Found. Redirecting to <a href="/u/mfa-sms-challenge?state=FAKESTATE01xxxxxxxxxxxxxxxxxxxx&amp;ui_locales=nl">/u/mfa-sms-challenge?state=FAKESTATE01xxxxxxxxxxxxxxxxxxxx&amp;ui_locales=nl</a></p>

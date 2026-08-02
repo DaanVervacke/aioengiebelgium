@@ -1,0 +1,162 @@
+{
+  "history": [
+    {
+      "electricityInjection": {
+        "cost": 26.1,
+        "kWh": 607.901
+      },
+      "electricityOfftake": {
+        "cost": 31.29,
+        "kWh": 15.756
+      },
+      "yearMonth": "2025-08"
+    },
+    {
+      "electricityInjection": {
+        "cost": 12.94,
+        "kWh": 326.912
+      },
+      "electricityOfftake": {
+        "cost": 28.16,
+        "kWh": 6.784
+      },
+      "yearMonth": "2025-09"
+    },
+    {
+      "electricityInjection": {
+        "cost": 1.65,
+        "kWh": 35.403
+      },
+      "electricityOfftake": {
+        "cost": 45.48,
+        "kWh": 71.491
+      },
+      "yearMonth": "2025-10"
+    },
+    {
+      "electricityInjection": {
+        "cost": 0.84,
+        "kWh": 14.377
+      },
+      "electricityOfftake": {
+        "cost": 91.95,
+        "kWh": 282.497
+      },
+      "yearMonth": "2025-11"
+    },
+    {
+      "electricityInjection": {
+        "cost": 1.14,
+        "kWh": 15.789
+      },
+      "electricityOfftake": {
+        "cost": 113.38,
+        "kWh": 392.166
+      },
+      "yearMonth": "2025-12"
+    },
+    {
+      "electricityInjection": {
+        "cost": 0.51,
+        "kWh": 5.336
+      },
+      "electricityOfftake": {
+        "cost": 121.96,
+        "kWh": 387.357
+      },
+      "yearMonth": "2026-01"
+    },
+    {
+      "electricityInjection": {
+        "cost": 1.44,
+        "kWh": 38.176
+      },
+      "electricityOfftake": {
+        "cost": 71.51,
+        "kWh": 204.54
+      },
+      "yearMonth": "2026-02"
+    },
+    {
+      "electricityInjection": {
+        "cost": 8.91,
+        "kWh": 335.484
+      },
+      "electricityOfftake": {
+        "cost": 33.68,
+        "kWh": 20.316
+      },
+      "yearMonth": "2026-03"
+    },
+    {
+      "electricityInjection": {
+        "cost": 12.39,
+        "kWh": 319.047
+      },
+      "electricityOfftake": {
+        "cost": 28.33,
+        "kWh": 83.077
+      },
+      "yearMonth": "2026-04"
+    },
+    {
+      "electricityInjection": {
+        "cost": 25.69,
+        "kWh": 386.874
+      },
+      "electricityOfftake": {
+        "cost": 26.4,
+        "kWh": 29.854
+      },
+      "yearMonth": "2026-05"
+    },
+    {
+      "electricityInjection": {
+        "cost": 54.09,
+        "kWh": 493.443
+      },
+      "electricityOfftake": {
+        "cost": 31.03,
+        "kWh": 10.638
+      },
+      "yearMonth": "2026-06"
+    },
+    {
+      "electricityInjection": {
+        "cost": 48.88,
+        "kWh": 552.147
+      },
+      "electricityOfftake": {
+        "cost": 31.19,
+        "kWh": 8.066
+      },
+      "yearMonth": "2026-07"
+    },
+    {
+      "yearMonth": "2026-08"
+    }
+  ],
+  "month": {
+    "energy": {},
+    "simulatedCost": {
+      "electricityInjection": {
+        "amount": 10.0
+      },
+      "electricityOfftake": {
+        "amount": 10.0
+      },
+      "total": 52.83
+    },
+    "simulatedEnergy": {
+      "electricityInjection": {
+        "kWh": 708.934
+      },
+      "electricityOfftake": {
+        "kWh": 131.389
+      }
+    }
+  },
+  "partialHistoricalData": true,
+  "partialYearMonthData": true,
+  "yearMonth": "2026-08"
+}

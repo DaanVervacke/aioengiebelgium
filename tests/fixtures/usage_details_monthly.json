@@ -1,0 +1,246 @@
+{
+  "items": [
+    {
+      "start": "2026-07-01T00:00:00+02:00",
+      "end": "2026-08-01T00:00:00+02:00",
+      "partialData": false,
+      "energy": {
+        "electricity": {
+          "injection": {
+            "kWhSum": 211.867,
+            "parts": [
+              {
+                "kWh": 211.867,
+                "percentageOfSum": 1.0,
+                "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "supplierParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "kWh": 211.867,
+                "percentageOfSum": 1.0
+              }
+            ],
+            "distributionParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "kWh": 211.867,
+                "percentageOfSum": 1.0
+              }
+            ]
+          },
+          "netto": -119.615,
+          "offtake": {
+            "kWhSum": 92.252,
+            "parts": [
+              {
+                "kWh": 92.252,
+                "percentageOfSum": 1.0,
+                "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "supplierParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "kWh": 92.252,
+                "percentageOfSum": 1.0
+              }
+            ],
+            "distributionParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "kWh": 92.252,
+                "percentageOfSum": 1.0
+              }
+            ]
+          }
+        },
+        "gas": {
+          "kWh": 19.325
+        }
+      },
+      "costs": {
+        "gasAndElectricitySum": 64.63,
+        "electricity": {
+          "injection": {
+            "amountSum": 8.71,
+            "parts": [
+              {
+                "amount": 8.71,
+                "percentageOfSum": 1.0,
+                "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "supplierParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "amount": 8.71,
+                "percentageOfSum": 1.0
+              }
+            ],
+            "distributionParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "amount": 8.71,
+                "percentageOfSum": 1.0
+              }
+            ]
+          },
+          "netto": 48.62,
+          "offtake": {
+            "amountSum": 57.33,
+            "parts": [
+              {
+                "amount": 57.33,
+                "percentageOfSum": 1.0,
+                "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "supplierParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "amount": 57.33,
+                "percentageOfSum": 1.0
+              }
+            ],
+            "distributionParts": [
+              {
+                "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+                "amount": 57.33,
+                "percentageOfSum": 1.0
+              }
+            ]
+          }
+        },
+        "gas": 16.01
+      },
+      "simulatedEnergy": {}
+    }
+  ],
+  "total": {
+    "start": "2026-07-01T00:00:00+02:00",
+    "end": "2026-08-01T00:00:00+02:00",
+    "partialData": false,
+    "energy": {
+      "electricity": {
+        "injection": {
+          "kWhSum": 211.867,
+          "parts": [
+            {
+              "kWh": 211.867,
+              "percentageOfSum": 1.0,
+              "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+            }
+          ],
+          "supplierParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "kWh": 211.867,
+              "percentageOfSum": 1.0
+            }
+          ],
+          "distributionParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "kWh": 211.867,
+              "percentageOfSum": 1.0
+            }
+          ]
+        },
+        "netto": -119.615,
+        "offtake": {
+          "kWhSum": 92.252,
+          "parts": [
+            {
+              "kWh": 92.252,
+              "percentageOfSum": 1.0,
+              "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+            }
+          ],
+          "supplierParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "kWh": 92.252,
+              "percentageOfSum": 1.0
+            }
+          ],
+          "distributionParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "kWh": 92.252,
+              "percentageOfSum": 1.0
+            }
+          ]
+        }
+      },
+      "gas": {
+        "kWh": 19.325
+      }
+    },
+    "costs": {
+      "gasAndElectricitySum": 64.63,
+      "electricity": {
+        "injection": {
+          "amountSum": 8.71,
+          "parts": [
+            {
+              "amount": 8.71,
+              "percentageOfSum": 1.0,
+              "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+            }
+          ],
+          "supplierParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "amount": 8.71,
+              "percentageOfSum": 1.0
+            }
+          ],
+          "distributionParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "amount": 8.71,
+              "percentageOfSum": 1.0
+            }
+          ]
+        },
+        "netto": 48.62,
+        "offtake": {
+          "amountSum": 57.33,
+          "parts": [
+            {
+              "amount": 57.33,
+              "percentageOfSum": 1.0,
+              "supplierTimeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "distributionTimeOfUseTimeSlotCode": "TOTAL_HOURS"
+            }
+          ],
+          "supplierParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "amount": 57.33,
+              "percentageOfSum": 1.0
+            }
+          ],
+          "distributionParts": [
+            {
+              "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+              "amount": 57.33,
+              "percentageOfSum": 1.0
+            }
+          ]
+        }
+      },
+      "gas": 16.01
+    },
+    "simulatedEnergy": {}
+  }
+}

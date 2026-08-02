@@ -1,0 +1,119 @@
+[build-system]
+requires = ["uv_build>=0.11.32,<0.13"]
+build-backend = "uv_build"
+
+[project]
+name = "aioengiebelgium"
+version = "0.1.0"
+description = "Unofficial asynchronous Python library to interact with the ENGIE Belgium API"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.14"
+authors = [{ name = "Daan Vervacke", email = "daan.vervacke@proton.me" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Home Automation",
+    "Typing :: Typed",
+]
+keywords = [
+    "engie",
+    "belgium",
+    "energy",
+    "api",
+    "asyncio",
+    "aiohttp",
+    "epex",
+    "home-assistant",
+]
+dependencies = ["aiohttp>=3.14.1"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.3.0",
+    "aioresponses>=0.7.9",
+    "syrupy>=5.0",
+    "mypy>=1.13",
+    "ruff>=0.16",
+    "coverage[toml]>=7.15.2",
+    "pip-audit>=2.7",
+    "pyyaml>=6.0.2",
+    "types-pyyaml>=6.0.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/DaanVervacke/aioengiebelgium"
+Repository = "https://github.com/DaanVervacke/aioengiebelgium"
+Issues = "https://github.com/DaanVervacke/aioengiebelgium/issues"
+Changelog = "https://github.com/DaanVervacke/aioengiebelgium/blob/main/CHANGELOG.md"
+
+[tool.uv]
+required-version = ">=0.11.32,<0.13"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = [".claude", ".agents", ".codex", ".continue"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",       # pydocstyle (we keep docstrings minimal)
+    "COM812",  # trailing-comma (conflicts with formatter)
+    "ISC001",  # single-line-implicit-string-concatenation (conflicts with formatter)
+    "ANN401",  # Any in parser/auth signatures — inputs are genuinely untyped API dicts
+    "PLR0913", # many-arg functions — request helpers and auth flows need them
+    "PLR0917", # many positional args — same reason
+    "TC001",   # TYPE_CHECKING — PEP 649 (Python 3.14) makes these moot
+    "TC002",   # TYPE_CHECKING for third-party imports — same reason
+    "TC003",   # TYPE_CHECKING for stdlib imports — same reason
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/check.py" = [
+    "T201", # gate runner prints the command it is about to run
+    "S603", # subprocess runs a fixed, hardcoded command tuple
+]
+"scripts/check_bruno_drift.py" = [
+    "T201", # the drift findings are this script's whole interface
+]
+"tests/**" = [
+    "S101",    # assert in tests
+    "S105",    # hardcoded test tokens
+    "S106",    # hardcoded password args
+    "SLF001",  # private member access in tests
+    "PLR2004", # magic values in assertions
+    "CPY001",  # copyright header
+    "RUF059",  # unpacked unused vars (_refresh)
+]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+filterwarnings = [
+    "error",
+    "ignore:Unclosed client session:ResourceWarning",
+    "ignore:Unclosed connector:ResourceWarning",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 98
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
