@@ -7,8 +7,6 @@ Requires Python >= 3.14.
 
 ## Install
 
-Not yet on PyPI. Install from git:
-
 ```bash
 pip install aioengiebelgium
 ```
