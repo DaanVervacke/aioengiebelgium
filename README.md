@@ -10,7 +10,7 @@ Requires Python >= 3.14.
 Not yet on PyPI. Install from git:
 
 ```bash
-pip install git+https://github.com/DaanVervacke/aioengiebelgium
+pip install aioengiebelgium
 ```
 
 ## Development
