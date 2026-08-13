@@ -112,5 +112,5 @@ docs: |-
   state, so the tests here accept it.
 
   Parsed by parsers.py: publicationTime, marketDate,
-  timeSeries[].{period,value}. Raw values are EUR/MWh; the client
+  timeSeries[].{period,value}. Raw values are EUR/MWh. The client
   divides by 1000 (const.py::EPEX_MWH_TO_KWH) to get EUR/kWh.

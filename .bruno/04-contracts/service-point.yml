@@ -59,7 +59,7 @@ docs: |-
   Runs after Energy contracts because that is what seeds ENGIE_EAN.
   Running it earlier drops the EAN from the path and ENGIE
   answers 404. ENGIE_EAN must carry the delivery-point suffix
-  (e.g. _ID1), exactly as servicePointNumber delivers it; a bare
+  (e.g. _ID1), exactly as servicePointNumber delivers it. A bare
   EAN answers 404 Ean not found.
 
   __init__.py calls this per EAN to tell electricity from gas: division

@@ -72,7 +72,7 @@ docs: |-
   same window re-published after midnight), each with startTime and
   endTime as ISO-8601 with explicit offsets.
 
-  The API only ever exposes the next window; a consumer that wants
+  The API only ever exposes the next window. A consumer that wants
   history has to archive past ones itself.
 
   The endpoint is not gated on dynamic-tariff status, so the
