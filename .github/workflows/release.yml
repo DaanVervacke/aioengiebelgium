@@ -58,4 +58,8 @@ jobs:
 
       # Trusted Publishing: the `aioengiebelgium` project on PyPI must be
       # configured (once, manually) to trust this repo + workflow + environment.
+      # skip-existing: an accidental re-tag of a published version no-ops
+      # instead of failing the job on PyPI's duplicate-file rejection.
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          skip-existing: true
