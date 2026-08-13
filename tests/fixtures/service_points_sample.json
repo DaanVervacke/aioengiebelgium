@@ -1,4 +1,30 @@
 {
-  "541448820000000001": "ELECTRICITY",
-  "541448820000000002": "GAS"
+  "chargingStation": false,
+  "division": "ELECTRICITY",
+  "ean": "541448860000000001_ID1",
+  "eanBlocked": null,
+  "marketDetails": {
+    "dgo": "FLUVIUS",
+    "grid": "FLUVIUS_WEST",
+    "installation": {
+      "RTPComponentID": "RTP0000001",
+      "budgetMeter": false,
+      "budgetMeterFromDate": null,
+      "energySharingList": [],
+      "gasConversionCoefficient": null,
+      "installationId": "4100000001",
+      "meteringConfiguration": {
+        "meterRegime": null,
+        "meteringMethodFrequency": "MONTHLY",
+        "meteringMethodType": "SMART_READING",
+        "meteringReadsForInformation": "NOT_APPLICABLE",
+        "registerTypeConfiguration": "TOTAL_HOURS",
+        "smartMeterRegime": "THREE",
+        "supplierBillingFrequency": "MONTHLY"
+      },
+      "serviceComponent": "CONSTRAINT_COMMERCIALIZATION_OF_INJECTION"
+    }
+  },
+  "premisesId": "5100000001",
+  "type": "DEREGULATED"
 }

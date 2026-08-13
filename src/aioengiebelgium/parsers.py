@@ -35,6 +35,7 @@ from .models import (
     HappyHourMonthData,
     HappyHourMonthReport,
     HappyHourWindow,
+    MeteringConfiguration,
     MonthlyPeaks,
     MonthReportHistoryEntry,
     Peak,
@@ -43,6 +44,8 @@ from .models import (
     PricesResponse,
     ProductConfiguration,
     ServicePoint,
+    ServicePointInstallation,
+    ServicePointMarketDetails,
     SimulatedCost,
     SimulatedCostFlow,
     SimulatedEnergy,
@@ -61,11 +64,10 @@ from .models import (
     UsageItem,
     UsageTouCrossPart,
     UsageTouPart,
+    bare_ean,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-_EAN_LENGTH = 18
 
 
 def _as_float(value: Any) -> float:
@@ -781,10 +783,52 @@ def parse_usage_details(data: dict[str, Any]) -> UsageDetailsResponse:
     return UsageDetailsResponse(items=tuple(items), total=total)
 
 
-def parse_service_point(data: dict[str, Any]) -> ServicePoint:
-    ean_map = {
-        k: v
-        for k, v in data.items()
-        if isinstance(k, str) and isinstance(v, str) and k.isdigit() and len(k) == _EAN_LENGTH
-    }
-    return ServicePoint(ean_energy_types=MappingProxyType(ean_map))
+def _parse_metering_configuration(sub: Any) -> MeteringConfiguration | None:
+    if not isinstance(sub, dict):
+        return None
+    return MeteringConfiguration(
+        metering_method_frequency=_as_str_or_none(sub.get("meteringMethodFrequency")),
+        metering_method_type=_as_str_or_none(sub.get("meteringMethodType")),
+        metering_reads_for_information=_as_str_or_none(sub.get("meteringReadsForInformation")),
+        register_type_configuration=_as_str_or_none(sub.get("registerTypeConfiguration")),
+        smart_meter_regime=_as_str_or_none(sub.get("smartMeterRegime")),
+        supplier_billing_frequency=_as_str_or_none(sub.get("supplierBillingFrequency")),
+    )
+
+
+def _parse_service_point_installation(sub: Any) -> ServicePointInstallation | None:
+    if not isinstance(sub, dict):
+        return None
+    return ServicePointInstallation(
+        installation_id=_as_str_or_none(sub.get("installationId")),
+        rtp_component_id=_as_str_or_none(sub.get("RTPComponentID")),
+        budget_meter=bool(sub.get("budgetMeter")),
+        service_component=_as_str_or_none(sub.get("serviceComponent")),
+        metering_configuration=_parse_metering_configuration(sub.get("meteringConfiguration")),
+    )
+
+
+def _parse_service_point_market_details(sub: Any) -> ServicePointMarketDetails | None:
+    if not isinstance(sub, dict):
+        return None
+    return ServicePointMarketDetails(
+        dgo=_as_str_or_none(sub.get("dgo")),
+        grid=_as_str_or_none(sub.get("grid")),
+        installation=_parse_service_point_installation(sub.get("installation")),
+    )
+
+
+def parse_service_point(data: dict[str, Any], requested_ean: str) -> ServicePoint:
+    division = _as_str_or_none(data.get("division"))
+    if division is None:
+        _LOGGER.debug("service point: missing division, energy-type mapping left empty")
+    ean_map = {} if division is None else {bare_ean(requested_ean): division}
+    return ServicePoint(
+        ean_energy_types=MappingProxyType(ean_map),
+        ean=_as_str_or_none(data.get("ean")),
+        division=division,
+        type=_as_str_or_none(data.get("type")),
+        charging_station=bool(data.get("chargingStation")),
+        premises_id=_as_str_or_none(data.get("premisesId")),
+        market_details=_parse_service_point_market_details(data.get("marketDetails")),
+    )

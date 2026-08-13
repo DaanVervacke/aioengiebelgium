@@ -173,7 +173,7 @@ class EngieBeClient:
         return await self._call(ENERGY_CONTRACTS, args)
 
     async def async_get_service_point(self, ean: str) -> ServicePoint:
-        """Fetch service point details for an EAN."""
+        """Fetch service point details for an EAN with its delivery-point suffix (e.g. _ID1)."""
         return await self._call(SERVICE_POINT, EanArgs(ean=ean))
 
     async def async_get_customer_account_relations(self) -> CustomerAccountRelations:

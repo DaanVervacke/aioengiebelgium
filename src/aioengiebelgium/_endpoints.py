@@ -253,7 +253,7 @@ SERVICE_POINT: Endpoint[EanArgs, ServicePoint] = Endpoint(
     method="GET",
     url=lambda a: f"{PREMISES_BASE_URL}/service-points/{a.ean}",
     user_agent=USER_AGENT_BROWSER,
-    parse=lambda raw, _a: parse_service_point(raw),
+    parse=lambda raw, a: parse_service_point(raw, a.ean),
 )
 
 CUSTOMER_ACCOUNT_RELATIONS: Endpoint[NoArgs, CustomerAccountRelations] = Endpoint(

@@ -664,7 +664,45 @@ class UsageDetailsResponse:
 
 
 @dataclass(frozen=True, slots=True)
+class MeteringConfiguration:
+    """Metering configuration of a service point installation."""
+
+    metering_method_frequency: str | None = None
+    metering_method_type: str | None = None
+    metering_reads_for_information: str | None = None
+    register_type_configuration: str | None = None
+    smart_meter_regime: str | None = None
+    supplier_billing_frequency: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ServicePointInstallation:
+    """Installation details of a service point."""
+
+    installation_id: str | None = None
+    rtp_component_id: str | None = None
+    budget_meter: bool = False
+    service_component: str | None = None
+    metering_configuration: MeteringConfiguration | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ServicePointMarketDetails:
+    """Market details of a service point."""
+
+    dgo: str | None = None
+    grid: str | None = None
+    installation: ServicePointInstallation | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ServicePoint:
     """Response from the service-point endpoint."""
 
     ean_energy_types: Mapping[str, str]
+    ean: str | None = None
+    division: str | None = None
+    type: str | None = None
+    charging_station: bool = False
+    premises_id: str | None = None
+    market_details: ServicePointMarketDetails | None = None

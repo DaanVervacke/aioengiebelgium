@@ -3,6 +3,7 @@
 import logging
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
+from functools import partial
 from itertools import pairwise
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -570,17 +571,117 @@ def test_parse_usage_details_keeps_raw_supplier_tariff_slot_codes() -> None:
     assert offtake.supplier_parts[0].slot_code == "S_TOU1_OFFTAKE_PEAK"
 
 
-def test_parse_service_point_drops_non_ean_keys() -> None:
-    data = {
-        "541448820000000001": "ELECTRICITY",
-        "servicePointId": "SP-123",
-        "12345": "GAS",
-        "5414488200000000012": "GAS",
-        "54144882000000000a": "GAS",
-        "541448820000000002": None,
+@pytest.mark.parametrize(
+    ("payload", "expected"),
+    [
+        pytest.param(
+            {
+                "division": "ELECTRICITY",
+                "ean": "541448820000000001_ID1",
+                "premisesId": "5100000001",
+                "type": "DEREGULATED",
+            },
+            {"541448820000000001": "ELECTRICITY"},
+            id="electricity",
+        ),
+        pytest.param({"division": "GAS"}, {"541448820000000001": "GAS"}, id="gas"),
+        pytest.param(
+            {"ean": "541448820000000001_ID1", "type": "DEREGULATED"},
+            {},
+            id="missing_division",
+        ),
+        pytest.param({"division": 7}, {}, id="non_string_division"),
+    ],
+)
+def test_parse_service_point_keys_division_by_bare_requested_ean(
+    payload: dict[str, Any],
+    expected: dict[str, str],
+) -> None:
+    result = parse_service_point(payload, "541448820000000001_ID1")
+    assert dict(result.ean_energy_types) == expected
+
+
+def test_parse_service_point_models_market_details() -> None:
+    payload = {
+        "chargingStation": False,
+        "division": "ELECTRICITY",
+        "ean": "541448820000000001_ID1",
+        "marketDetails": {
+            "dgo": "FLUVIUS",
+            "grid": "FLUVIUS_WEST",
+            "installation": {
+                "RTPComponentID": "RTP0000001",
+                "budgetMeter": False,
+                "installationId": "4100000001",
+                "meteringConfiguration": {
+                    "meteringMethodFrequency": "MONTHLY",
+                    "meteringMethodType": "SMART_READING",
+                    "meteringReadsForInformation": "NOT_APPLICABLE",
+                    "registerTypeConfiguration": "TOTAL_HOURS",
+                    "smartMeterRegime": "THREE",
+                    "supplierBillingFrequency": "MONTHLY",
+                },
+                "serviceComponent": "CONSTRAINT_COMMERCIALIZATION_OF_INJECTION",
+            },
+        },
+        "premisesId": "5100000001",
+        "type": "DEREGULATED",
     }
-    result = parse_service_point(data)
-    assert dict(result.ean_energy_types) == {"541448820000000001": "ELECTRICITY"}
+    result = parse_service_point(payload, "541448820000000001_ID1")
+    assert result.ean == "541448820000000001_ID1"
+    assert result.division == "ELECTRICITY"
+    assert result.type == "DEREGULATED"
+    assert result.charging_station is False
+    assert result.premises_id == "5100000001"
+    details = result.market_details
+    assert details is not None
+    assert details.dgo == "FLUVIUS"
+    assert details.grid == "FLUVIUS_WEST"
+    installation = details.installation
+    assert installation is not None
+    assert installation.installation_id == "4100000001"
+    assert installation.rtp_component_id == "RTP0000001"
+    assert installation.budget_meter is False
+    assert installation.service_component == "CONSTRAINT_COMMERCIALIZATION_OF_INJECTION"
+    config = installation.metering_configuration
+    assert config is not None
+    assert config.metering_method_frequency == "MONTHLY"
+    assert config.metering_method_type == "SMART_READING"
+    assert config.metering_reads_for_information == "NOT_APPLICABLE"
+    assert config.register_type_configuration == "TOTAL_HOURS"
+    assert config.smart_meter_regime == "THREE"
+    assert config.supplier_billing_frequency == "MONTHLY"
+
+
+def test_parse_service_point_partial_market_details() -> None:
+    payload = {
+        "division": "GAS",
+        "marketDetails": {"dgo": "ORES", "installation": {"budgetMeter": True}},
+    }
+    result = parse_service_point(payload, "541448820000000001_ID1")
+    details = result.market_details
+    assert details is not None
+    assert details.dgo == "ORES"
+    assert details.grid is None
+    installation = details.installation
+    assert installation is not None
+    assert installation.budget_meter is True
+    assert installation.installation_id is None
+    assert installation.metering_configuration is None
+
+    no_installation = parse_service_point(
+        {"division": "GAS", "marketDetails": {"dgo": "ORES"}},
+        "541448820000000001_ID1",
+    )
+    assert no_installation.market_details is not None
+    assert no_installation.market_details.installation is None
+
+
+def test_parse_service_point_logs_missing_division(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.DEBUG, logger="aioengiebelgium.parsers"):
+        result = parse_service_point({"ean": "541448820000000001_ID1"}, "541448820000000001_ID1")
+    assert dict(result.ean_energy_types) == {}
+    assert "missing division" in caplog.text
 
 
 def test_parse_customer_account_relations_null_consumption_address() -> None:
@@ -1001,8 +1102,8 @@ _NULLED_PAYLOADS = [
         id="usage_details",
     ),
     pytest.param(
-        parse_service_point,
-        {"541448820000000001": None, "541448820000000002": "GAS"},
+        partial(parse_service_point, requested_ean="541448820000000001_ID1"),
+        {"division": None, "ean": None, "eanBlocked": None, "premisesId": None},
         id="service_point",
     ),
 ]

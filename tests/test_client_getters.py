@@ -49,7 +49,7 @@ LoadFixture = Callable[[str], dict[str, Any]]
 _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
 
 _BAN = "000000000001"
-_EAN = "541448860000000001"
+_EAN = "541448860000000001_ID1"
 _DELIVERY_POINT_ID = "DP001"
 _TOKEN = "test-token"
 
