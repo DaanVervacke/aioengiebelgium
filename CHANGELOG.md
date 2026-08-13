@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service point parsing now matches the real API response.
 - `async_get_service_point` expects the EAN with its delivery-point suffix (e.g. `_ID1`).
 
+### Security
+
+- Raised the aiohttp floor to 3.14.3.
+
 ## [0.1.0] - 2026-08-02
 
 ### Added
