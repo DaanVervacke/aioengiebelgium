@@ -20,7 +20,6 @@ from aioengiebelgium._endpoints import CATALOG, BanArgs, Endpoint, EpexArgs, Mon
 from aioengiebelgium.client import EngieBeClient
 from aioengiebelgium.const import (
     ACCOUNTS_BASE_URL,
-    API_BASE_URL,
     AUTH_BASE_URL,
     BILLING_BASE_URL,
     BOOLEAN_FEATURE_FLAG_BASE_URL,
@@ -53,7 +52,7 @@ _EAN = "541448860000000001_ID1"
 _DELIVERY_POINT_ID = "DP001"
 _TOKEN = "test-token"
 
-_PRICES_URL = f"{API_BASE_URL}/business-agreements/{_BAN}/supplier-energy-prices"
+_PRICES_URL = f"{BILLING_BASE_URL}/business-agreements/{_BAN}/supplier-energy-prices"
 _RELATIONS_URL = f"{ACCOUNTS_BASE_URL}/customer-account-relations"
 _TOKEN_URL = f"{AUTH_BASE_URL}/oauth/token"
 _USAGE_DETAILS_URL = f"{ENERGY_INSIGHTS_V2_BASE_URL}/business-agreements/{_BAN}/usage-details"
