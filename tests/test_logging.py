@@ -8,7 +8,7 @@ import pytest
 from aioresponses import aioresponses
 
 from aioengiebelgium.client import EngieBeClient
-from aioengiebelgium.const import API_BASE_URL
+from aioengiebelgium.const import BILLING_BASE_URL
 from aioengiebelgium.exceptions import (
     EngieBeAuthenticationError,
     EngieBeCommunicationError,
@@ -69,7 +69,7 @@ async def test_debug_logs_never_contain_secrets(
     """A full mocked auth flow + refresh + getters + error bodies leaks no secret."""
     caplog.set_level(logging.DEBUG, logger="aioengiebelgium")
 
-    prices_url = f"{API_BASE_URL}/business-agreements/123/supplier-energy-prices"
+    prices_url = f"{BILLING_BASE_URL}/business-agreements/123/supplier-energy-prices"
     with aioresponses() as m:
         _register_auth_steps_1_to_7(m)
         client = EngieBeClient()

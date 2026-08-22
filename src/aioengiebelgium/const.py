@@ -5,19 +5,16 @@ from enum import Enum, StrEnum
 from importlib.metadata import version as _pkg_version
 
 AUTH_BASE_URL = "https://account.engie.be"
-API_BASE_URL = "https://www.engie.be/api/engie/be/ms/billing/customer/v1"
-PREMISES_BASE_URL = "https://www.engie.be/api/engie/be/ms/premises/customer/v1"
+PREMISES_BASE_URL = "https://api.engie.be/engie/ms/premises/customer/v1"
 PEAKS_BASE_URL = "https://api.engie.be/engie/ms/b2c-energy-insights/v1"
 ACCOUNTS_BASE_URL = "https://api.engie.be/engie/ms/accounts/customer/v1"
 HAPPY_HOUR_BASE_URL = "https://api.engie.be/engie/ms/energy-insights/customer/v1"
-ENERGY_INSIGHTS_V2_BASE_URL = "https://www.engie.be/api/engie/be/ms/energy-insights/customer/v2"
+ENERGY_INSIGHTS_V2_BASE_URL = "https://api.engie.be/engie/ms/energy-insights/customer/v2"
 BOOLEAN_FEATURE_FLAG_BASE_URL = (
     "https://api.engie.be/engie/ms/feature-flags/customer/v1/boolean-feature-flags/_query"
 )
 BILLING_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v1"
-BUSINESS_AGREEMENTS_BASE_URL = (
-    "https://www.engie.be/api/engie/be/ms/business-agreements/customer/v1"
-)
+BUSINESS_AGREEMENTS_BASE_URL = "https://api.engie.be/engie/ms/business-agreements/customer/v1"
 EPEX_BASE_URL = "https://api.engie.be/engie/ms/pricing/v1/public/prices/epex"
 
 DEFAULT_CLIENT_ID = "R0PQyUdjO5B2tBaRnltgitVnnUmjGyld"

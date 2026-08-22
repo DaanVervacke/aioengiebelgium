@@ -12,10 +12,8 @@ variables:
   value: R0PQyUdjO5B2tBaRnltgitVnnUmjGyld
 - name: authBaseUrl
   value: https://account.engie.be
-- name: apiBaseUrl
-  value: https://www.engie.be/api/engie/be/ms/billing/customer/v1
 - name: premisesBaseUrl
-  value: https://www.engie.be/api/engie/be/ms/premises/customer/v1
+  value: https://api.engie.be/engie/ms/premises/customer/v1
 - name: peaksBaseUrl
   value: https://api.engie.be/engie/ms/b2c-energy-insights/v1
 - name: accountsBaseUrl
@@ -23,12 +21,12 @@ variables:
 - name: energyInsightsBaseUrl
   value: https://api.engie.be/engie/ms/energy-insights/customer/v1
 - name: energyInsightsV2BaseUrl
-  value: https://www.engie.be/api/engie/be/ms/energy-insights/customer/v2
+  value: https://api.engie.be/engie/ms/energy-insights/customer/v2
 - name: featureFlagsUrl
   value: https://api.engie.be/engie/ms/feature-flags/customer/v1/boolean-feature-flags/_query
 - name: billingBaseUrl
   value: https://api.engie.be/engie/ms/billing/customer/v1
 - name: businessAgreementsBaseUrl
-  value: https://www.engie.be/api/engie/be/ms/business-agreements/customer/v1
+  value: https://api.engie.be/engie/ms/business-agreements/customer/v1
 - name: epexUrl
   value: https://api.engie.be/engie/ms/pricing/v1/public/prices/epex

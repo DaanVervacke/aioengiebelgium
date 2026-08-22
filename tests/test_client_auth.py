@@ -27,8 +27,8 @@ from aioengiebelgium._auth import (
 from aioengiebelgium._oauth import exchange_token
 from aioengiebelgium.client import EngieBeClient
 from aioengiebelgium.const import (
-    API_BASE_URL,
     AUTH_BASE_URL,
+    BILLING_BASE_URL,
     DEFAULT_CLIENT_ID,
     OAUTH_AUDIENCE,
     OAUTH_SCOPES,
@@ -227,7 +227,7 @@ async def test_refresh_invalid_grant_is_authentication_error(status: int) -> Non
 @pytest.mark.parametrize("status", [400, 403])
 async def test_auto_refresh_invalid_grant_surfaces_authentication_error(status: int) -> None:
     """The 401 -> refresh -> invalid_grant getter path surfaces reauth, chaining the 401."""
-    url = f"{API_BASE_URL}/business-agreements/123/supplier-energy-prices"
+    url = f"{BILLING_BASE_URL}/business-agreements/123/supplier-energy-prices"
     body = _capture_body("token_invalid_grant.http")
     with aioresponses() as m:
         m.get(_q(url), status=401)
@@ -392,8 +392,8 @@ async def test_concurrent_401_refresh_is_single_flight(
 
     monkeypatch.setattr(_tokens, "exchange_token", yielding_exchange_token)
 
-    url_a = f"{API_BASE_URL}/business-agreements/1/supplier-energy-prices"
-    url_b = f"{API_BASE_URL}/business-agreements/2/supplier-energy-prices"
+    url_a = f"{BILLING_BASE_URL}/business-agreements/1/supplier-energy-prices"
+    url_b = f"{BILLING_BASE_URL}/business-agreements/2/supplier-energy-prices"
     with aioresponses() as m:
         m.get(_q(url_a), status=401)
         m.get(_q(url_b), status=401)
@@ -1095,7 +1095,7 @@ async def test_raising_callback_does_not_break_getter(
         msg = "boom"
         raise RuntimeError(msg)
 
-    url = f"{API_BASE_URL}/business-agreements/123/supplier-energy-prices"
+    url = f"{BILLING_BASE_URL}/business-agreements/123/supplier-energy-prices"
     with aioresponses() as m:
         m.get(_q(url), status=401)
         m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)

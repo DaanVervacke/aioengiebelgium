@@ -7,7 +7,7 @@ info:
   - live
 http:
   method: GET
-  url: '{{apiBaseUrl}}/business-agreements/{{ENGIE_BAN}}/supplier-energy-prices?maxGranularity=MONTHLY'
+  url: '{{billingBaseUrl}}/business-agreements/{{ENGIE_BAN}}/supplier-energy-prices?maxGranularity=MONTHLY'
   params:
   - name: maxGranularity
     value: MONTHLY

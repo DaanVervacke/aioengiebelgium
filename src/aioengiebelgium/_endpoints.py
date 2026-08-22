@@ -10,7 +10,6 @@ from typing import Any, NoReturn
 
 from .const import (
     ACCOUNTS_BASE_URL,
-    API_BASE_URL,
     BILLING_BASE_URL,
     BOOLEAN_FEATURE_FLAG_BASE_URL,
     BUSINESS_AGREEMENTS_BASE_URL,
@@ -227,7 +226,7 @@ def _feature_flag_body(args: FlagArgs) -> dict[str, Any]:
 PRICES: Endpoint[BanArgs, PricesResponse] = Endpoint(
     name="prices",
     method="GET",
-    url=lambda a: f"{API_BASE_URL}/business-agreements/{a.ban}/supplier-energy-prices",
+    url=lambda a: f"{BILLING_BASE_URL}/business-agreements/{a.ban}/supplier-energy-prices",
     params={"maxGranularity": "MONTHLY"},
     user_agent=USER_AGENT_BROWSER,
     parse=lambda raw, _a: parse_prices(raw),
