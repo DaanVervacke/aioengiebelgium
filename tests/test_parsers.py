@@ -384,29 +384,47 @@ def test_parse_solar_surplus_forecasts_no_data(load_fixture: LoadFixture) -> Non
     assert day.inference_key == "no_data"
 
 
-def test_parse_tou_schedules_lowercases_slot_codes_and_keeps_unknown() -> None:
+def test_parse_tou_schedules_canonicalises_slot_codes_and_keeps_unknown() -> None:
     result = parse_tou_schedules(
         {
             "items": [
                 {
                     "eanWithSuffix": "541448800000000001_1",
-                    "dgoTgoSchedule": {
-                        "offtake": {
-                            "monday": [
-                                {"startTime": "00:00", "endTime": "06:00", "slotCode": "OFFPEAK"},
-                                {"startTime": "06:00", "endTime": "00:00", "slotCode": "NEW_CODE"},
-                            ],
+                    "gridMeterTimeOfUseSchedules": [
+                        {
+                            "dgoTgoSchedule": {
+                                "offtake": {
+                                    "monday": [
+                                        {
+                                            "startTime": "00:00",
+                                            "endTime": "06:00",
+                                            "slotCode": "S_TOU1_OFFTAKE_HIGH_LOAD_HOURS",
+                                        },
+                                        {
+                                            "startTime": "06:00",
+                                            "endTime": "12:00",
+                                            "slotCode": "LOW_LOAD_HOURS",
+                                        },
+                                        {
+                                            "startTime": "12:00",
+                                            "endTime": "00:00",
+                                            "slotCode": "NEW_CODE",
+                                        },
+                                    ],
+                                },
+                            },
                         },
-                    },
+                    ],
                 },
             ],
         },
     )
-    schedule = result.items[0].dgo_tgo
+    meter = result.items[0].grid_meter_schedules[0]
+    schedule = meter.dgo_tgo
     assert schedule is not None
     offtake = schedule.offtake
     assert offtake is not None
-    assert [s.slot_code for s in offtake.monday] == ["offpeak", "new_code"]
+    assert [s.slot_code for s in offtake.monday] == ["peak", "offpeak", "new_code"]
 
 
 def test_parse_tou_schedules_empty_items() -> None:
@@ -747,27 +765,39 @@ def test_parse_customer_account_relations_populates_address_and_language() -> No
 
 
 def test_parse_tou_schedules_null_schedule() -> None:
-    data = {"items": [{"eanWithSuffix": "541448820070000000_ID1", "dgoTgoSchedule": None}]}
-    result = parse_tou_schedules(data)
-    assert len(result.items) == 1
-    assert result.items[0].dgo_tgo is None
-    assert result.items[0].supplier is None
-
-
-def test_parse_tou_schedules_lowercases_optimal_timeslot_code() -> None:
     data = {
         "items": [
             {
                 "eanWithSuffix": "541448820070000000_ID1",
-                "dgoTgoSchedule": {
-                    "offtake": {"optimalTimeslotCode": "OFFPEAK"},
-                    "injection": {"optimalTimeslotCode": "BRAND_NEW"},
-                },
+                "gridMeterTimeOfUseSchedules": [{"dgoTgoSchedule": None}],
+            }
+        ]
+    }
+    result = parse_tou_schedules(data)
+    assert len(result.items) == 1
+    meter = result.items[0].grid_meter_schedules[0]
+    assert meter.dgo_tgo is None
+    assert meter.supplier is None
+
+
+def test_parse_tou_schedules_canonicalises_optimal_timeslot_code() -> None:
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "dgoTgoSchedule": {
+                            "offtake": {"optimalTimeslotCode": "S_TOU1_OFFTAKE_OFFPEAK"},
+                            "injection": {"optimalTimeslotCode": "BRAND_NEW"},
+                        },
+                    },
+                ],
             },
         ],
     }
     result = parse_tou_schedules(data)
-    schedule = result.items[0].dgo_tgo
+    schedule = result.items[0].grid_meter_schedules[0].dgo_tgo
     assert schedule is not None
     assert schedule.offtake is not None
     assert schedule.offtake.optimal_timeslot_code == "offpeak"
@@ -780,16 +810,314 @@ def test_parse_tou_schedules_absent_supplier_and_optimal_code() -> None:
         "items": [
             {
                 "eanWithSuffix": "541448820070000000_ID1",
-                "dgoTgoSchedule": {"offtake": {"monday": []}},
+                "gridMeterTimeOfUseSchedules": [
+                    {"dgoTgoSchedule": {"offtake": {"monday": []}}},
+                ],
             },
         ],
     }
     result = parse_tou_schedules(data)
-    item = result.items[0]
-    assert item.supplier is None
-    assert item.dgo_tgo is not None
-    assert item.dgo_tgo.offtake is not None
-    assert item.dgo_tgo.offtake.optimal_timeslot_code is None
+    meter = result.items[0].grid_meter_schedules[0]
+    assert meter.supplier is None
+    assert meter.dgo_tgo is not None
+    assert meter.dgo_tgo.offtake is not None
+    assert meter.dgo_tgo.offtake.optimal_timeslot_code is None
+
+
+def test_parse_tou_schedules_derives_optimal_from_cost_indicator() -> None:
+    """When the wire omits ``optimalTimeslotCode``, derive it from ``costIndicator``."""
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "monday": [
+                                    {
+                                        "startTime": "00:00:00",
+                                        "endTime": "06:00:00",
+                                        "slotCode": "S_TOU1_OFFTAKE_OFFPEAK",
+                                        "costIndicator": 2,
+                                    },
+                                    {
+                                        "startTime": "06:00:00",
+                                        "endTime": "22:00:00",
+                                        "slotCode": "S_TOU1_OFFTAKE_PEAK",
+                                        "costIndicator": 5,
+                                    },
+                                ]
+                            },
+                            "injection": {
+                                "monday": [
+                                    {
+                                        "startTime": "00:00:00",
+                                        "endTime": "06:00:00",
+                                        "slotCode": "S_TOU1_INJECTION_OFFPEAK",
+                                        "costIndicator": 2,
+                                    },
+                                    {
+                                        "startTime": "06:00:00",
+                                        "endTime": "22:00:00",
+                                        "slotCode": "S_TOU1_INJECTION_PEAK",
+                                        "costIndicator": 5,
+                                    },
+                                ]
+                            },
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    supplier = parse_tou_schedules(data).items[0].grid_meter_schedules[0].supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert supplier.offtake.optimal_timeslot_code == "offpeak"
+    assert supplier.injection is not None
+    assert supplier.injection.optimal_timeslot_code == "peak"
+
+
+def test_parse_tou_schedules_accepts_hhmm_and_hhmmss_in_same_day() -> None:
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "monday": [
+                                    {
+                                        "startTime": "00:00",
+                                        "endTime": "06:00",
+                                        "slotCode": "OFFPEAK",
+                                    },
+                                    {
+                                        "startTime": "06:00:00",
+                                        "endTime": "00:00:00",
+                                        "slotCode": "PEAK",
+                                    },
+                                ]
+                            }
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    supplier = parse_tou_schedules(data).items[0].grid_meter_schedules[0].supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert [(s.start_time, s.slot_code) for s in supplier.offtake.monday] == [
+        ("00:00", "offpeak"),
+        ("06:00:00", "peak"),
+    ]
+
+
+def test_parse_tou_schedules_strips_bare_direction_prefix() -> None:
+    """Bare OFFTAKE_/INJECTION_ prefixes also collapse, matching hass rfind semantics."""
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "monday": [
+                                    {
+                                        "startTime": "00:00",
+                                        "endTime": "12:00",
+                                        "slotCode": "OFFTAKE_PEAK",
+                                    },
+                                    {
+                                        "startTime": "12:00",
+                                        "endTime": "00:00",
+                                        "slotCode": "S_TOU2_INJECTION_OFFPEAK",
+                                    },
+                                ]
+                            }
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    supplier = parse_tou_schedules(data).items[0].grid_meter_schedules[0].supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert [s.slot_code for s in supplier.offtake.monday] == ["peak", "offpeak"]
+
+
+def test_parse_tou_schedules_captures_active_configuration_id() -> None:
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "activeConfigurationId": "TOU001",
+                            "offtake": {"monday": []},
+                        },
+                        "dgoTgoSchedule": {
+                            "activeConfigurationId": "TOTAL_HOURS",
+                            "offtake": {"monday": []},
+                        },
+                    }
+                ],
+            }
+        ]
+    }
+    meter = parse_tou_schedules(data).items[0].grid_meter_schedules[0]
+    assert meter.supplier is not None
+    assert meter.supplier.active_configuration_id == "TOU001"
+    assert meter.dgo_tgo is not None
+    assert meter.dgo_tgo.active_configuration_id == "TOTAL_HOURS"
+
+
+def test_parse_tou_schedules_primary_meter_selection_from_multi_meter_wire() -> None:
+    """End-to-end: two meters, first is exclusive-night, primary_meter picks the day one."""
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "gridMeterNumber": "NIGHT",
+                        "exclusiveNightMeter": True,
+                        "supplierSchedule": {"offtake": {"monday": []}},
+                    },
+                    {
+                        "gridMeterNumber": "DAY",
+                        "exclusiveNightMeter": False,
+                        "supplierSchedule": {"offtake": {"monday": []}},
+                    },
+                ],
+            }
+        ]
+    }
+    item = parse_tou_schedules(data).items[0]
+    assert len(item.grid_meter_schedules) == 2
+    primary = item.primary_meter()
+    assert primary is not None
+    assert primary.grid_meter_number == "DAY"
+
+
+def test_parse_tou_schedules_canonicalises_direction_prefixed_optimal_code() -> None:
+    """Wire `optimalTimeslotCode` also goes through the canonicaliser."""
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "optimalTimeslotCode": "S_TOU1_OFFTAKE_PEAK",
+                                "monday": [],
+                            }
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    supplier = parse_tou_schedules(data).items[0].grid_meter_schedules[0].supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert supplier.offtake.optimal_timeslot_code == "peak"
+
+
+def test_parse_tou_schedules_blank_optimal_code_falls_through_to_cost_derivation() -> None:
+    """An empty-string `optimalTimeslotCode` should not override the derived value."""
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "optimalTimeslotCode": "",
+                                "monday": [
+                                    {
+                                        "startTime": "00:00",
+                                        "endTime": "06:00",
+                                        "slotCode": "OFFPEAK",
+                                        "costIndicator": 2,
+                                    },
+                                    {
+                                        "startTime": "06:00",
+                                        "endTime": "00:00",
+                                        "slotCode": "PEAK",
+                                        "costIndicator": 5,
+                                    },
+                                ],
+                            }
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    supplier = parse_tou_schedules(data).items[0].grid_meter_schedules[0].supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert supplier.offtake.optimal_timeslot_code == "offpeak"
+
+
+def test_parse_tou_schedules_preserves_cost_indicator_zero() -> None:
+    """`costIndicator: 0` is a legitimate integer and must round-trip untouched."""
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "monday": [
+                                    {
+                                        "startTime": "00:00",
+                                        "endTime": "00:00",
+                                        "slotCode": "OFFPEAK",
+                                        "costIndicator": 0,
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    supplier = parse_tou_schedules(data).items[0].grid_meter_schedules[0].supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert supplier.offtake.monday[0].cost_indicator == 0
+
+
+def test_parse_tou_schedules_exposes_grid_meter_metadata() -> None:
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820070000000_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "gridMeterNumber": "1SAG0000000000",
+                        "exclusiveNightMeter": True,
+                        "supplierSchedule": {"offtake": {"monday": []}},
+                    }
+                ],
+            }
+        ]
+    }
+    meter = parse_tou_schedules(data).items[0].grid_meter_schedules[0]
+    assert meter.grid_meter_number == "1SAG0000000000"
+    assert meter.exclusive_night_meter is True
 
 
 def test_parse_tou_schedules_parses_supplier_schedule() -> None:
@@ -797,23 +1125,33 @@ def test_parse_tou_schedules_parses_supplier_schedule() -> None:
         "items": [
             {
                 "eanWithSuffix": "541448820070000000_ID1",
-                "supplierSchedule": {
-                    "offtake": {
-                        "optimalTimeslotCode": "PEAK",
-                        "monday": [
-                            {"startTime": "00:00", "endTime": "22:00", "slotCode": "PEAK"},
-                        ],
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "supplierSchedule": {
+                            "offtake": {
+                                "optimalTimeslotCode": "PEAK",
+                                "monday": [
+                                    {
+                                        "startTime": "00:00:00",
+                                        "endTime": "22:00:00",
+                                        "slotCode": "S_TOU1_OFFTAKE_PEAK",
+                                        "costIndicator": 5,
+                                    },
+                                ],
+                            },
+                        },
                     },
-                },
+                ],
             },
         ],
     }
     result = parse_tou_schedules(data)
-    supplier = result.items[0].supplier
+    supplier = result.items[0].grid_meter_schedules[0].supplier
     assert supplier is not None
     assert supplier.offtake is not None
     assert supplier.offtake.optimal_timeslot_code == "peak"
     assert [s.slot_code for s in supplier.offtake.monday] == ["peak"]
+    assert supplier.offtake.monday[0].cost_indicator == 5
 
 
 def test_parse_epex_prices_derives_ends_from_observed_spacing() -> None:
@@ -1262,10 +1600,13 @@ _MALFORMED_CASES = [
             "items": [
                 4,
                 {"eanWithSuffix": 9},
-                {"eanWithSuffix": "541448820000000001_ID1", "dgoTgoSchedule": "bad"},
+                {
+                    "eanWithSuffix": "541448820000000001_ID1",
+                    "gridMeterTimeOfUseSchedules": [{"dgoTgoSchedule": "bad"}],
+                },
             ]
         },
-        lambda r: len(r.items) == 1 and r.items[0].dgo_tgo is None,
+        lambda r: len(r.items) == 1 and r.items[0].grid_meter_schedules[0].dgo_tgo is None,
         id="tou_schedules",
     ),
     pytest.param(
@@ -1343,21 +1684,25 @@ def test_parse_tou_schedules_counts_skipped_tou_slots(caplog: pytest.LogCaptureF
         "items": [
             {
                 "eanWithSuffix": "541448820000000001_ID1",
-                "dgoTgoSchedule": {
-                    "offtake": {
-                        "monday": [
-                            {"startTime": "00:00", "endTime": "07:00", "slotCode": 3},
-                            {"startTime": None, "endTime": "22:00", "slotCode": "high"},
-                            {"startTime": "07:00", "endTime": "22:00", "slotCode": "HIGH"},
-                        ]
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "dgoTgoSchedule": {
+                            "offtake": {
+                                "monday": [
+                                    {"startTime": "00:00", "endTime": "07:00", "slotCode": 3},
+                                    {"startTime": None, "endTime": "22:00", "slotCode": "high"},
+                                    {"startTime": "07:00", "endTime": "22:00", "slotCode": "HIGH"},
+                                ]
+                            }
+                        },
                     }
-                },
+                ],
             }
         ]
     }
     with caplog.at_level(logging.DEBUG, logger="aioengiebelgium"):
         result = parse_tou_schedules(data)
-    schedule = result.items[0].dgo_tgo
+    schedule = result.items[0].grid_meter_schedules[0].dgo_tgo
     assert schedule is not None
     offtake = schedule.offtake
     assert offtake is not None

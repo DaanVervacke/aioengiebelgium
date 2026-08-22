@@ -22,6 +22,8 @@ from aioengiebelgium.models import (
     SolarSurplusForecasts,
     SolarSurplusSlot,
     TouDirectionSchedule,
+    TouGridMeterSchedule,
+    TouSchedule,
     TouScheduleItem,
     TouSchedulesResponse,
     TouSlot,
@@ -339,6 +341,90 @@ def test_has_multiple_slot_codes_false_for_flat_schedule() -> None:
         tuesday=(TouSlot(start_time="00:00", end_time="00:00", slot_code="offpeak"),),
     )
     assert schedule.has_multiple_slot_codes() is False
+
+
+def test_primary_meter_prefers_non_exclusive_night() -> None:
+    night = TouGridMeterSchedule(grid_meter_number="A", exclusive_night_meter=True)
+    day = TouGridMeterSchedule(grid_meter_number="B", exclusive_night_meter=False)
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(night, day))
+    assert item.primary_meter() is day
+
+
+def test_primary_meter_falls_back_to_first_meter_when_only_exclusive_night() -> None:
+    only = TouGridMeterSchedule(grid_meter_number="A", exclusive_night_meter=True)
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(only,))
+    assert item.primary_meter() is only
+
+
+def test_primary_meter_falls_back_to_first_when_all_are_exclusive_night() -> None:
+    a = TouGridMeterSchedule(grid_meter_number="A", exclusive_night_meter=True)
+    b = TouGridMeterSchedule(grid_meter_number="B", exclusive_night_meter=True)
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(a, b))
+    assert item.primary_meter() is a
+
+
+def test_primary_meter_prefers_day_meter_with_data_over_empty_day_meter() -> None:
+    empty = TouGridMeterSchedule(grid_meter_number="EMPTY", exclusive_night_meter=False)
+    schedule = TouSchedule(offtake=TouDirectionSchedule(monday=()))
+    with_data = TouGridMeterSchedule(
+        grid_meter_number="DATA", exclusive_night_meter=False, supplier=schedule
+    )
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(empty, with_data))
+    assert item.primary_meter() is with_data
+
+
+def test_primary_meter_returns_none_for_empty() -> None:
+    item = TouScheduleItem(ean_with_suffix="ean_1")
+    assert item.primary_meter() is None
+
+
+def test_has_supplier_and_network_tou_split_by_source() -> None:
+    """has_supplier_tou / has_network_tou inspect only their respective source."""
+    split = TouSchedule(
+        offtake=TouDirectionSchedule(
+            monday=(
+                TouSlot(start_time="00:00", end_time="06:00", slot_code="offpeak"),
+                TouSlot(start_time="06:00", end_time="00:00", slot_code="peak"),
+            )
+        )
+    )
+    flat = TouSchedule(
+        offtake=TouDirectionSchedule(
+            monday=(TouSlot(start_time="00:00", end_time="00:00", slot_code="total_hours"),)
+        )
+    )
+    meter = TouGridMeterSchedule(exclusive_night_meter=False, supplier=split, dgo_tgo=flat)
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(meter,))
+    assert item.has_supplier_tou() is True
+    assert item.has_network_tou() is False
+    assert item.has_tou() is True
+
+
+def test_has_tou_true_when_primary_meter_has_split_offtake() -> None:
+    schedule = TouSchedule(
+        offtake=TouDirectionSchedule(
+            monday=(
+                TouSlot(start_time="00:00", end_time="06:00", slot_code="offpeak"),
+                TouSlot(start_time="06:00", end_time="00:00", slot_code="peak"),
+            )
+        ),
+    )
+    meter = TouGridMeterSchedule(exclusive_night_meter=False, supplier=schedule)
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(meter,))
+    assert item.has_tou() is True
+
+
+def test_has_tou_false_when_flat_and_empty() -> None:
+    flat = TouSchedule(
+        offtake=TouDirectionSchedule(
+            monday=(TouSlot(start_time="00:00", end_time="00:00", slot_code="total_hours"),)
+        )
+    )
+    meter = TouGridMeterSchedule(exclusive_night_meter=False, supplier=flat)
+    item = TouScheduleItem(ean_with_suffix="ean_1", grid_meter_schedules=(meter,))
+    assert item.has_tou() is False
+    empty = TouScheduleItem(ean_with_suffix="ean_2")
+    assert empty.has_tou() is False
 
 
 def test_schedule_for_ean_found() -> None:

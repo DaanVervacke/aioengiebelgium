@@ -323,7 +323,7 @@ FEATURE_FLAG: Endpoint[FlagArgs, FeatureFlag] = Endpoint(
 TOU_SCHEDULES: Endpoint[BanArgs, TouSchedulesResponse] = Endpoint(
     name="tou_schedules",
     method="GET",
-    url=lambda a: f"{HAPPY_HOUR_BASE_URL}/business-agreements/{a.ban}/tou-schedules",
+    url=lambda a: f"{BILLING_BASE_URL}/business-agreements/{a.ban}/tou-schedules",
     parse=lambda raw, _a: parse_tou_schedules(raw),
 )
 

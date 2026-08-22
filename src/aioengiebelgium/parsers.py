@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 import logging
+import re
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from datetime import datetime, timedelta
 from itertools import pairwise
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Literal
 
 from .const import EPEX_MWH_TO_KWH
 from .models import (
@@ -54,6 +55,7 @@ from .models import (
     SolarSurplusForecasts,
     SolarSurplusSlot,
     TouDirectionSchedule,
+    TouGridMeterSchedule,
     TouSchedule,
     TouScheduleItem,
     TouSchedulesResponse,
@@ -592,6 +594,19 @@ def parse_solar_surplus_forecasts(data: dict[str, Any]) -> SolarSurplusForecasts
     return SolarSurplusForecasts(forecasts=tuple(days))
 
 
+_TOU_DIRECTION_PREFIX = re.compile(r"(?:^|_)(?:OFFTAKE|INJECTION)_")
+_TOU_SLOT_CODE_ALIASES = {"HIGH_LOAD_HOURS": "PEAK", "LOW_LOAD_HOURS": "OFFPEAK"}
+
+
+def _canonicalise_slot_code(raw: str) -> str:
+    """Strip any OFFTAKE_/INJECTION_ prefix, alias-map, then lowercase."""
+    upper = raw.upper()
+    match = _TOU_DIRECTION_PREFIX.search(upper)
+    if match is not None:
+        upper = upper[match.end() :]
+    return _TOU_SLOT_CODE_ALIASES.get(upper, upper).lower()
+
+
 def _parse_tou_slot(s: dict[str, Any]) -> TouSlot | None:
     start_time = s.get("startTime")
     end_time = s.get("endTime")
@@ -602,10 +617,15 @@ def _parse_tou_slot(s: dict[str, Any]) -> TouSlot | None:
         or not isinstance(slot_code, str)
     ):
         return None
+    cost_raw = s.get("costIndicator")
+    cost_indicator = (
+        cost_raw if isinstance(cost_raw, int) and not isinstance(cost_raw, bool) else None
+    )
     return TouSlot(
         start_time=start_time,
         end_time=end_time,
-        slot_code=_normalize_vocab(slot_code) or slot_code,
+        slot_code=_canonicalise_slot_code(slot_code),
+        cost_indicator=cost_indicator,
     )
 
 
@@ -613,27 +633,71 @@ def _parse_tou_slots(data: Any) -> tuple[TouSlot, ...]:
     return tuple(_parse_items(data, _parse_tou_slot, "TOU slot"))
 
 
-def _parse_tou_direction(data: Any) -> TouDirectionSchedule | None:
+def _derive_optimal_slot_code(
+    direction: Literal["offtake", "injection"],
+    slots_by_weekday: Iterable[tuple[TouSlot, ...]],
+) -> str | None:
+    """Pick the week-wide cheapest (offtake) or dearest (injection) slot code by costIndicator."""
+    ranked = [s for day in slots_by_weekday for s in day if s.cost_indicator is not None]
+    if not ranked:
+        return None
+    picker = min if direction == "offtake" else max
+    return picker(ranked, key=lambda s: (s.cost_indicator, s.slot_code)).slot_code
+
+
+def _parse_tou_direction(
+    data: Any, direction: Literal["offtake", "injection"]
+) -> TouDirectionSchedule | None:
     if not isinstance(data, dict):
         return None
+    weekdays = (
+        _parse_tou_slots(data.get("monday")),
+        _parse_tou_slots(data.get("tuesday")),
+        _parse_tou_slots(data.get("wednesday")),
+        _parse_tou_slots(data.get("thursday")),
+        _parse_tou_slots(data.get("friday")),
+        _parse_tou_slots(data.get("saturday")),
+        _parse_tou_slots(data.get("sunday")),
+    )
+    wire_optimal = data.get("optimalTimeslotCode")
+    optimal = (
+        _canonicalise_slot_code(wire_optimal)
+        if isinstance(wire_optimal, str) and wire_optimal
+        else _derive_optimal_slot_code(direction, weekdays)
+    )
     return TouDirectionSchedule(
-        optimal_timeslot_code=_normalize_vocab(data.get("optimalTimeslotCode")),
-        monday=_parse_tou_slots(data.get("monday")),
-        tuesday=_parse_tou_slots(data.get("tuesday")),
-        wednesday=_parse_tou_slots(data.get("wednesday")),
-        thursday=_parse_tou_slots(data.get("thursday")),
-        friday=_parse_tou_slots(data.get("friday")),
-        saturday=_parse_tou_slots(data.get("saturday")),
-        sunday=_parse_tou_slots(data.get("sunday")),
+        optimal_timeslot_code=optimal,
+        monday=weekdays[0],
+        tuesday=weekdays[1],
+        wednesday=weekdays[2],
+        thursday=weekdays[3],
+        friday=weekdays[4],
+        saturday=weekdays[5],
+        sunday=weekdays[6],
     )
 
 
 def _parse_tou_schedule(data: Any) -> TouSchedule | None:
     if not isinstance(data, dict):
         return None
+    config_id = data.get("activeConfigurationId")
     return TouSchedule(
-        offtake=_parse_tou_direction(data.get("offtake")),
-        injection=_parse_tou_direction(data.get("injection")),
+        active_configuration_id=config_id if isinstance(config_id, str) else None,
+        offtake=_parse_tou_direction(data.get("offtake"), "offtake"),
+        injection=_parse_tou_direction(data.get("injection"), "injection"),
+    )
+
+
+def _parse_tou_grid_meter(meter: Any) -> TouGridMeterSchedule | None:
+    if not isinstance(meter, dict):
+        return None
+    grid_meter_number = meter.get("gridMeterNumber")
+    exclusive_night = meter.get("exclusiveNightMeter")
+    return TouGridMeterSchedule(
+        grid_meter_number=grid_meter_number if isinstance(grid_meter_number, str) else None,
+        exclusive_night_meter=exclusive_night if isinstance(exclusive_night, bool) else None,
+        supplier=_parse_tou_schedule(meter.get("supplierSchedule")),
+        dgo_tgo=_parse_tou_schedule(meter.get("dgoTgoSchedule")),
     )
 
 
@@ -641,11 +705,12 @@ def _parse_tou_schedule_item(item: dict[str, Any]) -> TouScheduleItem | None:
     ean = item.get("eanWithSuffix")
     if not isinstance(ean, str):
         return None
-    return TouScheduleItem(
-        ean_with_suffix=ean,
-        dgo_tgo=_parse_tou_schedule(item.get("dgoTgoSchedule")),
-        supplier=_parse_tou_schedule(item.get("supplierSchedule")),
+    meters = tuple(
+        _parse_items(
+            item.get("gridMeterTimeOfUseSchedules"), _parse_tou_grid_meter, "TOU grid meter"
+        )
     )
+    return TouScheduleItem(ean_with_suffix=ean, grid_meter_schedules=meters)
 
 
 def parse_tou_schedules(data: dict[str, Any]) -> TouSchedulesResponse:

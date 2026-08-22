@@ -1,5 +1,5 @@
 info:
-  name: DGO TOU is active
+  name: TOU is active
   type: http
   seq: 3
   tags:
@@ -19,7 +19,7 @@ http:
     type: json
     data: |-
       {
-        "name": "dgo-tou-is-active",
+        "name": "tou-is-active",
         "additionalContext": {
           "contractAccountId": "{{ENGIE_BAN}}",
           "platform": "android",
@@ -70,21 +70,18 @@ settings:
   followRedirects: false
   maxRedirects: 5
 docs: |-
-  Queries the dgo-tou-is-active flag for one BAN.
+  Queries the tou-is-active flag for one BAN.
 
   Mirrors EngieBeClient::async_get_feature_flag.
 
-  The flag gates the time-of-use tile in the Smart App, and nothing
-  more. The /tou-schedules endpoint returns data either way, because the
-  DGO/network schedule applies to every digital-meter customer.
+  The flag gates the supplier-side time-of-use pricing. When it is true the
+  supplierSchedule in /tou-schedules carries live TOU slots for the account.
+  When false the supplier side is a single-tariff product.
 
-  The flag name comes from the Android app's libapp.so, alongside the
-  isTimeOfUseActive sync method.
+  reason names the active configuration id (e.g. TOU001) matching
+  supplierSchedule.activeConfigurationId.
 
   The targeted endpoint returns a flat {value, reason} object, not
   the group envelope keyed by flag name.
 
-  additionalContext.contractAccountId takes the BAN. The
-  customerAccountNumber the Smart App also sends is accepted but
-  not required, and the integration omits it because the v5
-  subentry schema dropped the CAN.
+  additionalContext.contractAccountId takes the BAN.

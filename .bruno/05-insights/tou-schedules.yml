@@ -7,7 +7,7 @@ info:
   - live
 http:
   method: GET
-  url: '{{energyInsightsBaseUrl}}/business-agreements/{{ENGIE_BAN}}/tou-schedules'
+  url: '{{billingBaseUrl}}/business-agreements/{{ENGIE_BAN}}/tou-schedules'
   headers:
   - name: User-Agent
     value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
@@ -54,10 +54,23 @@ runtime:
         expect(malformed.length).to.equal(0);
       });
 
-      test("schedules carry a supplier or dgoTgo schedule", function () {
+      test("schedules carry a gridMeterTimeOfUseSchedules list", function () {
         const rows = res.getBody().items || [];
-        const malformed = rows.filter(function (i) { return !(i.supplierSchedule || i.dgoTgoSchedule); });
+        const malformed = rows.filter(function (i) { return !Array.isArray(i.gridMeterTimeOfUseSchedules); });
         expect(malformed.length).to.equal(0);
+      });
+
+      test("every grid meter carries a supplier or dgoTgo schedule", function () {
+        const meters = (res.getBody().items || []).flatMap(function (i) { return i.gridMeterTimeOfUseSchedules || []; });
+        const malformed = meters.filter(function (m) { return !(m.supplierSchedule || m.dgoTgoSchedule); });
+        expect(malformed.length).to.equal(0);
+      });
+
+      test("non-empty response ships at least one grid meter", function () {
+        const items = res.getBody().items || [];
+        if (items.length === 0) { return; }
+        const meterCount = items.reduce(function (n, i) { return n + ((i.gridMeterTimeOfUseSchedules || []).length); }, 0);
+        expect(meterCount).to.be.greaterThan(0);
       });
 settings:
   encodeUrl: true
@@ -65,20 +78,30 @@ settings:
   followRedirects: false
   maxRedirects: 5
 docs: |-
-  Time-of-use tariff slots per EAN and direction.
+  Time-of-use tariff slots per EAN, grid meter, and direction.
 
   Mirrors EngieBeClient::async_get_tou_schedules.
 
-  The endpoint responds even when the dgo-tou-is-active flag is false,
-  because the DGO/network schedule applies to every digital-meter
-  customer. The flag only gates the Smart App tile.
+  Served by the billing microservice (the endpoint the ENGIE Smart App
+  calls). The endpoint responds even when the tou-is-active flag is
+  false, because the DGO/network schedule applies to every digital-meter
+  customer. The flag only gates the supplier-side TOU product.
 
-  parsers.py reads items[].eanWithSuffix and the individual slots, each
-  a {startTime, endTime, slotCode}. The dgoTgoSchedule and
-  supplierSchedule wrappers become TouScheduleItem.dgo_tgo and .supplier
-  in models.py, each a TouSchedule holding offtake / injection maps of
-  weekday to a list of slots, plus the per-direction optimalTimeslotCode.
+  parsers.py reads items[].eanWithSuffix and the per-meter
+  gridMeterTimeOfUseSchedules[]. Each meter carries a supplierSchedule
+  and a dgoTgoSchedule, each a TouSchedule holding offtake / injection
+  maps of weekday to a list of slots, plus the per-direction
+  optimalTimeslotCode when the wire sends one. Individual slots are
+  {startTime, endTime, slotCode, costIndicator} where startTime /
+  endTime accept HH:MM or HH:MM:SS and costIndicator is 1 (cheapest) to
+  5 (dearest).
 
-  Wire slot codes are uppercase (PEAK, OFFPEAK, SUPEROFFPEAK,
-  EXCLUSIVE_NIGHT, DAY). The models store the lowercase form, which is
-  the vocabulary const.py::TouSlotCode lists.
+  Wire slot codes are uppercase, sometimes direction-prefixed
+  (S_TOU1_OFFTAKE_PEAK, S_TOU1_INJECTION_OFFPEAK, HIGH_LOAD_HOURS,
+  LOW_LOAD_HOURS, PEAK, OFFPEAK, SUPEROFFPEAK, EXCLUSIVE_NIGHT, DAY,
+  TOTAL_HOURS). The parser strips supplier direction prefixes and
+  collapses HIGH_LOAD_HOURS / LOW_LOAD_HOURS to peak / offpeak. The
+  final lowercase vocabulary is what const.py::TouSlotCode lists.
+
+  When the wire omits optimalTimeslotCode the parser derives it from
+  costIndicator: cheapest slot for offtake, dearest for injection.

@@ -4,6 +4,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
+from typing import Literal
 from zoneinfo import ZoneInfo
 
 from .const import DELIVERY_POINT_SUFFIX, DYNAMIC_ENERGY_PRODUCTS, SolarSurplusLevel
@@ -489,6 +490,7 @@ class TouSlot:
     start_time: str
     end_time: str
     slot_code: str
+    cost_indicator: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -561,17 +563,66 @@ class TouDirectionSchedule:
 class TouSchedule:
     """One TOU schedule (grid-operator or supplier), both directions."""
 
+    active_configuration_id: str | None = None
     offtake: TouDirectionSchedule | None = None
     injection: TouDirectionSchedule | None = None
 
 
 @dataclass(frozen=True, slots=True)
+class TouGridMeterSchedule:
+    """Per-grid-meter TOU schedules."""
+
+    grid_meter_number: str | None = None
+    exclusive_night_meter: bool | None = None
+    supplier: TouSchedule | None = None
+    dgo_tgo: TouSchedule | None = None
+
+
+def _schedule_has_tou(
+    meter: TouGridMeterSchedule | None, *, source: Literal["supplier", "dgo_tgo"]
+) -> bool:
+    if meter is None:
+        return False
+    schedule = meter.supplier if source == "supplier" else meter.dgo_tgo
+    if schedule is None:
+        return False
+    return any(
+        d is not None and d.has_multiple_slot_codes()
+        for d in (schedule.offtake, schedule.injection)
+    )
+
+
+@dataclass(frozen=True, slots=True)
 class TouScheduleItem:
-    """TOU schedules for a single EAN: the DGO/TGO and supplier schedules."""
+    """TOU schedules for a single EAN, one entry per grid meter."""
 
     ean_with_suffix: str
-    dgo_tgo: TouSchedule | None = None
-    supplier: TouSchedule | None = None
+    grid_meter_schedules: tuple[TouGridMeterSchedule, ...] = ()
+
+    def primary_meter(self) -> TouGridMeterSchedule | None:
+        """Non-night meter with data, else first non-night, else first meter, else None."""
+        day_meters = [m for m in self.grid_meter_schedules if m.exclusive_night_meter is not True]
+        with_data = next(
+            (m for m in day_meters if m.supplier is not None or m.dgo_tgo is not None),
+            None,
+        )
+        if with_data is not None:
+            return with_data
+        if day_meters:
+            return day_meters[0]
+        return self.grid_meter_schedules[0] if self.grid_meter_schedules else None
+
+    def has_supplier_tou(self) -> bool:
+        """True when the primary meter's supplier schedule has more than one slot code."""
+        return _schedule_has_tou(self.primary_meter(), source="supplier")
+
+    def has_network_tou(self) -> bool:
+        """True when the primary meter's DGO/TGO schedule has more than one slot code."""
+        return _schedule_has_tou(self.primary_meter(), source="dgo_tgo")
+
+    def has_tou(self) -> bool:
+        """Shape probe. True when supplier OR network TOU exists on the primary meter."""
+        return self.has_supplier_tou() or self.has_network_tou()
 
 
 @dataclass(frozen=True, slots=True)

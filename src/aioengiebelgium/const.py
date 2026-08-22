@@ -53,6 +53,7 @@ class TouSlotCode(StrEnum):
     SUPEROFFPEAK = "superoffpeak"
     EXCLUSIVE_NIGHT = "exclusive_night"
     DAY = "day"
+    TOTAL_HOURS = "total_hours"
 
 
 class SolarSurplusLevel(StrEnum):
@@ -104,4 +105,4 @@ class FeatureFlagKey(StrEnum):
 
     HAPPY_HOURS_SERVICE_ENABLED = "happy-hours-service-enabled"
     SOLAR_SURPLUS_SHOWN_DASHBOARD = "solar-surplus-shown-dashboard"
-    DGO_TOU_IS_ACTIVE = "dgo-tou-is-active"
+    TOU_IS_ACTIVE = "tou-is-active"
