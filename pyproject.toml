@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "aioengiebelgium"
-version = "0.1.1"
+version = "0.1.2"
 description = "Unofficial asynchronous Python library to interact with the ENGIE Belgium API"
 readme = "README.md"
 license = "MIT"
