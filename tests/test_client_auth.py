@@ -22,12 +22,12 @@ from aioengiebelgium._auth import (
     AuthFlow,
     _base64url,
     _generate_pkce,
-    _state_from_html,
+    _harvest_hidden_inputs,
+    _state_from_body,
 )
 from aioengiebelgium._oauth import exchange_token
 from aioengiebelgium.client import EngieBeClient
 from aioengiebelgium.const import (
-    AUTH_BASE_URL,
     BILLING_BASE_URL,
     DEFAULT_CLIENT_ID,
     OAUTH_AUDIENCE,
@@ -45,23 +45,22 @@ from aioengiebelgium.exceptions import (
 from tests.conftest import (
     _AUTH_CODE,
     _AUTHORIZE_URL,
+    _IDENTIFIER_CAPABILITIES,
     _LOGIN_IDENTIFIER_URL,
     _LOGIN_PASSWORD_URL,
     _LOGIN_STATE,
     _MFA_STATE,
     _OAUTH_STATE,
-    _PASSKEY_ENROLLMENT_URL,
-    _PASSKEY_LOCATION,
-    _PASSKEY_STATE,
     _PASSWORD,
+    _PASSWORD_CAPABILITIES,
     _RESUME_URL,
     _TOKEN_RESPONSE,
     _TOKEN_URL,
     _USERNAME,
-    _body_with_state,
     _callback_url,
     _mfa_submit_url,
     _q,
+    _redirect_body,
     _register_auth_steps_1_to_7,
     _register_submit_shortcircuit,
 )
@@ -75,19 +74,6 @@ def _html_fixture(name: str) -> str:
 def _capture_body(name: str) -> str:
     """Body of a sanitized .http capture, minus the capture-note first line."""
     return (Path(__file__).parent / "fixtures" / name).read_text().split("\n", 1)[1]
-
-
-def _register_passkey_redirect(m: aioresponses) -> None:
-    """Steps 8-11 outcome B: the resume 302s to the passkey-enrollment interstitial."""
-    m.post(_q(_mfa_submit_url(MfaMethod.SMS)), body=_body_with_state("postmfa"))
-    m.get(
-        _q(_RESUME_URL),
-        status=302,
-        headers={"Location": _PASSKEY_LOCATION},
-        body=_body_with_state(_PASSKEY_STATE),
-    )
-    m.get(_q(_PASSKEY_ENROLLMENT_URL), body="")
-    m.post(_q(_PASSKEY_ENROLLMENT_URL), body="")
 
 
 def _recorded(m: aioresponses, method: str, path: str) -> list[RequestCall]:
@@ -457,24 +443,15 @@ async def test_login_posts_carry_credentials_and_form_fields() -> None:
     assert identifier_post.kwargs["params"] == {"state": _OAUTH_STATE, "ui_locales": "nl"}
     assert identifier_post.kwargs["data"] == {
         "state": _OAUTH_STATE,
-        "allow-passkeys": "true",
+        **_IDENTIFIER_CAPABILITIES,
         "username": _USERNAME,
-        "js-available": "true",
-        "webauthn-available": "true",
-        "is-brave": "false",
-        "webauthn-platform-available": "true",
-        "ulp-remember-me-present": "true",
-        "ulp-remember-me": "on",
     }
     assert password_post.kwargs["params"] == {"state": _OAUTH_STATE, "ui_locales": "nl"}
     assert password_post.kwargs["data"] == {
         "state": _OAUTH_STATE,
+        **_PASSWORD_CAPABILITIES,
         "username": _USERNAME,
         "password": _PASSWORD,
-        "js-available": "true",
-        "webauthn-available": "true",
-        "is-brave": "false",
-        "webauthn-platform-available": "true",
     }
 
 
@@ -513,7 +490,7 @@ async def test_start_authentication_failure_keeps_injected_session_open() -> Non
 
 async def test_start_authentication_missing_login_state_raises() -> None:
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
@@ -527,7 +504,7 @@ async def test_start_authentication_missing_login_state_raises() -> None:
 async def test_start_authentication_wrong_password_raises_invalid_credentials() -> None:
     """The real wrong-password trace (HTTP 400 re-render) maps to a clean auth error."""
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
@@ -545,18 +522,50 @@ async def test_start_authentication_wrong_password_raises_invalid_credentials() 
     assert excinfo.value.status == 400
 
 
-def test_state_from_html_falls_back_to_link_when_action_stateless() -> None:
+def test_state_from_body_falls_back_to_link_when_action_stateless() -> None:
     """A stateless form action no longer masks a state carried in a body link."""
     body = '<form action="/toggle"></form><a href="/continue?state=linkstate">go</a>'
-    assert _state_from_html(body) == "linkstate"
+    assert _state_from_body(body) == "linkstate"
 
 
-def test_state_from_html_reads_link_when_no_form() -> None:
-    assert _state_from_html('<a href="/x?state=abc123">x</a>') == "abc123"
+def test_state_from_body_reads_link_when_no_form() -> None:
+    assert _state_from_body('<a href="/x?state=abc123">x</a>') == "abc123"
 
 
-def test_state_from_html_returns_none_without_state() -> None:
-    assert _state_from_html("<html>no state here</html>") is None
+def test_state_from_body_returns_none_without_state() -> None:
+    assert _state_from_body("<html>no state here</html>") is None
+
+
+def test_harvest_scopes_to_primary_form_and_ignores_secondary() -> None:
+    """Multi-form pages must not leak sibling-form fields into the primary POST body."""
+    body = (
+        '<form data-form-primary="true">'
+        '<input type="hidden" name="state" value="primary"/>'
+        '<input type="hidden" name="allow-passkeys" value="true"/>'
+        "</form>"
+        '<form data-form-secondary="true">'
+        '<input type="hidden" name="state" value="secondary"/>'
+        '<input type="hidden" name="connection" value="itsme"/>'
+        "</form>"
+    )
+    assert _harvest_hidden_inputs(body) == {"state": "primary", "allow-passkeys": "true"}
+    assert _harvest_hidden_inputs(body, form_marker='data-form-secondary="true"') == {
+        "state": "secondary",
+        "connection": "itsme",
+    }
+
+
+def test_harvest_returns_empty_when_no_matching_form() -> None:
+    assert _harvest_hidden_inputs("<html>no forms</html>") == {}
+
+
+def test_harvest_keeps_missing_value_as_empty_string() -> None:
+    body = (
+        '<form data-form-primary="true">'
+        '<input type="hidden" id="passkey" name="passkey"/>'
+        "</form>"
+    )
+    assert _harvest_hidden_inputs(body) == {"passkey": ""}
 
 
 async def test_wrong_password_detected_before_state_extraction() -> None:
@@ -564,7 +573,7 @@ async def test_wrong_password_detected_before_state_extraction() -> None:
     usable state is not mistaken for a successful login."""
     body = f'<span {_FIELD_ERROR_MARKER}>wrong</span><form action="/x?state=deadbeef01"></form>'
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
@@ -578,7 +587,7 @@ async def test_wrong_password_detected_before_state_extraction() -> None:
 async def test_login_400_without_error_marker_raises_invalid_credentials() -> None:
     """A 400 with neither the error marker nor a usable state is still a credential error."""
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
@@ -593,7 +602,7 @@ async def test_login_400_without_error_marker_raises_invalid_credentials() -> No
 async def test_login_200_without_state_raises_login_failed() -> None:
     """A 200 password response with no marker and no extractable state is an unrecognized page."""
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
@@ -607,7 +616,7 @@ async def test_login_200_without_state_raises_login_failed() -> None:
 async def test_start_authentication_password_post_500_is_communication_error() -> None:
     """A server-side failure on the password POST is not misread as bad credentials."""
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
@@ -620,11 +629,11 @@ async def test_start_authentication_password_post_500_is_communication_error() -
 
 async def test_start_authentication_missing_mfa_state_raises() -> None:
     with aioresponses() as m:
-        m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
         m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
         m.get(_q(_LOGIN_PASSWORD_URL), body="")
-        m.post(_q(_LOGIN_PASSWORD_URL), body=_body_with_state(_LOGIN_STATE))
+        m.post(_q(_LOGIN_PASSWORD_URL), body=_redirect_body(_LOGIN_STATE, "/authorize/resume"))
         m.get(_q(_RESUME_URL), body="<html>no mfa state</html>")
 
         client = EngieBeClient()
@@ -720,7 +729,10 @@ async def test_submit_mfa_state_mismatch_raises(
         _register_auth_steps_1_to_7(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
-        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), body=_body_with_state("postmfastate"))
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            body=_redirect_body("postmfastate", "/authorize/resume"),
+        )
         m.get(
             _q(_RESUME_URL),
             status=302,
@@ -741,7 +753,10 @@ async def test_submit_mfa_callback_missing_code_raises(
         _register_auth_steps_1_to_7(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
-        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), body=_body_with_state("postmfastate"))
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            body=_redirect_body("postmfastate", "/authorize/resume"),
+        )
         m.get(
             _q(_RESUME_URL),
             status=302,
@@ -789,7 +804,7 @@ async def test_submit_mfa_same_state_back_raises_mfa_error(
         client = EngieBeClient()
         flow = await _start_flow(client)
         echoed_form = (
-            '<html><form method="POST">'
+            '<html><form data-form-primary="true" method="POST">'
             f'<input type="hidden" name="state" value="{_MFA_STATE}"/>'
             "</form></html>"
         )
@@ -816,162 +831,6 @@ async def test_submit_mfa_unrecognized_page_is_not_a_wrong_code(
     assert created_sessions[0].closed
 
 
-async def test_submit_mfa_passkey_enrollment_path() -> None:
-    """Outcome B: passkey interstitial aborted, code taken from the resume Location.
-
-    Mirrors the captured trace (passkey_resume_3.http): a 302 whose Location
-    carries both code and state, with a redirect body echoing the callback
-    URL.  The body's decoy code must be ignored in favor of the header's.
-    """
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        _register_passkey_redirect(m)
-        m.get(
-            _q(_RESUME_URL),
-            status=302,
-            headers={"Location": _callback_url(state=flow._expected_state)},
-            body=_capture_body("passkey_resume_3.http"),
-        )
-        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
-
-        access, refresh = await flow.async_submit_mfa("123456")
-        (token_post,) = _recorded(m, "POST", "/oauth/token")
-
-    assert access == "new-access"
-    assert refresh == "new-refresh"
-    assert token_post.kwargs["data"]["code"] == _AUTH_CODE
-
-
-async def test_submit_mfa_passkey_code_via_location() -> None:
-    """Outcome B variant: code in Location header of step 12."""
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        _register_passkey_redirect(m)
-        m.get(
-            _q(_RESUME_URL),
-            body="<html>no code in body</html>",
-            headers={"Location": _callback_url(state=flow._expected_state)},
-        )
-        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
-
-        access, _refresh = await flow.async_submit_mfa("123456")
-
-    assert access == "new-access"
-
-
-async def test_submit_mfa_passkey_state_mismatch_raises() -> None:
-    """Outcome B: the resume callback carries a foreign OAuth state -> auth error."""
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        _register_passkey_redirect(m)
-        m.get(
-            _q(_RESUME_URL),
-            status=302,
-            headers={"Location": _callback_url(state="attacker-state")},
-            body="",
-        )
-        with pytest.raises(EngieBeAuthenticationError, match="state mismatch"):
-            await flow.async_submit_mfa("123456")
-
-
-async def test_submit_mfa_passkey_missing_state_raises_strict() -> None:
-    """Outcome B: a callback without state is rejected (ADR-0006 amendment executed)."""
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        _register_passkey_redirect(m)
-        m.get(
-            _q(_RESUME_URL),
-            status=302,
-            headers={"Location": f"{REDIRECT_URI}?code={_AUTH_CODE}"},
-            body="",
-        )
-        with pytest.raises(EngieBeAuthenticationError, match="state mismatch"):
-            await flow.async_submit_mfa("123456")
-
-    assert client.access_token is None
-
-
-async def test_submit_mfa_passkey_missing_state_raises(
-    created_sessions: list[aiohttp.ClientSession],
-) -> None:
-    """Outcome B: no passkey state in the resume body -> auth error."""
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), body=_body_with_state("postmfa"))
-        m.get(
-            _q(_RESUME_URL),
-            status=302,
-            headers={"Location": f"{AUTH_BASE_URL}/u/somewhere-else"},
-            body="<html>nothing useful</html>",
-        )
-        with pytest.raises(EngieBeAuthenticationError, match="passkey enrollment state"):
-            await flow.async_submit_mfa("123456")
-
-    assert created_sessions[0].closed
-
-
-async def test_submit_mfa_passkey_no_code_raises(
-    created_sessions: list[aiohttp.ClientSession],
-) -> None:
-    """Outcome B: the resume callback carries a state but no code -> auth error."""
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        _register_passkey_redirect(m)
-        m.get(
-            _q(_RESUME_URL),
-            status=302,
-            headers={"Location": f"{REDIRECT_URI}?state={flow._expected_state}"},
-            body="",
-        )
-        with pytest.raises(EngieBeAuthenticationError, match="missing authorization code"):
-            await flow.async_submit_mfa("123456")
-
-    assert created_sessions[0].closed
-
-
-async def test_submit_mfa_passkey_resume_not_callback_raises(
-    created_sessions: list[aiohttp.ClientSession],
-) -> None:
-    """Outcome B: a resume that never redirects to the callback fails, whatever the body says.
-
-    The body carries a decoy ``?code=`` URL: the retired whole-body scan
-    would have taken it for the authorization code.
-    """
-    with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
-        client = EngieBeClient()
-        flow = await _start_flow(client)
-
-        _register_passkey_redirect(m)
-        m.get(
-            _q(_RESUME_URL),
-            body='<html><a href="https://support.example/help?code=deadbeef">help</a></html>',
-            headers={"Location": f"{AUTH_BASE_URL}/u/no-code"},
-        )
-        with pytest.raises(EngieBeAuthenticationError, match="did not redirect to the callback"):
-            await flow.async_submit_mfa("123456")
-
-    assert created_sessions[0].closed
-    assert client.access_token is None
-
 
 async def test_submit_mfa_token_response_missing_tokens_raises(
     created_sessions: list[aiohttp.ClientSession],
@@ -982,7 +841,10 @@ async def test_submit_mfa_token_response_missing_tokens_raises(
         client = EngieBeClient()
         flow = await _start_flow(client)
 
-        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), body=_body_with_state("postmfastate"))
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            body=_redirect_body("postmfastate", "/authorize/resume"),
+        )
         m.get(
             _q(_RESUME_URL),
             status=302,

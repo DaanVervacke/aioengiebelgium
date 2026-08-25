@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="ulp-version" content="1.139.3">
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="https://cdn.auth0.com/ulp/react-components/1.216.3/css/main_wcag_compliant.cdn.min.css">
+    <style id="custom-styles-container">
+      :root, .af-custom-form-container .af-form {
+          --primary-color: #0079cc;
+        }
+:root, .af-custom-form-container .af-form {
+          --button-font-color: #ffffff;
+        }
+:root {
+          --secondary-button-border-color: #c9cace;
+          --social-button-border-color: #c9cace;
+          --radio-button-border-color: #c9cace;
+        }
+:root {
+          --secondary-button-text-color: #1e212a;
+        }
+:root {
+          --computed-readonly-color: #c2c8d0;
+        }
+:root {
+          --link-color: #005a97;
+        }
+:root {
+          --title-font-color: #394B54;
+        }
+:root {
+          --font-default-color: #394B54;
+        }
+:root {
+          --widget-background-color: #ffffff;
+        }
+:root {
+          --box-border-color: #0079cc;
+        }
+:root {
+          --font-light-color: #65676e;
+        }
+:root {
+          --input-text-color: #000000;
+        }
+:root {
+          --input-border-color: #c9cace;
+          --border-default-color: #c9cace;
+        }
+:root {
+          --input-background-color: #ffffff;
+        }
+:root {
+          --icon-default-color: #65676e;
+        }
+:root {
+          --error-color: #d03c38;
+          --error-text-color: #ffffff;
+        }
+:root {
+          --success-color: #13a688;
+        }
+:root {
+          --base-focus-color: #005a97;
+          --transparency-focus-color: rgba(0,90,151, 0.15);
+        }
+:root {
+          --base-hover-color: #005a97;
+          --transparency-hover-color: rgba(0,90,151, var(--hover-transparency-value));
+        }
+:root {
+          --ulp-captcha-widget-theme: light;
+        }
+
+html, :root {
+          font-size: 100%;
+          --default-font-size: 1rem;
+          --small-font-size: 0.75rem;
+          --title-font-size: 1.5rem;
+          --lg-font-size: 1rem;
+          --xl-font-size: 1.25rem;
+          --spacing: 0.5rem;
+        }
+        .af-custom-form-container .af-form {
+          font-size: 1rem;
+        }
+body {
+          --title-font-size: 1.5rem;
+          --title-font-weight: var(--font-bold-weight);
+        }
+.cb6a66a8d {
+          font-size: 0.875rem;
+          font-weight: var(--font-default-weight);
+        }
+.c2568109f {
+          font-size: 0.875rem;
+          font-weight: var(--font-default-weight);
+        }
+        .ulp-passkey-benefit-heading {
+          font-size: 1.025rem;
+        }
+.c5e5a5ca0, .c694062bf {
+          font-size: 1rem;
+          font-weight: var(--font-default-weight);
+        }
+body {
+          --ulp-label-font-size: 1rem;
+          --ulp-label-font-weight: var(--font-default-weight);
+        }
+.c4d6eaf21, .c48ef479f, [id^='ulp-container-'] a {
+          font-size: 0.875rem;
+          font-weight: var(--font-bold-weight) !important;
+        }
+
+:root {
+          --button-border-width: 1px;
+          --social-button-border-width: 1px;
+          --radio-border-width: 1px;
+        }
+body {
+          --button-border-radius: 9999px;
+          --radio-border-radius: 9999px;
+        }
+
+:root {
+          --input-border-width: 1px;
+        }
+body {
+          --input-border-radius: 4px;
+        }
+
+        .af-custom-form-container .af-form {
+          --border-radius: 4px;
+        }
+
+:root {
+          --border-radius-outer: 16px;
+        }
+:root {
+          --box-border-width: 0px;
+        }
+body {
+          --shadow-component-outer: none;
+        }
+
+          body {
+            --logo-alignment: 0 auto;
+          }
+        
+
+          .c773f6fba {
+            content: url('https://upload.wikimedia.org/wikipedia/commons/f/ff/Engie_logo_%282026%29.svg');
+          }
+        
+body {
+          --logo-height: 48px;
+        }
+        .c773f6fba {
+          height: var(--logo-height);
+        }
+        
+
+          body {
+            --header-alignment: center;
+          }
+        
+
+.c222a30a4 {
+          --page-background-alignment: left;
+        }
+body {
+          --page-background-color: #000000;
+        }
+.c222a30a4 {
+          --page-background-image: url('https://assets.engie.be/image/upload/f_auto,q_auto,w_2000/v1758101196/account_login_bg_kscxhz');
+        }
+
+    </style>
+    <style>
+    /* By default, hide features for javascript-disabled browsing */
+    /* We use !important to override any css with higher specificity */
+    /* It is also overriden by the styles in <noscript> in the header file */
+    .no-js {
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      height: 1px;
+      overflow: hidden;
+      position: absolute;
+      white-space: nowrap;
+      width: 1px;
+    }
+  </style>
+  <noscript>
+    <style>
+      /* We use !important to override the default for js enabled */
+      /* If the display should be other than block, it should be defined specifically here */
+      .js-required { display: none !important; }
+      .no-js {
+        clip: auto;
+        clip-path: none;
+        height: auto;
+        overflow: auto;
+        position: static;
+        white-space: normal;
+        width: 100%;
+      }
+      .no-js-container {
+        width: var(--prompt-width);
+      }
+    </style>
+  </noscript>
+    
+  
+    <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link type="text/css" rel="stylesheet" href="https://chatapi.n-allo.be/V2/style.css" />
+    <link type="text/css" rel="stylesheet" href="https://www.engie.be/.resources/assets/css/impulse.css"/>
+    <title>Voer uw telefooncode in om in te loggen</title>
+    <style>
+        body._widget-auto-layout {
+            --page-background-image: url("https://assets.engie.be/image/upload/f_auto,q_auto,w_2000/v1758101196/account_login_bg_kscxhz");
+            background-image: var(--page-background-image);
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+h1 {
+  font-size: 1.5rem;
+  line-height: 76px !important;
+}
+
+
+.hidden-login {
+  display: none;
+}
+
+.passkey-info {
+  font-size: 14px;
+}
+
+.or-divider span {
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.login-id-header {
+  padding-bottom: 0;
+}
+
+.temp-banner {
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  display: none;
+  padding: 18px;
+  background-color: white;
+  color: var(--color-primary);
+  box-shadow: var(--shadows-4);
+  width: var(--prompt-width);
+  margin: 10px auto;
+  border-radius: var(--border-radius-outer);
+  a {
+  text-decoration: underline;
+  }
+}
+
+.ulp-passkey-benefit:not(:first-child),
+._form-passkey-enrollment #dontShowAgain,
+._form-passkey-enrollment [for="dontShowAgain"],
+.ulp-passkey-benefit .ulp-passkey-benefit-icon-container {
+  display: none !important;
+}
+
+.ulp-passkey-benefit:first-child .ulp-passkey-benefit-content {
+  text-align: center;
+}
+
+._widget.login {
+  display: none;
+}
+  h1:after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 44px;
+    height: 5px;
+    background: #4CB798;
+    border-radius: 11px;
+    left: 50%;
+    margin-top: -15px;
+    transform: translateX(-50%);
+  };
+
+.cookie-consent {
+  z-index: 500000 !important;
+
+  &__logo {
+    background: url('#{$image-folder}logo-blue.svg') no-repeat 50%/contain;
+    height: 5rem;
+
+    &__small {
+      height: 4rem;
+      width: 11rem;
+    }
+  }
+
+  &__scrollable {
+    overflow-y: auto;
+    max-height: 55vh;
+  }
+}
+
+.modal {
+  &__content {
+    top: 2% !important;
+  }
+
+  &__header {
+    margin-bottom: 0;
+  }
+}
+    </style>
+<!-- Data Preparations -->
+<script>
+    // Extracting query params
+    let query = new URL(window.location.href).searchParams
+
+  let language = document.documentElement.lang ?? 'EN'
+  let page_name = 'usermanagement.login'
+  let isErrorPage = false
+    let client_id = query.get('client_id') ?? 'magnolia'
+  let env_work = 'preprod'
+
+    // Env determintation
+    if (document.location.origin?.match("https?:\/\/account\.engie\.be")) {
+        env_work = 'prod'
+    }
+    let evergageScript = env_work == 'preprod' ? 'testing' : 'production_b2c'
+
+
+    // Segment determination
+    const redirectUri = query.get('redirect_uri')
+  let env_segment = 'residential'
+    if (redirectUri?.startsWith("/fr/professionals") || redirectUri?.startsWith("/nl/professionals")) {
+        env_segment = 'professionals'
+    }
+
+    // UTMs determination
+    let utms = {}
+    Object.keys(query).filter(u => u.startsWith("utm_")).forEach(u => utms[u] = query.get(u))
+
+    // chatbot CSS (not added into the header if needed, might have ot be added programmatically)
+
+
+  let page_name_parts = page_name.split(".")
+  const page_cats = {}
+  /*for (const [index, id] of ["1", "2", "3", "x"]) {
+    if( id === 'x') {
+      page_cats['page_cat' + id]: page_name_parts.length > 3 ? 'page_catx' : 'none'
+    } else {
+      page_cats['page_cat' + id]: page_name_parts[id?index] ?? 'none'
+    }
+  }*/
+
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    // TC_VARS
+    //<![CDATA[
+    tc_vars = {
+        env_work: env_work,
+        env_language: language?.toUpperCase(),
+        env_segment: env_segment,
+        client_id: client_id,
+        ...page_cats,
+        ...utms,
+        page_name: page_name,
+        page_error: isErrorPage
+    }
+    var _aaq = window._aaq || (window._aaq = []);
+    var cookies = document.cookie;
+    if (cookies) {
+        var consent = cookies.split('; ').find(row => row.startsWith('cookie-consent='));
+        if (consent) {
+            consentValue = consent.split('=')[1]
+            if (consentValue.indexOf('optimization') !== -1) {
+                (function(){
+                    var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+                    g.type = 'text/javascript'; g.async = true;
+                    g.src = document.location.protocol + '//cdn.evgnet.com/beacon/electrabel/' + evergageScript + '/scripts/evergage.min.js';
+                    s.parentNode.insertBefore(g, s);
+                })();
+            }
+        }
+    }
+    //]]>
+
+
+  //<![CDATA[
+  window.chatbotData = {
+        env_work: env_work,
+        env_language: language?.toUpperCase(),
+        env_segment: env_segment,
+        client_id: client_id,
+        ...page_cats,
+        ...utms,
+        page_name: page_name,
+        page_error: isErrorPage,
+  }
+  //]]>
+</script>
+<!-- Live Chat Bot Script -->
+<script>
+    function livechat_launch() {
+  try {
+    let URL, databotname, buttonText, placeholderText, subTitle;
+    if (window.chatbotData.env_work === 'preprod') {
+      URL = 'chatapi-acc.n-allo.be';
+      databotname = 'LOGIN'; //'NALLO';
+    } else if (window.chatbotData.env_work === 'prod') {
+      URL = 'chatapi.n-allo.be';
+      databotname = 'LOGIN';
+    }
+    const userca = '';
+    const firstname = 'User';
+    const lastname = 'Anonymous';
+    if (window.chatbotData.env_language === "FR") {
+      buttonText = "Chattez ici";
+      subTitle = "Démarrer une conversation";
+      placeholderText = "Votre question ?";
+    } else if (window.chatbotData.env_language === "NL") {
+      buttonText = "Chat hier";
+      subTitle = "Chat opstarten";
+      placeholderText = "Uw vraag?";
+    } else {
+      buttonText = "Chat here";
+      subTitle = "Start a conversation";
+      placeholderText = "Your question?";
+    }
+    const scriptElt1 = document.createElement("script");
+    scriptElt1.id = "tc_script_382_1";
+    scriptElt1.src = "https://" + URL + "/V2/bundle.js";
+    scriptElt1.setAttribute("data-customer-identifier", "8937844e-6c17-4aec-a73d-bb491f5d30dc");
+    scriptElt1.setAttribute("data-customer-id", userca);
+    scriptElt1.setAttribute("data-customer-firstname", firstname);
+    scriptElt1.setAttribute("data-customer-lastname", lastname);
+    scriptElt1.setAttribute("data-segment", "ALL");
+    scriptElt1.setAttribute("data-language", window.chatbotData.env_language.toLowerCase());
+    scriptElt1.setAttribute("data-topic", "GENERAL");
+    scriptElt1.setAttribute("data-color", "#00aeff");
+    scriptElt1.setAttribute("data-bot-name", databotname);
+    scriptElt1.setAttribute("data-title", "ENGIE Chat");
+    scriptElt1.setAttribute("data-bot-avatar", "https://" + URL + "/images/bot.png");
+    scriptElt1.setAttribute("data-agent-avatar", "https://" + URL + "/images/agent.png");
+    scriptElt1.setAttribute("data-agent-alias", "Engie");
+    scriptElt1.setAttribute("data-open-delay", "0");
+    scriptElt1.setAttribute("data-textbutton", buttonText);
+    scriptElt1.setAttribute("data-placeholder", placeholderText);
+    scriptElt1.setAttribute("data-hide-welcome", "");
+    scriptElt1.setAttribute("data-intent", "login");
+    scriptElt1.type = "text/javascript";
+    scriptElt1.async = true;
+    scriptElt1.defer = true;
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] || document.getElementsByTagName('script')[0].parentNode).insertBefore(scriptElt1, null);
+    console.log({
+      'event': 'custom',
+      'app_name': 'loginbot',
+      'login_action': 'Display'
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+function docReady(fn) {
+  // see if DOM is already available
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    // call on next available tick
+    setTimeout(fn, 1);
+  } else {
+    document.addEventListener("DOMContentLoaded", fn);
+  }
+}
+
+docReady(() => {
+  livechat_launch();
+});
+window.addEventListener(
+  "message",
+  (event) => {
+    if (event.data.message !== undefined) {
+      if (event.data.mode == "1") {
+        console.log({
+          'event': 'custom',
+          'app_name': 'loginbot',
+          'login_action': 'Message Received',
+          'login_label': event.data.message
+        })
+      } else if (event.data.mode == "2") {
+        switch (event.data.message) {
+          case 'Oui':
+          case 'Non':
+          case 'Nee':
+          case 'Ja':
+          case 'Je n\'ai pas reçu d\'email':
+          case 'Ik heb geen email ontvangen':
+          case 'J\'ai reçu l\'email “Réinitialisez votre mot de passe” ':
+          case 'Ik heb een email ontvangen met de titel “Je wachtwoord wijzigen” ':
+          case 'Ik heb nog een vraag':
+          case 'Ik heb geen andere vraag':
+          case 'J\'ai une autre question':
+          case 'Je n\'ai pas d\'autre question':
+          case 'J\'ai reçu l\'email “Votre adresse e-mail n\'a pas été reconnue par notre système” ':
+          case 'Ik heb een email ontvangen met de titel “Je e-mailadres is niet herkend door ons” ':
+          case 'Je vois un login et des champs pour changer mon mot de passe':
+          case 'Ik zie een login en velden om mijn paswoord te wijzigen':
+          case 'Ik zie een opsomming van verschillende logins':
+          case 'Je vois une liste de plusieurs Login':
+          case 'Relancer la procédure':
+          case 'Klik hier indien je de procedure opnieuw bent opgestart':
+            console.log({
+              'event': 'custom',
+              'app_name': 'loginbot',
+              'login_action': 'Message Sent',
+              'login_label': event.data.message
+            })
+        }
+      }
+    }
+  },
+  false
+);
+onmessage = function (event) {
+};
+
+</script>
+</head>
+
+<body class="_widget-auto-layout">
+  <div class="temp-banner">
+    <p>
+    
+        <a href="https://www.engie.be/nl/veilig-inloggen/" target="_blank" rel="noopener">Je account wordt extra beveiligd.</a>
+    
+  </p>
+  </div>
+<div class="c6a4369ee c9a3385cf">
+    <link rel="preload" as="image" href="https://cdn.auth0.com/manhattan/versions/1.3935.0/assets/badge.png"/><main class="_widget c5f5ad5cf"><section class="c66cf9f3c _prompt-box-outer ceb084376"><div class="c299ad867 c7050031c"><div class="c35123490"><header class="cb33fe323 c5fe231d0" id="screen-header" tabindex="-1"><div title="engie-bnl-ms-prd" id="custom-prompt-logo" style="width:auto !important;height:60px !important;position:static !important;margin:auto !important;padding:0 !important;background-color:transparent !important;background-position:center !important;background-size:contain !important;background-repeat:no-repeat !important"></div><img class="c773f6fba cd6731702" id="prompt-logo-center" src="https://cdn.auth0.com/manhattan/versions/1.3935.0/assets/badge.png" alt="engie-bnl-ms-prd"/><h1 class="cf89f40d1 c5908ed3e">SMS-code activeren</h1><div class="cb6a66a8d cb97a412b"><p class="ca3a40ce6 c74a3991c" id="aria-description-text">We hebben een SMS met een 6-cijferige code verzonden naar het nummer:</p></div></header><div class="c2568109f c7099186f"><div class="c893d430d cb0c2c543"><div class="c54cedc21"><div><div class="c52839716 cbbfe9825 cbf94bd78 ce79506c6 c6d817de2 cb21fe132"><span id="authenticator-selector-label-authenticator" class="screen-reader-only">Telefoonnummer</span><span class="ulp-authenticator-selector-text" role="textbox" aria-readonly="true" tabindex="0" aria-labelledby="authenticator-selector-label-authenticator">XXXXXXXX4557</span></div></div><form class="cba29f42e c24c346ec" data-form-primary="true" data-disable-html-validations="true" method="POST"><div id="ulp-error-announcer" class="screen-reader-only" aria-live="assertive" aria-atomic="true"></div><input type="hidden" name="state" value="hKFo2SBGQUtFU1RBVEUwMXh4eHh4eHh4eHh4eHh4eHh4eHhoaGhoaGihblhVTklWLUxPR0lOo3RpZNkgRkFLRVRJRDAxeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHhoo2NpZNkgRkFLRUNJRDAxeHh4eHh4eHh4eHh4eHh4eHh4eHh4eA"/><div class="c893d430d cb0c2c543"><div class="c54cedc21"><div class="input-wrapper _input-wrapper"><div class="c93924124 c541041f3 text cb4fe2379 ulp-field" data-action-text="" data-alternate-action-text=""><label id="code-label" class="c2d18a746 c2b18a383 c3aa8e94a" for="code">Voer de code in <span class="required" aria-hidden="true">*</span></label><input class="input c556977c4 c6a212d55" pattern="[0-9]*" inputMode="numeric" id="code" type="text" aria-labelledby="code-label" aria-describedby="aria-description-text" aria-required="true" required="" autoComplete="off" autoCapitalize="none" spellCheck="false" name="code" value=""/></div><div id="error-cs-code-required" class="ulp-error-info aria-error-check" data-ulp-validation-function="ulpRequiredFunction" data-ulp-validation-event-listeners="blur,change,input,focus" data-ulp-validation-target="code" aria-live="polite" aria-atomic="true">Voer een code in</div></div></div></div><div class="cd836a333"><button type="submit" value="default" class="c5e5a5ca0 cb79f1cb1 c0c6b932f c55b963c1 c06a35ceb" data-action-button-primary="true" name="action">Aanmelden</button></div></form><div class="c5dd68bfd c7758bb20">Geen SMS na 30s ontvangen ?  <form class="c7a630b2a ulp-action-form-resend-code" method="POST"><input type="hidden" name="state" value="hKFo2SBGQUtFU1RBVEUwMXh4eHh4eHh4eHh4eHh4eHh4eHhoaGhoaGihblhVTklWLUxPR0lOo3RpZNkgRkFLRVRJRDAxeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHhoo2NpZNkgRkFLRUNJRDAxeHh4eHh4eHh4eHh4eHh4eHh4eHh4eA"/><button type="submit" aria-label="" value="resend-code" class="c4d6eaf21 _link-resend-code c538aeabe" name="action">Opnieuw sturen</button></form> </div></div></div><div class="ulp-alternate-action center _alternate-action"><form class="c7a630b2a ulp-action-form-pick-authenticator" method="POST"><input type="hidden" name="state" value="hKFo2SBGQUtFU1RBVEUwMXh4eHh4eHh4eHh4eHh4eHh4eHhoaGhoaGihblhVTklWLUxPR0lOo3RpZNkgRkFLRVRJRDAxeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHhoo2NpZNkgRkFLRUNJRDAxeHh4eHh4eHh4eHh4eHh4eHh4eHh4eA"/><button type="submit" aria-label="" value="pick-authenticator" class="c4d6eaf21 cd1c6a0cc c538aeabe" name="action">Code via e-mail ontvangen ?</button></form></div></div></div></div></section></main>
+<script id="client-scripts">
+window.ulpFlags = {"custom_prompts_passkeys":true,"ulp_field_validation_double_submit_fix":true,"enable_ulp_wcag_compliance":true,"enable_ulp_rtl_support":false,"disable_ulp_form_submission_fix":false,"disable_back_button_block_submit_fix":false,"enable_ulp_separate_login_display":true,"enable_ulp_separate_signup_identifiers":true};!function(){var t,e,n,r,i={exports:function(t,e){return"object"==typeof t.ulpFlags&&null!==t.ulpFlags?t.ulpFlags:{}}}.exports(window,document),a=((t={}).exports=function(n,c){var r={},i={};function u(t,e){if(t.classList)return t.classList.add(e);var n=t.className.split(" ");-1===n.indexOf(e)&&(n.push(e),t.className=n.join(" "))}function a(t,e,n,r){return t.addEventListener(e,n,r)}function o(t){return"string"==typeof t}function l(t,e){return o(t)?c.querySelector(t):t.querySelector(e)}function s(t,e){var n=o(t)?c.querySelectorAll(t):t.querySelectorAll(e);return Array.prototype.slice.call(n)}function f(t,e){if(t.classList)return t.classList.remove(e);var n=t.className.split(" "),r=n.indexOf(e);-1!==r&&(n.splice(r,1),t.className=n.join(" "))}function d(t,e){return t.getAttribute(e)}function p(t,e,n){return t.setAttribute(e,n)}function m(t){return t.remove()}var t=["text","number","email","password","tel","url"],e="select,textarea,"+t.map(function(t){return'input[type="'+t+'"]'}).join(",");return{addClass:u,toggleClass:function(t,e,n){if(!0===n||!1===n)return r=t,i=e,!0!==n?f(r,i):u(r,i);var r,i;if(t.classList)return t.classList.toggle(e);var a=t.className.split(" "),o=a.indexOf(e);-1!==o?a.splice(o,1):a.push(e),t.className=a.join(" ")},hasClass:function(t,e){return t.classList?t.classList.contains(e):-1!==t.className.split(" ").indexOf(e)},addClickListener:function(t,e){return a(t,"click",e)},addEventListener:a,getAttribute:d,hasAttribute:function(t,e){return t.hasAttribute(e)},getElementById:function(t){return c.getElementById(t)},getParent:function(t){return t.parentNode},isString:o,loadScript:function(t,e){var n=c.createElement("script");for(var r in e)r.startsWith("data-")?n.dataset[r.replace("data-","")]=e[r]:n[r]=e[r];n.src=t,c.body.appendChild(n)},removeScript:function(t){c.querySelectorAll('script[src="'+t+'"]').forEach(function(t){t.remove()})},poll:function(t){var a=t.interval||2e3,e=t.url||n.location.href,o=t.condition||function(){return!0},u=t.onSuccess||function(){},l=t.onError||function(){};return setTimeout(function r(){if(c.hidden)return setTimeout(r,a);var i=new XMLHttpRequest;return i.open("GET",e),i.setRequestHeader("Accept","application/json"),i.onload=function(){if(200===i.status){var t="application/json"===i.getResponseHeader("Content-Type").split(";")[0]?JSON.parse(i.responseText):i.responseText;return o(t)?u():setTimeout(r,a)}if(429!==i.status)return l({status:i.status,responseText:i.responseText});var e=1e3*Number.parseInt(i.getResponseHeader("X-RateLimit-Reset")),n=e-(new Date).getTime();return setTimeout(r,a<n?n:a)},i.send()},a)},querySelector:l,querySelectorAll:s,removeClass:f,removeElement:m,setAttribute:p,removeAttribute:function(t,e){return t.removeAttribute(e)},swapAttributes:function(t,e,n){var r=d(t,e),i=d(t,n);p(t,n,r),p(t,e,i)},setGlobalFlag:function(t,e){r[t]=!!e},getGlobalFlag:function(t){return!!r[t]},setSubmittedForm:function(t,e){i[t]=e},getSubmittedForm:function(t){return i[t]},preventFormSubmit:function(t){t.stopPropagation(),t.preventDefault()},getUlpFields:function(t){var e=[];return s(t,'input[name^="ulp-"], textarea[name^="ulp-"], select[name^="ulp-"]').forEach(function(t){e.push({name:d(t,"name"),value:t.value})}),e},appendUlpFieldsToForm:function(n,t){t&&t.length&&(s(n,'input[type="hidden"][name^="ulp-"], textarea[name^="ulp-"], select[name^="ulp-"]').forEach(function(t){m(t)}),t.forEach(function(t){var e=c.createElement("input");p(e,"type","hidden"),p(e,"name",t.name),p(e,"value",t.value),n.appendChild(e)}))},matchMedia:function(t){return"function"==typeof n.matchMedia&&n.matchMedia(t).matches},dispatchEvent:function(t,e,n){var r;"function"!=typeof Event?(r=c.createEvent("Event")).initCustomEvent(e,n,!1):r=new Event(e,{bubbles:n}),t.dispatchEvent(r)},timeoutPromise:function(t,i){return new Promise(function(e,n){var r=setTimeout(function(){n(new Error("timeoutPromise: promise timed out"))},t);i.then(function(t){clearTimeout(r),e(t)},function(t){clearTimeout(r),n(t)})})},createMutationObserver:function(t){return"undefined"==typeof MutationObserver?null:new MutationObserver(t)},consoleWarn:function(){(console.warn||console.log).apply(console,arguments)},getConfigJson:function(t){try{var e=l(t);if(!e)return null;var n=e.value;return n?JSON.parse(n):null}catch(t){return null}},getCSSVariable:function(t){return getComputedStyle(c.documentElement).getPropertyValue(t)},removeAndTrimString:function(t,e){var n=new RegExp(e,"g"),r=t.replace(n,"");return r=r.replace(/\s+/g,"  ").trim()},htmlEncode:function(t){var e=c.createTextNode(t),n=c.createElement("span");return n.appendChild(e),n.innerHTML||""},cleanServerErrorMessage:function(t,e){0<t.length&&0<e.length&&e.forEach(function(t){m(t)})},arrayFrom:function(t){return Array.prototype.slice.call(t)},arrayIncludes:function(t,e){return-1!==t.indexOf(e)},stringStartsWith:function(t,e){return 0===t.indexOf(e)},stringEndsWith:function(t,e){return-1!==t.indexOf(e,t.length-e.length)},setTimeout:setTimeout,globalWindow:n,SUPPORTED_INPUT_TYPES:t,ELEMENT_TYPE_SELECTOR:e,RUN_INIT:!0}},t.exports)(window,document),o=function(){var t={};function b(t){if(!("string"==typeof t||t instanceof String)){var e=typeof t;throw null===t?e="null":"object"===e&&(e=t.constructor.name),new TypeError("Expected a string but received a "+e)}}function _(t,e){var n,r;b(t),r="object"==typeof e?(n=e.min||0,e.max):(n=e,arguments[2]);var i=encodeURI(t).split(/%..|./).length-1;return n<=i&&(void 0===r||i<=r)}function h(t,e){for(var n in void 0===t&&(t={}),e)void 0===t[n]&&(t[n]=e[n]);return t}var x={require_tld:!0,allow_underscores:!1,allow_trailing_dot:!1,allow_numeric_tld:!1,allow_wildcard:!1,ignore_max_length:!1},e="(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])",n="("+e+"[.]){3}"+e,r=new RegExp("^"+n+"$"),i="(?:[0-9a-fA-F]{1,4})",a=new RegExp("^((?:"+i+":){7}(?:"+i+"|:)|(?:"+i+":){6}(?:"+n+"|:"+i+"|:)|(?:"+i+":){5}(?::"+n+"|(:"+i+"){1,2}|:)|(?:"+i+":){4}(?:(:"+i+"){0,1}:"+n+"|(:"+i+"){1,3}|:)|(?:"+i+":){3}(?:(:"+i+"){0,2}:"+n+"|(:"+i+"){1,4}|:)|(?:"+i+":){2}(?:(:"+i+"){0,3}:"+n+"|(:"+i+"){1,5}|:)|(?:"+i+":){1}(?:(:"+i+"){0,4}:"+n+"|(:"+i+"){1,6}|:)|(?::((?::"+i+"){0,5}:"+n+"|(?::"+i+"){1,7}|:)))(%[0-9a-zA-Z-.:]{1,})?$");function E(t,e){return void 0===e&&(e=""),b(t),(e=String(e))?"4"===e?r.test(t):"6"===e&&a.test(t):E(t,4)||E(t,6)}var F={allow_display_name:!1,allow_underscores:!1,require_display_name:!1,allow_utf8_local_part:!0,require_tld:!0,blacklisted_chars:"",ignore_max_length:!1,host_blacklist:[],host_whitelist:[]},y=/^([^\x00-\x1F\x7F-\x9F\cX]+)</i,w=/^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~]+$/i,S=/^[a-z\d]+$/,A=/^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$/i,T=/^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A1-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i,C=/^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$/i,q=254;function u(t,e,n,r,i){if(b(t),t=t.trim(),(e=h(e,F)).require_display_name||e.allow_display_name){var a=t.match(y);if(a){var o=a[1];if(t=t.replace(o,"").replace(/(^<|>$)/g,""),i(o," ")&&(o=o.slice(0,-1)),!function(t){var e=t.replace(/^"(.+)"$/,"$1");if(!e.trim())return!1;if(/[\.";<>]/.test(e)){if(e===t)return!1;if(e.split('"').length!==e.split('\\"').length)return!1}return!0}(o))return!1}else if(e.require_display_name)return!1}if(!e.ignore_max_length&&t.length>q)return!1;var u=t.split("@"),l=u.pop(),c=l.toLowerCase();if(n(e.host_blacklist,c))return!1;if(0<e.host_whitelist.length&&!n(e.host_whitelist,c))return!1;var s=u.join("@");if(e.domain_specific_validation&&("gmail.com"===c||"googlemail.com"===c)){var f=(s=s.toLowerCase()).split("+")[0];if(!_(f.replace(/\./g,""),{min:6,max:30}))return!1;for(var d=f.split("."),p=0;p<d.length;p++)if(!S.test(d[p]))return!1}if(!(!1!==e.ignore_max_length||_(s,{max:64})&&_(l,{max:254})))return!1;if(!function(t,e){b(t),(e=h(e,x)).allow_trailing_dot&&"."===t[t.length-1]&&(t=t.substring(0,t.length-1)),!0===e.allow_wildcard&&0===t.indexOf("*.")&&(t=t.substring(2));var n=t.split("."),r=n[n.length-1];if(e.require_tld){if(n.length<2)return!1;if(!e.allow_numeric_tld&&!/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(r))return!1;if(/\s/.test(r))return!1}return!(!e.allow_numeric_tld&&/^\d+$/.test(r))&&n.every(function(t){return!(63<t.length&&!e.ignore_max_length||!/^[a-z_\u00a1-\uffff0-9-]+$/i.test(t)||/[\uff01-\uff5e]/.test(t)||/^-|-$/.test(t)||!e.allow_underscores&&/_/.test(t))})}(l,{require_tld:e.require_tld,ignore_max_length:e.ignore_max_length,allow_underscores:e.allow_underscores})){if(!e.allow_ip_domain)return!1;if(!E(l)){if(!r(l,"[")||!i(l,"]"))return!1;var m=l.slice(1,-1);if(0===m.length||!E(m))return!1}}if('"'===s[0])return s=s.slice(1,s.length-1),e.allow_utf8_local_part?C.test(s):A.test(s);for(var v=e.allow_utf8_local_part?T:w,g=(d=s.split("."),0);g<d.length;g++)if(!v.test(d[g]))return!1;return!e.blacklisted_chars||-1===s.search(new RegExp("["+e.blacklisted_chars+"]+","g"))}return t.exports=function(r,i,n,a,o){return{ulpRequiredFunction:function(t,e){return!e||!!t.value},ulpPasswordPolicyFunction:function(t,e){if(r&&r.ulpFlags&&r.ulpFlags.disable_ulp_form_submission_fix)return!0;if(!t||"password"!==t.name)return!0;if(!i.querySelector(".c4090d9cd.cabd3b98c"))return!0;if(!t.value)return!0;var n=t.classList&&t.classList.contains("c4483666f");return!e&&!n||!n},ulpEmailValidationFunction:function(t,e){return!e||!t.value||!!u(t.value,void 0,n,a,o)},ulpPatternCheckFunction:function(t,e){return!e||!t.value||function(t){if("password"===t.name)return!0;var e=t.getAttribute("pattern");return!e||null!==t.value.match(e)}(t)}}},t.exports}()(window,document,a.arrayIncludes,a.stringStartsWith,a.stringEndsWith);((e={}).exports=function(r,t,i,a,o,u,l,c,n,s,e){if(!e.enable_ulp_wcag_compliance){if(r("body._simple-labels"))return t(".c2d18a746.no-js").forEach(function(t){o(t,"no-js")}),void t(".c2d18a746.js-required").forEach(function(t){a(t,"hide")});t(".c93924124:not(.c5a4a433f):not(disabled)").forEach(function(t){a(t,"ce430f9ff");var e,n=r(t,".input");n.value&&a(t,"c073dc0d1"),i(t,"change",f),i(n,"blur",f),i(n,"animationstart",d),e=n,l(function(){e.value&&c(e,"change",!0)},100)})}function f(t){var e=t.target,n=u(e);e.value||s(e,"data-autofilled")?a(n,"c073dc0d1"):o(n,"c073dc0d1")}function d(t){var e=t.target;"onAutoFillStart"===t.animationName&&(n(e,"data-autofilled",!0),c(t.target,"change",!0),i(e,"keyup",p,{once:!0}))}function p(t){var e=t.target;n(e,"data-autofilled","")}},e.exports)(a.querySelector,a.querySelectorAll,a.addEventListener,a.addClass,a.removeClass,a.getParent,a.setTimeout,a.dispatchEvent,a.setAttribute,a.getAttribute,i),{exports:function(n,t,r,i,a,o,u,l,c,e,s,f){if(f.enable_ulp_wcag_compliance){var d=t("[id^='ulp-container-']");if(d&&d.length){var p=e(E);if(p)for(var m=0;m<d.length;m++)p.observe(d[m],{childList:!0,subtree:!0})}E()}function v(t){var e=t.target,n=o(e);e.value||l(e,"data-autofilled")?i(n,"c073dc0d1"):a(n,"c073dc0d1")}function g(t){var e=t.target,n=o(e);i(n,"focus"),x(e,n)}function b(t){var e=t.target,n=o(e);a(n,"focus"),v(t),x(e,n)}function _(t){var e=t.target;c(e,"data-autofilled","")}function h(t){var e=t.target;"onAutoFillStart"===t.animationName&&(c(e,"data-autofilled",!0),dispatchEvent(t.target,"change",!0),r(e,"keyup",_,{once:!0}))}function x(t,e){t.value?i(e,"c073dc0d1"):a(e,"c073dc0d1")}function E(){t(".ulp-field").forEach(function(t){if(!u(t,"ce430f9ff")){var e=n(t,s);e&&(i(t,"ce430f9ff"),x(e,t),setTimeout(function(){x(e,t)},50),e===document.activeElement&&i(t,"focus"),r(e,"change",v),r(e,"focus",g),r(e,"blur",b),r(e,"animationstart",h))}})}}}.exports(a.querySelector,a.querySelectorAll,a.addEventListener,a.addClass,a.removeClass,a.getParent,a.hasClass,a.getAttribute,a.setAttribute,a.createMutationObserver,a.ELEMENT_TYPE_SELECTOR,i),{exports:function(t,e){var n=e(".c9927185e #rememberBrowser"),r=t('input[name="rememberBrowser"][type="hidden"]');0<r.length&&n.addEventListener("change",function(){var e=this.checked;r.forEach(function(t){t.value=e?"true":"false"})})}}.exports(a.querySelectorAll,a.querySelector),{exports:function(t,e,r,i,a,o,u,l,n,c){function s(t){var e=r("submitted"),n=a("submittedForm");i("submitted",!0),o("submittedForm",t.currentTarget),e&&n&&n===t.currentTarget?u(t):"apple"===l(t.target,"data-provider")&&setTimeout(function(){i("submitted",!1)},2e3)}c=c||{};var f=t("form");f&&(f.forEach(function(t){e(t,"submit",s)}),e(n,"pageshow",function(){c.disable_back_button_block_submit_fix||i("submitted",!1)}))}}.exports(a.querySelectorAll,a.addEventListener,a.getGlobalFlag,a.setGlobalFlag,a.getSubmittedForm,a.setSubmittedForm,a.preventFormSubmit,a.getAttribute,a.globalWindow,i),((n={}).exports=function(a,o,r,i,c,u,l,s,f,d,p,m,e,v,g,t,n,b,_,h,x,E){if(h.enable_ulp_wcag_compliance){var F=!1,y=t+',input[type="checkbox"]',w=50,S=2e3,A=[];return I(),[y,L,P,N,O,$,j,D,M,q,I]}function T(t){u(t,"disabled",!0),h.disable_back_button_block_submit_fix?h.ulp_field_validation_double_submit_fix&&setTimeout(function(){l(t,"disabled")},S):A.push(t)}function C(t){o(t,'button[data-action-button-primary="true"]').forEach(function(t){T(t)})}function q(){h.disable_back_button_block_submit_fix||r(m,"pageshow",function(){A.forEach(function(t){l(t,"disabled")}),A=[]})}function L(t){var e=c(t,"data-ulp-validation-function"),n=i(t);return{functionName:e,element:a(n,y),parent:n}}function P(t){var i=[],a=[];return o(t,"[data-ulp-validation-function]").forEach(function(t){var e=L(t),n=[];if(e.element){if("input"===e.element.tagName.toLowerCase()){var r=c(e.element,"type");"checkbox"!==r&&-1===g.indexOf(r)&&n.push("Unsupported input type: "+r)}}else n.push("Could not find element");m[e.functionName]||n.push("Could not find function with name: "+e.functionName),n.length?a=a.concat(n):i.push(t)}),a.length&&e(a.join("\r\n")),i}function N(t,e,n){var r=L(t),i=(0,m[r.functionName])(r.element,e,n);i?s(t,"ulp-validator-error")&&(d(t,"ulp-validator-error"),l(t,"data-is-error")):s(t,"ulp-validator-error")||(f(t,"ulp-validator-error"),u(t,"data-is-error",!0));var a=o(r.parent,".ulp-validator-error");return p(r.parent,"ulp-error",!!a.length),i}function O(e){var n=L(e),t=(c(e,"data-ulp-validation-event-listeners")||"").replace(/\s/g,"").split(",").filter(function(t){return!!t});t.length&&t.forEach(function(t){r(n.element,t,function(){N(e,F,t)})})}function k(t){t.forEach(function(t){var e=t.id,n=c(t,"data-ulp-validation-target"),r=a('[id="'+n+'"]');if(r){var i=c(r,"aria-describedby");i&&-1!==i.indexOf(e)||u(r,"aria-describedby",i?i+" "+e:e),u(r,"aria-invalid","true")}})}function R(t,e){var n=a("#ulp-error-announcer");if(n){n.textContent="";var r=[];if(t.forEach(function(t){var e=t.textContent;e&&e.trim()&&r.push(e.trim())}),e){var i=function(){var t=a(".c4090d9cd.cabd3b98c");if(!t)return[];var i=[],e=a(t,".cb9e4f3aa");e&&e.textContent&&e.textContent.trim()&&i.push(e.textContent.trim());var n=o(t,"li.c8b9db1a8");return n&&n.length&&n.forEach(function(t){var e="";if(s(t,"cd3bc0ad2")){var n=a(t,".c50cf2ccb");n&&(e=n.textContent)}else if(s(t,"c71ccd47c")){var r=a(t,".c19ada725");r&&(e=r.textContent)}e&&e.trim()&&i.push(e.trim())}),i}();i.length&&(r=r.concat(i))}r.length&&m.setTimeout(function(){n.textContent=r.map(function(t){return t.replace(/\.+$/,"")}).join(". ")},w)}}function $(t,e,n){var r=x&&x("submitted");if(!(h.ulp_field_validation_double_submit_fix&&e.defaultPrevented&&r)){F=!0;var i=n.filter(function(t){return!N(t,F,"submit")});if(h.disable_ulp_form_submission_fix){if(!i.length&&!e.defaultPrevented)return e.submitter&&"default"==c(e.submitter,"value")&&T(e.submitter),h.ulp_field_validation_double_submit_fix&&C(t),void t.submit();if(v(e),k(i),R(i,!1),h.ulp_field_validation_double_submit_fix&&E("submitted",!1),i.length){var a=L(i[0]);a.element.focus({preventScroll:!0}),a.parent.scrollIntoView({behavior:"smooth"})}}else{var o=x&&x("invalidPasswordPolicy"),u=x&&x("invalidCaptcha");if(!i.length&&!o&&!u)return e.submitter&&"default"==c(e.submitter,"value")&&T(e.submitter),h.ulp_field_validation_double_submit_fix&&C(t),void t.submit();if(v(e),k(i),R(i,!!o),h.ulp_field_validation_double_submit_fix&&E&&E("submitted",!1),i.length){var l=L(i[0]);l.element.focus({preventScroll:!0}),l.parent.scrollIntoView({behavior:"smooth"})}}}}function D(){var e=a('form[data-form-primary="true"]'),n=P(e);0!==n.length&&(n.forEach(function(t){O(t)}),r(e,"submit",function(t){$(e,t,n)}))}function j(){var n=a('form[data-form-primary="true"]'),t=o('form[data-form-secondary="true"]');n&&t.length&&t.forEach(function(e){r(e,"submit",function(){var t=b(n);t.length&&_(e,t)})})}function M(){if(n)for(var t in n)n.hasOwnProperty(t)&&(m[t]=n[t])}function I(){var t=a("form[data-disable-html-validations]");t&&(M(),u(t,"novalidate",""),D(),q(),h.custom_prompts_passkeys&&j())}},n.exports)(a.querySelector,a.querySelectorAll,a.addEventListener,a.getParent,a.getAttribute,a.setAttribute,a.removeAttribute,a.hasClass,a.addClass,a.removeClass,a.toggleClass,a.globalWindow,a.consoleWarn,a.preventFormSubmit,a.SUPPORTED_INPUT_TYPES,a.ELEMENT_TYPE_SELECTOR,o,a.getUlpFields,a.appendUlpFieldsToForm,i,a.getGlobalFlag,a.setGlobalFlag),((r={}).exports=function(o,t,u,l,c,s,e,f,n){if(n.enable_ulp_wcag_compliance){var r=t('[class*="aria-error-check"]');if(r&&r.length){var i=e(function(t){t&&t.length&&t.map(function(t){if(t.target&&u(t.target,"aria-error-check")){var e=o('[id="'+l(t.target,"data-ulp-validation-target")+'"');if(e){var n=l(e,"aria-describedby");l(t.target,"data-is-error")?(r=e,i=n,a=t.target.id,i&&-1!==i.search(a)||c(r,"aria-describedby",i?i+" "+a:a),c(r,"aria-invalid",!0)):function(t,e,n){if(e){var r=f(e,n);r.length?c(t,"aria-describedby",r):(s(t,"aria-invalid"),s(t,"aria-describedby"))}else s(t,"aria-invalid"),s(t,"aria-describedby")}(e,n,t.target.id)}}var r,i,a})});i&&r.map(function(t){i.observe(t,{attributes:!0,attributeFilter:["class","data-is-error"]})})}}},r.exports)(a.querySelector,a.querySelectorAll,a.hasClass,a.getAttribute,a.setAttribute,a.removeAttribute,a.createMutationObserver,a.removeAndTrimString,i)}();
+</script>
+</div>
+
+<!-- Cookie Banner -->
+<dialog class="modal cookie-consent modal__medium">
+  <div class="modal__header">
+  </div>
+  <div class="modal__body p-0">
+    <div class="cookie-consent__step1 p-3">
+      <div class="mb-2">
+        <div class="cookie-consent__logo">
+        </div>
+      </div>
+      <div class="text-center">
+        <div class="text-main headings-600 ff-bold text-black text-center mt-3 mb-2 d-block">
+            
+                Wij respecteren je privacy
+            
+        </div>
+        <div class="text-main fs-10 ff-news text-black text-center mb-2 d-block">
+          <p>
+            
+            ENGIE gebruikt cookies op haar website om de goede werking ervan te garanderen, deze te personaliseren op basis van jouw interesses en om je surfervaring te optimaliseren. Bepaalde cookies laten ons toe om onze reclameberichten te personaliseren via online banners of directe berichten. Bepaalde partners van ENGIE kunnen cookies op onze website installeren om de reclame die jou online wordt aangeboden te personaliseren.
+            
+          </p>
+          <p>
+            
+            Indien je meer informatie wenst over ons gebruik van cookies kan je ons cookiebeleid <a href="https://www.engie.be/nl/cookiebeleid">hier</a> en ons Privacybeleid&nbsp;<a href="https://www.engie.be/nl/privacybeleid">hier</a> raadplegen. Klik op “Accepteren” om alle cookies te aanvaarden en direct door te gaan naar de website of klik op "Je cookies beheren" om alle (behalve functionele) cookies te weigeren en je cookievoorkeuren aan te passen.
+            
+          </p>
+        </div>
+        <div class="d-flex flex-wrap justify-content-around pb-1">
+          <div class="col-12 col-md-4 mb-1 mb-md-0">
+            <a href="#" class="fs-10 mb-2 mb-md-0 button button--secondary button--blue button--thin button--small order-2 order-md-0 cookie-consent__more-options">
+                
+                    Je cookies beheren
+                
+            </a>
+          </div>
+          <div class="col-12 col-md-4 mb-1 mb-md-0">
+            <button class="fs-10 mb-2 mb-md-0 button button--small button--secondary button--blue button--thin cookie-consent__accept-all order-0 order-md-0">
+                
+                    Alles accepteren
+                
+            </button>
+          </div>
+          <div class="col-12 col-md-4 mb-1 mb-md-0">
+            <button class="fs-10 mb-2 mb-md-0 button button--small button--secondary button--blue button--thin cookie-consent__refuse-all order-0 order-md-0">
+                
+                    Alles weigeren
+                
+            </button>
+          </div>
+          <div class="col-12 mt-2">
+                
+                    <a href="/nl/cookiebeleid/" class="fs-10" target="_blank">Lijst van alle cookies</a>
+                
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="pt-1 pt-md-2">
+        
+        <div class="fs-10 text-center">Deze banner registreert anonieme statistieken. Indien je niet wenst deel te nemen,
+            <a href="#" id="tracing-optout-link" class="text-blue">klik hier.</a>
+        </div>
+        
+        <div id="unTrack-confirmation" class="fs-10 bg-green text-dark-green d-none">
+        
+            Dank u
+        
+        </div>
+      </div>
+    </div>
+    <div class="cookie-consent__step2 p-0 d-none">
+      <div class="px-2">
+        <div class="row d-flex justify-content-between align-content-center">
+          <div class="col-12 col-md-4 d-flex justify-content-center justify-content-md-start align-items-center py-2">
+            <div class="cookie-consent__logo cookie-consent__logo__small">
+            </div>
+          </div>
+          <div class="col-12 col-md-4 py-md-2 py-1">
+            <button class="button button--small button--blue cookie-consent__unselect-all">
+        
+                Weiger alles
+        
+            </button>
+          </div>
+          <div class="col-12 col-md-4 py-md-2 py-1">
+            <button class="button button--secondary button--small button--blue cookie-consent__select-all">
+        
+                Accepteer alles
+        
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="border-top-1 border-grey-40">
+      </div>
+      <div class="p-2 cookie-consent__scrollable">
+        <div class="text-main fs-10 ff-news mb-2 d-block">
+        
+        Alle cookies zijn standaard uitgeschakeld behalve functionele cookies die verplicht zijn. Nadat u een keuze heeft gemaakt, gelieve op "Opslaan en doorgaan" te klikken.
+        
+        </div>
+        <div class="text-main headings-400 ff-medium mt-3 mb-2 d-block">
+        
+        Gebruik van cookies
+        
+        </div>
+        <div class="text-main fs-10 ff-news mb-2 d-block">
+        
+ENGIE gebruikt cookies op haar website om de goede werking ervan te garanderen en om jouw voorkeuren en interesses te kennen zodat we je surfervaring kunnen optimaliseren. Wij personaliseren eveneens onze website en bepaalde websites van onze partners, op basis van jouw interesses. Indien je meer informatie wenst over ons gebruik van cookies kan je ons cookiebeleid <a href="/nl/cookiebeleid">hier</a> raadplegen.
+        
+        </div>
+        <div class="pt-1 cookie-consent__list">
+          <div class="d-flex border-top-1 border-grey-40 py-1 my-1">
+            <div>
+              <div class="body-200 ff-medium pb-1">
+        
+                Functionele cookies
+        
+              </div>
+              <div class="pl-1">
+                <div class="fs-10">
+        
+            Cookies die nodig zijn om onze websites en apps correct te laten werken. Deze cookies zijn bijvoorbeeld nodig om je in te loggen op de klantenzone of om je taalkeuze te onthouden. Deze cookies kunnen niet gedeactiveerd worden.
+        
+                </div>
+              </div>
+            </div>
+            <div class="pl-1">
+              <label class="form__check__toggle form__check__toggle--small">
+                <input type="checkbox" class="custom-control-input" checked="checked" disabled="disabled" name="required">
+                <span class="custom-control-indicator cookie-consent__option">
+                                    </span>
+              </label>
+            </div>
+          </div>
+          <div class="d-flex border-top-1 border-grey-40 py-1 my-1">
+            <div>
+              <div class="body-200 ff-medium pb-1">
+        
+                Analytische cookies
+        
+
+              </div>
+              <div class="pl-1">
+                <div class="fs-10">
+        
+                   Cookies die informatie verzamelen over de manier waarop bezoekers onze websites en apps gebruiken (bezochte pagina’s, gemiddelde duur van het bezoek, …), om de werking ervan te verbeteren, om de inhoud aan te passen aan de wensen van de bezoekers en om je surfervaring te optimaliseren.
+        
+
+                </div>
+              </div>
+            </div>
+            <div class="pl-1">
+              <label class="form__check__toggle form__check__toggle--small">
+                <input type="checkbox" class="custom-control-input" name="analytics">
+                <span class="custom-control-indicator cookie-consent__option">
+                                        </span>
+              </label>
+            </div>
+          </div>
+          <div class="d-flex border-top-1 border-grey-40 py-1 my-1">
+            <div>
+              <div class="body-200 ff-medium pb-1">
+        
+                Comfort en personalisatie cookies
+        
+
+              </div>
+              <div class="pl-1">
+                <div class="fs-10">
+        
+                    Cookies om je surfcomfort te verhogen en je een meer gepersonaliseerde surfervaring te bezorgen, bijvoorbeeld door de inhoud van een pagina te herschikken of door bepaalde informatie vooraf in te vullen in een formulier.
+        
+
+                </div>
+              </div>
+            </div>
+            <div class="pl-1">
+              <label class="form__check__toggle form__check__toggle--small">
+                <input type="checkbox" class="custom-control-input" name="optimization">
+                <span class="custom-control-indicator cookie-consent__option">
+                                            </span>
+              </label>
+            </div>
+          </div>
+          <div class="d-flex border-top-1 border-grey-40 py-1 my-1">
+            <div>
+              <div class="body-200 ff-medium pb-1">
+        
+                Commerciële en social media cookies
+        
+
+              </div>
+              <div class="pl-1">
+                <div class="fs-10">
+        
+
+                    Cookies die informatie verzamelen over je surfgedrag met als doel je reclame of inhoud aan te bieden waarin je geïnteresseerd bent, op onze websites en apps, maar ook daarbuiten via banners of directe berichten (zoals bijvoorbeeld e-mail, sms, via de post, ...). Dit kunnen ook cookies van derden zijn om de inhoud en de werking van onze website en apps te verbeteren of om de ENGIE-banners op andere websites of andere apps op te volgen en te optimaliseren. Met deze cookies kan je ook de inhoud van onze websites en apps delen met andere personen via sociale media.
+        
+
+                </div>
+              </div>
+            </div>
+            <div class="pl-1">
+              <label class="form__check__toggle form__check__toggle--small">
+                <input type="checkbox" class="custom-control-input" name="remarketing">
+                <span class="custom-control-indicator cookie-consent__option">
+                                                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-top-1 border-grey-40">
+      </div>
+      <div class="px-2">
+        <div class="row d-flex justify-content-between align-content-center">
+          <div class="col-12 col-md-6 py-1 py-md-2 order-2 order-md-1 d-flex flex-wrap align-items-center justify-content-center justify-content-md-start">
+        
+            <a href="/nl/cookiebeleid/" target="_blank" class="fs-10 px-2 text-blue">Cookiebeleid</a>
+            <a href="/nl/privacybeleid/" target="_blank" class="fs-10 px-2 text-blue">Privacybeleid</a>
+        
+          </div>
+          <div class="col-12 col-md-6 py-1 py-md-2 order-1 order-md-2 text-right">
+            <button class="button button--alternative button--small cookie-consent__accept">
+        
+                Opslaan en doorgaan
+        
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cookie-consent__step3 cookie-consent__loading d-none py-10">
+      <div class="d-flex justify-content-center">
+        <div class="spinner">
+          <div>
+          </div>
+          <div>
+          </div>
+          <div>
+          </div>
+          <div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- End cookie banner -->
+
+<!-- Cookie banner script -->
+<script>
+  let consentName = 'cookie-consent'
+  let privacy = false
+  let prohibitedUri = ['cookiebeleid', 'politique-cookies', 'policy-cookies']
+  let allowedLocation = true
+  let domain = ''
+  let el = undefined
+function setCookie(cookie) {
+  document.cookie = cookie.name + "=" + cookie.value + ";expires=" + cookie.expires + ";path=" + cookie.path + ";domain=" + cookie.domain + ";secure=" + cookie.secure;
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie(cookieName) {
+  return !!getCookie(cookieName)
+}
+
+function register (selector, callback, parent = document) {
+  parent.querySelectorAll(selector).forEach((el) => {
+    callback(el)
+  });
+}
+function cookieConsent(htmlElement) {
+  el = htmlElement
+  privacy = el?.dataset && el?.dataset.privacy
+  allowedLocation = !prohibitedUri.some(uri => document.location.href.includes(uri))
+  const hostname = window.location.hostname
+  domain = hostname
+
+  if (hostname.indexOf('.') > 0) {
+    domain = hostname.slice(hostname.indexOf('.'))
+  }
+
+  if (!checkCookie(consentName) && !privacy && allowedLocation) {
+    el?.showModal()
+    setupListeners(el)
+    updateSelected(el)
+    configureGoogleAnaLytics()
+    ga('ga_cookie.send', {
+      'hitType': 'event',
+      'eventCategory': 'Cookie Banner',
+      'eventAction': 'First Step',
+      'eventLabel': 'Page'
+    })
+  }
+    attachClickEvent('.cookie-consent__more-options', () => {
+      toggleStep(1, true, el)
+      toggleStep(2, false, el)
+    }, el)
+    attachClickEvent('.cookie-consent__refuse-all', () => {
+      if (typeof ga === 'function') {
+        ga('ga_cookie.send', {
+          'hitType': 'event',
+          'eventCategory': 'Cookie Banner',
+          'eventAction': 'First Step',
+          'eventLabel': 'All cookies refused'
+        })
+      }
+      setCookie( {
+        name: consentName,
+        value: 'required',
+        path: '/',
+        expires: '1Y',
+        domain: domain,
+        secure: true
+      })
+      el?.close()
+    }, el)
+    attachClickEvent('.cookie-consent__accept-all', () => {
+      setToAllCheckboxes(true, el)
+      ga('ga_cookie.send', {
+        'hitType': 'event',
+        'eventCategory': 'Cookie Banner',
+        'eventAction': 'First Step',
+        'eventLabel': 'All cookies accepted'
+      }, el)
+      saveCookieConsent(false, el)
+    }, el)
+    attachClickEvent('.cookie-consent__accept', () => {
+      saveCookieConsent(true, el)
+    }, el)
+    attachClickEvent('.cookie-consent__unselect-all', () => {
+      setToAllCheckboxes(false, el)
+    }, el)
+    attachClickEvent('.cookie-consent__select-all', () => {
+      setToAllCheckboxes(true, el)
+    }, el)
+    checkForManual()
+    attachClickEvent('#tracing-optout-link', () => {
+      window['ga-disable-UA-92834960-5'] = true
+      el?.querySelector('#unTrack-confirmation').classList.remove('d-none')
+      setTimeout(() => el?.querySelector('#unTrack-confirmation').classList.add('d-none'), 3000)
+    }, el)
+  }
+function configureGoogleAnaLytics () {
+    ga('create', 'UA-92834960-5', 'auto', { 'name': 'ga_cookie' })
+  }
+
+function checkForManual (el) {
+    const manualLink = Array.from(document.querySelectorAll('.cookie-consent_manual-show'))
+    if (manualLink) {
+      for (const link of manualLink) {
+        link.addEventListener('click', () => {
+          toggleStep(1, true, el)
+          toggleStep(2, false, el)
+            el?.close()
+        })
+      }
+    }
+  }
+
+function saveCookieConsent (secondStep = true, el) {
+    const consentValue = []
+    const items = Array.from(el?.querySelectorAll(`.cookie-consent__list input`))
+    if (items) {
+      for (const item of items) {
+        if (item.checked) {
+          consentValue.push(item.name)
+        }
+      }
+    }
+    if (secondStep) {
+      ga('ga_cookie.send', {
+        'hitType': 'event',
+        'eventCategory': 'Cookie Banner',
+        'eventAction': 'Second step',
+        'eventLabel': consentValue.join(' - ')
+      })
+    }
+     setCookie({
+        name: consentName,
+        value: consentValue.join(),
+        path: '/',
+        expires: '1Y',
+        domain: domain,
+        secure: true
+    })
+      el?.close()
+
+    removeCookie('_ga')
+    removeCookie('_gat_ga_cookie')
+    removeCookie('_gid')
+    const evt = new CustomEvent('cookiesChanged', {detail: {accepted: consentValue.join()}})
+    document.dispatchEvent(evt)
+  }
+
+function removeCookie (cookieName) {
+     setCookie({
+        name: cookieName,
+        value:  'a',
+        path: '/',
+        expires: new Date(),
+        domain: domain,
+        secure: true
+    })
+  }
+
+function setToAllCheckboxes (checked, el) {
+    const items = Array.from(el?.querySelectorAll(`.cookie-consent__list input`))
+    if (items) {
+      for (const item of items) {
+        if (!item.disabled) {
+          item.checked = checked
+        }
+      }
+
+      updateSelected(el)
+    }
+  }
+
+function checkAllCheckboxes (status, el) {
+    const items = el?.querySelectorAll(`.cookie-consent__list input`)
+    if (items) {
+      for (const item of items) {
+        if (!item.disabled) {
+          if (item.checked !== status) {
+            return false
+          }
+        }
+      }
+      return true
+    }
+  }
+
+
+function updateSelected (el) {
+    const acceptAll= el?.querySelector('.cookie-consent__step2 .cookie-consent__select-all')
+    const refuseAll= el?.querySelector('.cookie-consent__step2 .cookie-consent__unselect-all')
+    if (checkAllCheckboxes(true, el)) {
+      acceptAll.classList.remove('button--secondary')
+      refuseAll.classList.add('button--secondary')
+    } else if (checkAllCheckboxes(false, el)) {
+      acceptAll.classList.add('button--secondary')
+      refuseAll.classList.remove('button--secondary')
+    } else {
+      acceptAll.classList.add('button--secondary')
+      refuseAll.classList.add('button--secondary')
+    }
+  }
+
+
+function attachClickEvent (selector, eventCallback, el) {
+    const elements = Array.from(el?.querySelectorAll(selector) ?? [])
+    if (elements) {
+      for (const elem of elements) {
+        elem.addEventListener('click', eventCallback)
+      }
+    }
+  }
+
+function toggleStep (stepNo, flag, el) {
+    const stepEl = el?.querySelector(`.cookie-consent__step${stepNo}`)
+    if (stepNo === 2) {
+      ga('ga_cookie.send', {
+        'hitType': 'event',
+        'eventCategory': 'Cookie Banner',
+        'eventAction': 'Second step',
+        'eventLabel': 'Page'
+      })
+    }
+    if (stepEl) {
+      if (flag) {
+        stepEl.classList.add('d-none')
+      } else {
+        stepEl.classList.remove('d-none')
+      }
+    }
+  }
+
+  function setupListeners (el) {
+    const items = el?.querySelectorAll(`.cookie-consent__list input`)
+    if (items) {
+      for (const item of items) {
+        if (!item.disabled) {
+          item.addEventListener('change', () => {
+            updateSelected(el)
+          })
+        }
+      }
+    }
+  }
+
+function stripAuth (el) {
+  const parts = el.innerText.split('@')
+  if (!el.innerText.startsWith('*') && parts[0].length > 30) {
+        el.innerText = el.innerText.substr(31)
+  }
+
+  if (!el.innerText.startsWith('*') && parts[0].startsWith('auth') && parts[1].startsWith('engi')) {
+        el.parentElement.style.display = 'none';
+  }
+}
+
+function addLinkForPasskey (el) {
+  if (!window.location.href.includes('login/identifier')) return
+  const target = document.createElement('a')
+  target.setAttribute('target', '_blank')
+  target.classList.add('passkey-info')
+  if (language.toLowerCase() === 'fr') {
+    target.innerText = "Pas encore de passkey? Plus d'info"
+    target.setAttribute('href', 'https://www.engie.be/fr/connexion-securisee/#passkey')
+  } else {
+    target.innerText = "Nog geen passkey? Meer info"
+    target.setAttribute('href', 'https://www.engie.be/nl/veilig-inloggen/#passkey')
+  }
+  el.prepend(target)
+}
+
+function addEmailButton(loginContainer) {
+  const lng = language || 'fr'
+  const box = document.querySelector('.buttons-box')
+  const classes = box.querySelector('button').className
+  const button = document.createElement('button')
+  button.className = classes
+  button.style.marginTop = 0
+  const span = document.createElement('span')
+  span.classList.add('f-icon', 'f-icon-envelope', 'email-button')
+  const text = document.createElement('span')
+  text.innerText = lng === 'fr' ? 'Se connecter avec mot de passe' : 'Meld je aan met wachtwoord'
+  button.appendChild(span)
+  button.appendChild(text)
+  box.appendChild(button)
+  const back = document.createElement('a')
+  back.innerText = lng === 'fr' ? 'Retour au choix' : 'Terug naar keuze'
+  loginContainer.prepend(back)
+  const create = document.querySelector('.ulp-alternate-action._alternate-action')
+
+  back.addEventListener('click', () => {
+    box.classList.remove('hidden-login')
+    loginContainer.classList.add('hidden-login')
+    create.classList.remove('hidden-login')
+  })
+
+  button.addEventListener('click', () => {
+    box.classList.add('hidden-login')
+    loginContainer.classList.remove('hidden-login')
+    create.classList.add('hidden-login')
+  })
+}
+
+function appendIfPresent(parent, child) {
+  if (child) {
+    parent.appendChild(child)
+  }
+}
+
+function reorderBoxes (el) {
+  if (!window.location.href.includes('login/identifier')) return
+  const head = el.querySelector('header')
+  const parentBox = head.nextElementSibling
+  const innerBoxes = Array.from(parentBox.children)
+
+    /* remove forgot password */
+  innerBoxes[0].querySelector('p').remove()
+
+  const newContainer = document.createElement('div')
+  newContainer.classList.add('login-box', 'hidden-login')
+  const buttonsContainer = document.createElement('div')
+  buttonsContainer.classList.add('buttons-box')
+
+  appendIfPresent(buttonsContainer, innerBoxes[5])
+  appendIfPresent(buttonsContainer, innerBoxes[6])
+  appendIfPresent(buttonsContainer, innerBoxes[7])
+
+  appendIfPresent(newContainer, innerBoxes[0])
+  appendIfPresent(newContainer, innerBoxes[1])
+
+  appendIfPresent(parentBox, buttonsContainer)
+  addEmailButton(newContainer)
+  appendIfPresent(parentBox, newContainer)
+
+  appendIfPresent(parentBox, innerBoxes[2])
+
+  appendIfPresent(parentBox, innerBoxes[3])
+
+  innerBoxes[4].classList.add('or-divider')
+  innerBoxes[4].remove()
+  head.classList.add('login-id-header')
+}
+
+function addEmailError(el) {
+  if (!window.location.href.includes('signup/identifier')) return
+  const text = language === 'fr' ? 'Veuillez utiliser une adresse email valide.' : 'Voer een geldig e-mailadres in.'
+  const content = document.createElement('div')
+  content.setAttribute('id', 'error-cs-email-invalid')
+  content.setAttribute('data-ulp-validation-function', 'ulpEmailCheckFunction')
+  content.setAttribute('data-ulp-validation-event-listeners', 'blur,change,input,focus')
+  content.setAttribute('data-ulp-validation-target', 'username')
+  content.setAttribute('aria-live', 'polite')
+  content.setAttribute('aria-atomic', 'true')
+  content.classList.add('ulp-error-info', 'aria-error-check')
+  content.innerText = text
+  const target = document.querySelector('#error-cs-username-required')
+  target.parentElement.appendChild(content)
+}
+
+function overrideEmailValidation(el) {
+
+  if (!window.location.href.includes('signup/identifier')) return
+
+  document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form') // narrow selector if needed
+  const emailInput = document.querySelector('#username')
+
+  const errorRequired = document.querySelector('#error-cs-username-required')
+  const errorPattern = document.querySelector('#error-cs-pattern-mismatch')
+  const errorEmail   = document.querySelector('#error-cs-email-invalid')
+
+  const submitBtn = form?.querySelector('button[type="submit"], input[type="submit"]')
+
+  const setError = (errorEl, hasError) => {
+    if (!errorEl) return
+    errorEl.dataset.isError = hasError ? 'true' : 'false'
+    errorEl.classList.toggle('ulp-validator-error', hasError)
+  }
+
+  const validateEmail = () => {
+    const value = emailInput.value.trim()
+    let isValid = true
+
+    const allowedChars   = /^[a-zA-Z0-9_+\-.!#\$\^`~@']*$/
+    const emailStructure = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    // reset errors
+    setError(errorRequired, false)
+    setError(errorPattern, false)
+    setError(errorEmail, false)
+
+    if (value.length < 3) {
+      setError(errorRequired, true)
+      emailInput.setAttribute('aria-invalid', 'true')
+      isValid = false
+    } else if (!allowedChars.test(value)) {
+      setError(errorPattern, true)
+      emailInput.setAttribute('aria-invalid', 'true')
+      isValid = false
+    } else if (!emailStructure.test(value)) {
+      setError(errorEmail, true)
+      emailInput.setAttribute('aria-invalid', 'true')
+      isValid = false
+    } else {
+      emailInput.removeAttribute('aria-invalid')
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = !isValid
+    }
+
+    return isValid
+  }
+
+  const blockIfInvalid = event => {
+    const ok = validateEmail()
+    if (!ok) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.stopImmediatePropagation) {
+        event.stopImmediatePropagation()
+      }
+      return false
+    }
+  }
+
+  if (!form || !emailInput) return
+
+  // 1) Intercept native submit events (capture phase)
+  form.addEventListener('submit', blockIfInvalid, true)
+
+  // 2) Intercept clicks on the submit button (some libs hijack this)
+  if (submitBtn) {
+    submitBtn.addEventListener('click', blockIfInvalid, true)
+  }
+
+  // 3) Monkey-patch programmatic form.submit()
+  const nativeSubmit = form.submit.bind(form)
+  form.submit = function () {
+    if (validateEmail()) {
+      nativeSubmit()
+    } else {
+      console.log('Blocked programmatic submit: invalid email')
+    }
+  }
+
+  // 4) Live validation
+  emailInput.addEventListener('input', validateEmail)
+
+  // Initial sync
+  validateEmail()
+})
+
+}
+
+function clickAbort () {
+  if (!window.location.href.includes('signup/passkeys')) return
+
+  const targetClass = '_link-abort-passkey-enrollment'
+  const maxAttempts = 10
+  const intervalTime = 500 // in ms
+  let attempts = 0
+
+  const clickAbortLink = () => {
+    const link = document.querySelector(`.${targetClass}`)
+    if (link) {
+      link.click()
+      clearInterval(checkInterval)
+    } else if (++attempts >= maxAttempts) {
+      clearInterval(checkInterval)
+    }
+  }
+
+  const checkInterval = setInterval(clickAbortLink, intervalTime)
+}
+
+function checkAndApplyLoginGrid() {
+  if (window.location.href.includes('signup/passkeys')) return
+
+  const elements = document.querySelectorAll('._widget.login')
+    if (elements.length) {
+      elements.forEach(el => {
+        el.style.display = 'grid'
+      })
+  }
+}
+
+function showBanner(el) {
+  if (!window.location.href.includes('login/identifier')) return
+    const banner = document.querySelector('.temp-banner')
+  const container = document.querySelector('main > section')
+  container.prepend(banner)
+  banner.style.display = 'block'
+}
+
+function hidePassKeyErrorMessage(el) {
+  if (!window.location.href.includes('login/identifier')) return
+
+  const inputUsername = document.querySelector('#username')
+  if (!inputUsername) return
+  el.remove()
+}
+
+function hideLinksOnPasswordStep (el) {
+  if (!window.location.href.includes('login/password')) return
+  const inputUsername = document.querySelector('input[name=username]')
+  if (!inputUsername) return
+  el.parentElement.style.display = 'none'
+}
+
+
+function addMoreInfoLink (el) {
+  const pathName = new URL(window.location.href)
+  if (pathname.includes('mfa-sms-enrollment') && !pathname.includes('mfa-sms-enrollment-verify')) {
+    const target = document.createElement('a')
+    target.setAttribute('target', '_blank')
+    target.classList.add('sms-info')
+    target.style.fontSize = '14px'
+    if (language.toLowerCase() === 'fr') {
+      target.innerText = "Besoin de plus d'information ?"
+      target.setAttribute('href', 'https://www.engie.be/fr/connexion-securisee/#sms')
+    } else {
+      target.innerText = "Meer info nodig?"
+      target.setAttribute('href', 'https://www.engie.be/nl/veilig-inloggen/#sms')
+    }
+    el.appendChild(target)
+  }
+}
+
+function addMoreInfoLinkPasskey (el) {
+  if (!window.location.href.includes('passkey-enrollment')) return
+  const target = document.createElement('a')
+  target.setAttribute('target', '_blank')
+  target.classList.add('passkey-info')
+  if (language.toLowerCase() === 'fr') {
+    target.innerText = "Besoin de plus d'information ?"
+    target.setAttribute('href', 'https://www.engie.be/fr/connexion-securisee/#passkey')
+  } else {
+    target.innerText = "Meer info nodig?"
+    target.setAttribute('href', 'https://www.engie.be/nl/veilig-inloggen/#passkey')
+  }
+  el.appendChild(target)
+}
+
+function removeRegistrationLink (el) {
+  if (!window.location.href.includes('login/password')) return
+  el.remove()
+}
+
+function removeAccessesBox (el) {
+  if (!window.location.href.includes('u/consent')) return
+  const hiddenInput = el.querySelector('input[name="audience"]')
+  const box = hiddenInput.nextElementSibling.remove()
+}
+
+
+clickAbort()
+checkAndApplyLoginGrid()
+
+register('.cookie-consent', el => cookieConsent(el))
+register('.ulp-authenticator-selector-text', el => stripAuth(el))
+register('.ulp-alternate-action', el => addLinkForPasskey(el))
+register('#prompt-alert[data-error-code="no-passkey"]', el => hidePassKeyErrorMessage(el))
+register('.login-id', el => reorderBoxes(el))
+register('.login-id', el => showBanner(el))
+register('.signup-with-passkeys', el => overrideEmailValidation(el))
+register('.signup-with-passkeys form .input-wrapper', el => addEmailError(el))
+register('#prompt-alert[data-error-code="no-passkey"]', el => hidePassKeyErrorMessage(el))
+register('.passkey-info', el => hideLinksOnPasswordStep(el))
+register('#aria-description-text', el => addMoreInfoLink(el))
+register('.ulp-passkey-benefit-description', el => addMoreInfoLinkPasskey(el))
+register('.ulp-alternate-action', el => removeRegistrationLink(el))
+register('._widget', el => removeAccessesBox(el))
+</script>
+<!-- End Cookie Banner script -->
+<!-- Dark Theme -->
+<!--script>document.documentElement.setAttribute('data-theme', window.localStorage.getItem('data-theme') || window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && 'dark' || 'light')</script-->
+<!-- GTM Script -->
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer2','GTM-M2GWJNGK');
+</script>
+<script type="text/javascript" src="/_Incapsula_Resource?SWJIYLWA=719d34d31c8e3a6e6fffd425f7e032f3&ns=8&cb=1779839390" async></script></body>
+</html>

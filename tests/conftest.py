@@ -22,7 +22,6 @@ _AUTH_CODE = "test-authorization-code"
 _OAUTH_STATE = "test-oauth-state"
 _LOGIN_STATE = "test-login-state"
 _MFA_STATE = "mfaChallengeState123"
-_PASSKEY_STATE = "AbcdEfgh1234567890PassKeyStateXYZ"
 _USERNAME = "user@example.com"
 _PASSWORD = "hunter2"
 _TOKEN_RESPONSE = {"access_token": "new-access", "refresh_token": "new-refresh"}
@@ -32,8 +31,24 @@ _RESUME_URL = f"{AUTH_BASE_URL}/authorize/resume"
 _TOKEN_URL = f"{AUTH_BASE_URL}/oauth/token"
 _LOGIN_IDENTIFIER_URL = f"{AUTH_BASE_URL}/u/login/identifier"
 _LOGIN_PASSWORD_URL = f"{AUTH_BASE_URL}/u/login/password"
-_PASSKEY_ENROLLMENT_URL = f"{AUTH_BASE_URL}/u/passkey-enrollment"
-_PASSKEY_LOCATION = f"{_PASSKEY_ENROLLMENT_URL}?state={_PASSKEY_STATE}"
+_MFA_SMS_URL = f"{AUTH_BASE_URL}/u/mfa-sms-challenge"
+_MFA_EMAIL_URL = f"{AUTH_BASE_URL}/u/mfa-email-challenge"
+_MFA_LOGIN_OPTIONS_URL = f"{AUTH_BASE_URL}/u/mfa-login-options"
+
+_IDENTIFIER_CAPABILITIES = {
+    "allow-passkeys": "true",
+    "js-available": "false",
+    "webauthn-available": "false",
+    "is-brave": "false",
+    "webauthn-platform-available": "false",
+    "ulp-remember-me-present": "true",
+}
+_PASSWORD_CAPABILITIES = {
+    "js-available": "false",
+    "webauthn-available": "false",
+    "is-brave": "false",
+    "webauthn-platform-available": "false",
+}
 
 
 def _q(url: str) -> re.Pattern[str]:
@@ -41,8 +56,61 @@ def _q(url: str) -> re.Pattern[str]:
     return re.compile(rf"^{re.escape(url)}(\?.*)?$")
 
 
-def _body_with_state(state: str) -> str:
-    return f'<html><form method="POST" action="/u/x?state={state}"></form></html>'
+def _hidden_inputs(fields: dict[str, str]) -> str:
+    return "".join(
+        f'<input type="hidden" name="{name}" value="{value}"/>' for name, value in fields.items()
+    )
+
+
+def _redirect_body(state: str, path: str = "/u/x") -> str:
+    """Auth0-style ``Redirecting to <a href=?state=...>`` body used when a POST returns 302."""
+    return (
+        f'<html><body><p>Found. Redirecting to '
+        f'<a href="{path}?state={state}&amp;ui_locales=nl">go</a></p></body></html>'
+    )
+
+
+def _identifier_body(state: str) -> str:
+    """GET /u/login/identifier: primary form carrying capability flags + state."""
+    return (
+        f'<html><form class="_form-login-id" data-form-primary="true" method="POST">'
+        f"{_hidden_inputs({'state': state, **_IDENTIFIER_CAPABILITIES})}"
+        f"</form></html>"
+    )
+
+
+def _password_body(state: str) -> str:
+    """GET /u/login/password: primary form carrying capability flags + state."""
+    return (
+        f'<html><form class="_form-login-password" data-form-primary="true" method="POST">'
+        f"{_hidden_inputs({'state': state, **_PASSWORD_CAPABILITIES})}"
+        f"</form></html>"
+    )
+
+
+def _mfa_sms_body(state: str) -> str:
+    """GET /u/mfa-sms-challenge: primary form + a pick-authenticator secondary form."""
+    return (
+        f'<html>'
+        f'<form data-form-primary="true" method="POST">{_hidden_inputs({"state": state})}</form>'
+        f'<form class="ulp-action-form-pick-authenticator" method="POST">'
+        f'{_hidden_inputs({"state": state})}</form>'
+        f'</html>'
+    )
+
+
+def _mfa_email_body(state: str) -> str:
+    return (
+        f'<html><form data-form-primary="true" method="POST">'
+        f"{_hidden_inputs({'state': state})}</form></html>"
+    )
+
+
+def _mfa_login_options_body(state: str) -> str:
+    return (
+        f'<html><form data-form-primary="true" method="POST">'
+        f"{_hidden_inputs({'state': state})}</form></html>"
+    )
 
 
 def _callback_url(code: str = _AUTH_CODE, state: str = _OAUTH_STATE) -> str:
@@ -55,19 +123,23 @@ def _mfa_submit_url(mfa: MfaMethod) -> str:
 
 def _register_auth_steps_1_to_7(m: aioresponses, *, mfa: MfaMethod = MfaMethod.SMS) -> None:
     """Register mocks for the credentials half of the flow (steps 1-7)."""
-    m.get(_q(_AUTHORIZE_URL), body=_body_with_state(_OAUTH_STATE))
-    m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
-    m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
-    m.get(_q(_LOGIN_PASSWORD_URL), body="")
-    m.post(_q(_LOGIN_PASSWORD_URL), body=_body_with_state(_LOGIN_STATE))
-    m.get(_q(_RESUME_URL), body=_body_with_state(_MFA_STATE))
+    m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
+    m.get(_q(_LOGIN_IDENTIFIER_URL), body=_identifier_body(_OAUTH_STATE))
+    m.post(_q(_LOGIN_IDENTIFIER_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/password"))
+    m.get(_q(_LOGIN_PASSWORD_URL), body=_password_body(_OAUTH_STATE))
+    m.post(_q(_LOGIN_PASSWORD_URL), body=_redirect_body(_LOGIN_STATE, "/authorize/resume"))
+    m.get(_q(_RESUME_URL), body=_redirect_body(_MFA_STATE, f"/u/mfa-{mfa.value}-challenge"))
     if mfa is MfaMethod.SMS:
-        m.get(_q(f"{AUTH_BASE_URL}/u/mfa-sms-challenge"), body="")
+        m.get(_q(_MFA_SMS_URL), body=_mfa_sms_body(_MFA_STATE))
     else:
-        m.post(_q(f"{AUTH_BASE_URL}/u/mfa-sms-challenge"), body="")
-        m.get(_q(f"{AUTH_BASE_URL}/u/mfa-login-options"), body="")
-        m.post(_q(f"{AUTH_BASE_URL}/u/mfa-login-options"), body="")
-        m.get(_q(f"{AUTH_BASE_URL}/u/mfa-email-challenge"), body="")
+        m.get(_q(_MFA_SMS_URL), body=_mfa_sms_body(_MFA_STATE))
+        m.post(_q(_MFA_SMS_URL), body=_redirect_body(_MFA_STATE, "/u/mfa-login-options"))
+        m.get(_q(_MFA_LOGIN_OPTIONS_URL), body=_mfa_login_options_body(_MFA_STATE))
+        m.post(
+            _q(_MFA_LOGIN_OPTIONS_URL),
+            body=_redirect_body(_MFA_STATE, "/u/mfa-email-challenge"),
+        )
+        m.get(_q(_MFA_EMAIL_URL), body=_mfa_email_body(_MFA_STATE))
 
 
 def _register_submit_shortcircuit(
@@ -76,8 +148,8 @@ def _register_submit_shortcircuit(
     state: str,
     mfa: MfaMethod = MfaMethod.SMS,
 ) -> None:
-    """Steps 8-13 outcome A: 302 straight to the callback URI."""
-    m.post(_q(_mfa_submit_url(mfa)), body=_body_with_state("postmfastate"))
+    """Steps 8-13: MFA POST 302s, resume 302s to the callback URI, token exchange succeeds."""
+    m.post(_q(_mfa_submit_url(mfa)), body=_redirect_body("postmfastate", "/authorize/resume"))
     m.get(
         _q(_RESUME_URL),
         status=302,

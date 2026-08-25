@@ -18,51 +18,19 @@ from tests.conftest import (
     _LOGIN_STATE,
     _MFA_STATE,
     _OAUTH_STATE,
-    _PASSKEY_STATE,
     _PASSWORD,
-    _RESUME_URL,
     _TOKEN_URL,
     _USERNAME,
-    _callback_url,
     _q,
     _register_auth_steps_1_to_7,
     _register_submit_shortcircuit,
 )
-from tests.test_client_auth import _capture_body, _register_passkey_redirect
 
 _MFA_CODE = "654321"
 _ERROR_BODY_SENTINEL = "sekrit-token-DEADBEEF"
 
-MfaDriver = Callable[[aioresponses, str], None]
 
-
-def _drive_mfa_shortcircuit(m: aioresponses, state: str) -> None:
-    """Outcome A: the resume 302s straight to the callback URI."""
-    _register_submit_shortcircuit(m, state=state)
-
-
-def _drive_mfa_passkey(m: aioresponses, state: str) -> None:
-    """Outcome B: the resume 302s through the passkey-enrollment interstitial."""
-    _register_passkey_redirect(m)
-    m.get(
-        _q(_RESUME_URL),
-        status=302,
-        headers={"Location": _callback_url(state=state)},
-        body=_capture_body("passkey_resume_3.http"),
-    )
-    m.post(
-        _q(_TOKEN_URL),
-        payload={"access_token": "new-access", "refresh_token": "new-refresh"},
-    )
-
-
-@pytest.mark.parametrize(
-    "drive_mfa",
-    [_drive_mfa_shortcircuit, _drive_mfa_passkey],
-    ids=["mfa_shortcircuit", "mfa_passkey"],
-)
 async def test_debug_logs_never_contain_secrets(
-    drive_mfa: MfaDriver,
     caplog: pytest.LogCaptureFixture,
     load_fixture: Callable[[str], dict[str, Any]],
 ) -> None:
@@ -76,7 +44,7 @@ async def test_debug_logs_never_contain_secrets(
         flow = await client.async_start_authentication(_USERNAME, _PASSWORD)
         code_verifier = flow._code_verifier
         expected_state = flow._expected_state
-        drive_mfa(m, expected_state)
+        _register_submit_shortcircuit(m, state=expected_state)
         await flow.async_submit_mfa(_MFA_CODE)
 
         m.post(
@@ -127,8 +95,7 @@ async def test_debug_logs_never_contain_secrets(
         _OAUTH_STATE,
         _LOGIN_STATE,
         _MFA_STATE,
-        _PASSKEY_STATE,
-        "postmfastate",
+            "postmfastate",
         code_verifier,
         expected_state,
         "new-access",

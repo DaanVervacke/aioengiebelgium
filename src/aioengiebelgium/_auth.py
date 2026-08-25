@@ -43,9 +43,13 @@ _BROWSER_HEADERS: dict[str, str] = {
     "sec-ch-ua-platform": '"Android"',
 }
 
-_FORM_ACTION_RE = re.compile(r"""action=["']([^"']+)["']""")
 _STATE_IN_URL_RE = re.compile(r"[?&]state=([a-zA-Z0-9_-]+)")
-_FORM_STATE_INPUT_RE = re.compile(r'<input[^>]*name="state"[^>]*value="([a-zA-Z0-9_-]+)"')
+_HIDDEN_INPUT_RE = re.compile(r'<input\b[^>]*\btype="hidden"[^>]*>', re.IGNORECASE)
+_INPUT_NAME_RE = re.compile(r'\bname="([^"]+)"')
+_INPUT_VALUE_RE = re.compile(r'\bvalue="([^"]*)"')
+
+_PRIMARY_FORM = 'data-form-primary="true"'
+_PICK_AUTHENTICATOR_FORM = "ulp-action-form-pick-authenticator"
 
 _FIELD_ERROR_MARKER = 'class="ulp-input-error-message"'
 
@@ -67,13 +71,32 @@ def _query_param(url: str, name: str) -> str | None:
     return values[0] if values else None
 
 
-def _state_from_html(body: str) -> str | None:
-    """Extract the continuation state carried by an auth page."""
-    action = _FORM_ACTION_RE.search(body)
-    if action:
-        state = _query_param(action.group(1), "state")
-        if state:
-            return state
+def _harvest_hidden_inputs(body: str, *, form_marker: str = _PRIMARY_FORM) -> dict[str, str]:
+    """Return {name: value} for all hidden inputs inside the first form matching form_marker."""
+    pattern = re.compile(
+        rf"<form\b[^>]*\b{re.escape(form_marker)}(?![\w-])[^>]*>(.*?)</form>",
+        re.DOTALL | re.IGNORECASE,
+    )
+    match = pattern.search(body)
+    if not match:
+        return {}
+    scope = match.group(1)
+    result: dict[str, str] = {}
+    for tag_match in _HIDDEN_INPUT_RE.finditer(scope):
+        tag = tag_match.group(0)
+        name_match = _INPUT_NAME_RE.search(tag)
+        if not name_match:
+            continue
+        value_match = _INPUT_VALUE_RE.search(tag)
+        result[name_match.group(1)] = value_match.group(1) if value_match else ""
+    return result
+
+
+def _state_from_body(body: str) -> str | None:
+    """Extract state: primary form's hidden ``state`` input, else ``?state=`` in URL."""
+    state = _harvest_hidden_inputs(body).get("state")
+    if state:
+        return state
     match = _STATE_IN_URL_RE.search(body)
     return match.group(1) if match else None
 
@@ -127,6 +150,7 @@ class AuthFlow:
         owned_session: OwnedSession,
         login_state: str,
         mfa_challenge_state: str,
+        mfa_form_inputs: dict[str, str],
         code_verifier: str,
         expected_state: str,
         mfa_method: MfaMethod,
@@ -138,6 +162,7 @@ class AuthFlow:
         self._session = owned_session.session
         self._login_state = login_state
         self._mfa_challenge_state = mfa_challenge_state
+        self._mfa_form_inputs = mfa_form_inputs
         self._code_verifier = code_verifier
         self._expected_state = expected_state
         self._mfa_method = mfa_method
@@ -171,31 +196,29 @@ class AuthFlow:
             self._mfa_challenge_state,
             mfa_code,
             self._mfa_method,
+            self._mfa_form_inputs,
             timeout=self._timeout,
         )
         _LOGGER.debug("auth step: MFA code submitted (%s)", self._mfa_method.value)
 
-        echoed = _FORM_STATE_INPUT_RE.search(body)
-        if (echoed and echoed.group(1) == self._mfa_challenge_state) or (
-            _FIELD_ERROR_MARKER in body
-        ):
+        echoed = _harvest_hidden_inputs(body).get("state")
+        if echoed == self._mfa_challenge_state or _FIELD_ERROR_MARKER in body:
             msg = "Invalid MFA code"
             raise EngieBeMfaError(msg)
 
-        if not _state_from_html(body):
+        if not _state_from_body(body):
             msg = "MFA submission returned an unrecognized page (no continuation state)"
             raise EngieBeAuthenticationError(msg)
 
-        body, resp_headers = await _resume_authorization(
+        _body, resp_headers = await _resume_authorization(
             self._session, self._login_state, timeout=self._timeout
         )
 
         location = resp_headers.get("Location", "")
-        if location.startswith(REDIRECT_URI):
-            auth_code = self._extract_callback_code(location)
-        else:
-            _LOGGER.debug("auth: passkey interstitial detected")
-            auth_code = await self._finish_passkey_enrollment(body)
+        if not location.startswith(REDIRECT_URI):
+            msg = "Resume did not redirect to the callback"
+            raise EngieBeAuthenticationError(msg)
+        auth_code = self._extract_callback_code(location)
         _LOGGER.debug("auth step: authorization code received")
 
         return await self._exchange_code_for_tokens(auth_code)
@@ -209,39 +232,6 @@ class AuthFlow:
             msg = "Callback redirect missing authorization code"
             raise EngieBeAuthenticationError(msg)
         return auth_code
-
-    async def _finish_passkey_enrollment(self, body: str) -> str:
-        """Abort the passkey-enrollment interstitial and extract the auth code."""
-        passkey_state = _state_from_html(body)
-        if not passkey_state:
-            msg = "Failed to extract passkey enrollment state"
-            raise EngieBeAuthenticationError(msg)
-
-        await _auth_request(
-            self._session,
-            "GET",
-            "/u/passkey-enrollment",
-            passkey_state,
-            timeout=self._timeout,
-        )
-
-        await _auth_request(
-            self._session,
-            "POST",
-            "/u/passkey-enrollment",
-            passkey_state,
-            data={"state": passkey_state, "action": "abort-passkey-enrollment"},
-            timeout=self._timeout,
-        )
-
-        _body, resp_headers = await _resume_authorization(
-            self._session, self._login_state, timeout=self._timeout
-        )
-        location = resp_headers.get("Location", "")
-        if not location.startswith(REDIRECT_URI):
-            msg = "Passkey resume did not redirect to the callback"
-            raise EngieBeAuthenticationError(msg)
-        return self._extract_callback_code(location)
 
     async def _exchange_code_for_tokens(self, auth_code: str) -> tuple[str, str]:
         access_token, refresh_token = await exchange_token(
@@ -296,35 +286,31 @@ async def start_auth_flow(
         allow_redirects=False,
         timeout=timeout,
     )
-    authorize_state = _state_from_html(body)
+    authorize_state = _state_from_body(body)
     if not authorize_state:
         msg = "Failed to extract authorize state from response"
         raise EngieBeAuthenticationError(msg)
     _LOGGER.debug("auth step: authorize page fetched")
 
-    await _auth_request(session, "GET", "/u/login/identifier", authorize_state, timeout=timeout)
+    identifier_body, _ = await _auth_request(
+        session, "GET", "/u/login/identifier", authorize_state, timeout=timeout
+    )
+    identifier_inputs = _harvest_hidden_inputs(identifier_body)
 
     await _auth_request(
         session,
         "POST",
         "/u/login/identifier",
         authorize_state,
-        data={
-            "state": authorize_state,
-            "allow-passkeys": "true",
-            "username": username,
-            "js-available": "true",
-            "webauthn-available": "true",
-            "is-brave": "false",
-            "webauthn-platform-available": "true",
-            "ulp-remember-me-present": "true",
-            "ulp-remember-me": "on",
-        },
+        data={**identifier_inputs, "username": username},
         timeout=timeout,
     )
     _LOGGER.debug("auth step: username submitted")
 
-    await _auth_request(session, "GET", "/u/login/password", authorize_state, timeout=timeout)
+    password_body, _ = await _auth_request(
+        session, "GET", "/u/login/password", authorize_state, timeout=timeout
+    )
+    password_inputs = _harvest_hidden_inputs(password_body)
 
     async with request(
         session,
@@ -332,15 +318,7 @@ async def start_auth_flow(
         url=f"{AUTH_BASE_URL}/u/login/password",
         params={"state": authorize_state, "ui_locales": "nl"},
         headers=_BROWSER_HEADERS,
-        data={
-            "state": authorize_state,
-            "username": username,
-            "password": password,
-            "js-available": "true",
-            "webauthn-available": "true",
-            "is-brave": "false",
-            "webauthn-platform-available": "true",
-        },
+        data={**password_inputs, "username": username, "password": password},
         allow_redirects=False,
         raise_on_error=False,
         timeout=timeout,
@@ -357,7 +335,7 @@ async def start_auth_flow(
     if _FIELD_ERROR_MARKER in body:
         msg = "Invalid credentials"
         raise EngieBeAuthenticationError(msg, status=password_status)
-    login_state = _state_from_html(body)
+    login_state = _state_from_body(body)
     if not login_state:
         if password_status == HTTPStatus.BAD_REQUEST:
             msg = "Invalid credentials"
@@ -367,28 +345,21 @@ async def start_auth_flow(
     _LOGGER.debug("auth step: password submitted")
 
     body, _ = await _resume_authorization(session, login_state, timeout=timeout)
-    mfa_challenge_state = _state_from_html(body)
+    mfa_challenge_state = _state_from_body(body)
     if not mfa_challenge_state:
         msg = "Failed to extract MFA challenge state"
         raise EngieBeAuthenticationError(msg)
 
-    match mfa_method:
-        case MfaMethod.SMS:
-            await _auth_request(
-                session,
-                "GET",
-                "/u/mfa-sms-challenge",
-                mfa_challenge_state,
-                timeout=timeout,
-            )
-        case MfaMethod.EMAIL:
-            await _switch_to_email_mfa(session, mfa_challenge_state, timeout=timeout)
+    mfa_form_inputs = await _prime_mfa_challenge(
+        session, mfa_challenge_state, mfa_method, timeout=timeout
+    )
     _LOGGER.debug("auth step: MFA challenge requested (%s)", mfa_method.value)
 
     return AuthFlow(
         owned_session=owned_session,
         login_state=login_state,
         mfa_challenge_state=mfa_challenge_state,
+        mfa_form_inputs=mfa_form_inputs,
         code_verifier=code_verifier,
         expected_state=state,
         mfa_method=mfa_method,
@@ -398,21 +369,44 @@ async def start_auth_flow(
     )
 
 
+async def _prime_mfa_challenge(
+    session: aiohttp.ClientSession,
+    challenge_state: str,
+    mfa_method: MfaMethod,
+    *,
+    timeout: float = 30.0,  # noqa: ASYNC109
+) -> dict[str, str]:
+    """Trigger the MFA challenge and return the primary form's hidden inputs for the code POST."""
+    match mfa_method:
+        case MfaMethod.SMS:
+            body, _ = await _auth_request(
+                session,
+                "GET",
+                "/u/mfa-sms-challenge",
+                challenge_state,
+                timeout=timeout,
+            )
+        case MfaMethod.EMAIL:
+            body = await _switch_to_email_mfa(session, challenge_state, timeout=timeout)
+    return _harvest_hidden_inputs(body)
+
+
 async def _submit_mfa_code(
     session: aiohttp.ClientSession,
     challenge_state: str,
     mfa_code: str,
     mfa_method: MfaMethod,
+    mfa_form_inputs: dict[str, str],
     *,
     timeout: float = 30.0,  # noqa: ASYNC109
 ) -> str:
-    data = {"state": challenge_state, "code": mfa_code}
     match mfa_method:
         case MfaMethod.SMS:
             path = "/u/mfa-sms-challenge"
+            data = {**mfa_form_inputs, "code": mfa_code}
         case MfaMethod.EMAIL:
             path = "/u/mfa-email-challenge"
-            data["action"] = "default"
+            data = {**mfa_form_inputs, "code": mfa_code, "action": "default"}
     body, _ = await _auth_request(
         session,
         "POST",
@@ -430,34 +424,33 @@ async def _switch_to_email_mfa(
     challenge_state: str,
     *,
     timeout: float = 30.0,  # noqa: ASYNC109
-) -> None:
+) -> str:
+    """Switch MFA method to email; return the email-challenge page body for input harvest."""
+    sms_body, _ = await _auth_request(
+        session, "GET", "/u/mfa-sms-challenge", challenge_state, timeout=timeout
+    )
+    pick_inputs = _harvest_hidden_inputs(sms_body, form_marker=_PICK_AUTHENTICATOR_FORM)
     await _auth_request(
         session,
         "POST",
         "/u/mfa-sms-challenge",
         challenge_state,
-        data={"state": challenge_state, "action": "pick-authenticator"},
+        data={**pick_inputs, "action": "pick-authenticator"},
         timeout=timeout,
     )
-    await _auth_request(
-        session,
-        "GET",
-        "/u/mfa-login-options",
-        challenge_state,
-        timeout=timeout,
+    options_body, _ = await _auth_request(
+        session, "GET", "/u/mfa-login-options", challenge_state, timeout=timeout
     )
+    options_inputs = _harvest_hidden_inputs(options_body)
     await _auth_request(
         session,
         "POST",
         "/u/mfa-login-options",
         challenge_state,
-        data={"state": challenge_state, "action": "email::1"},
+        data={**options_inputs, "action": "email::1"},
         timeout=timeout,
     )
-    await _auth_request(
-        session,
-        "GET",
-        "/u/mfa-email-challenge",
-        challenge_state,
-        timeout=timeout,
+    email_body, _ = await _auth_request(
+        session, "GET", "/u/mfa-email-challenge", challenge_state, timeout=timeout
     )
+    return email_body

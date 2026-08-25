@@ -1,2 +1,0 @@
-<!-- captured GET https://account.engie.be/authorize/resume -> HTTP 302; content-type: text/html; charset=utf-8; location: be.engie.smart://login-callback/nl?code=FAKECODExxxxxxxxxxxxxxxx&state=FAKESTATE01xxxxxxxxxxxxxxxxxxxx ; sanitized -->
-<p>Found. Redirecting to <a href="be.engie.smart://login-callback/nl?code=FAKECODExxxxxxxxxxxxxxxx&amp;state=FAKESTATE01xxxxxxxxxxxxxxxxxxxx">be.engie.smart://login-callback/nl?code=FAKECODExxxxxxxxxxxxxxxx&amp;state=FAKESTATE01xxxxxxxxxxxxxxxxxxxx</a></p>
