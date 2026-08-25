@@ -95,7 +95,7 @@ async def test_debug_logs_never_contain_secrets(
         _OAUTH_STATE,
         _LOGIN_STATE,
         _MFA_STATE,
-            "postmfastate",
+        "postmfastate",
         code_verifier,
         expected_state,
         "new-access",

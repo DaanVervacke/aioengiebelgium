@@ -561,9 +561,7 @@ def test_harvest_returns_empty_when_no_matching_form() -> None:
 
 def test_harvest_keeps_missing_value_as_empty_string() -> None:
     body = (
-        '<form data-form-primary="true">'
-        '<input type="hidden" id="passkey" name="passkey"/>'
-        "</form>"
+        '<form data-form-primary="true"><input type="hidden" id="passkey" name="passkey"/></form>'
     )
     assert _harvest_hidden_inputs(body) == {"passkey": ""}
 
@@ -829,7 +827,6 @@ async def test_submit_mfa_unrecognized_page_is_not_a_wrong_code(
 
     assert not isinstance(excinfo.value, EngieBeMfaError)
     assert created_sessions[0].closed
-
 
 
 async def test_submit_mfa_token_response_missing_tokens_raises(

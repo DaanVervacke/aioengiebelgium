@@ -65,7 +65,7 @@ def _hidden_inputs(fields: dict[str, str]) -> str:
 def _redirect_body(state: str, path: str = "/u/x") -> str:
     """Auth0-style ``Redirecting to <a href=?state=...>`` body used when a POST returns 302."""
     return (
-        f'<html><body><p>Found. Redirecting to '
+        f"<html><body><p>Found. Redirecting to "
         f'<a href="{path}?state={state}&amp;ui_locales=nl">go</a></p></body></html>'
     )
 
@@ -91,11 +91,11 @@ def _password_body(state: str) -> str:
 def _mfa_sms_body(state: str) -> str:
     """GET /u/mfa-sms-challenge: primary form + a pick-authenticator secondary form."""
     return (
-        f'<html>'
+        f"<html>"
         f'<form data-form-primary="true" method="POST">{_hidden_inputs({"state": state})}</form>'
         f'<form class="ulp-action-form-pick-authenticator" method="POST">'
-        f'{_hidden_inputs({"state": state})}</form>'
-        f'</html>'
+        f"{_hidden_inputs({'state': state})}</form>"
+        f"</html>"
     )
 
 
