@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-15
+
+### Maintenance
+
+- Switch release tooling to Release Drafter: add `.github/release-drafter.yml` config and `.github/workflows/release-drafter.yml` workflow. Update `release.yml` to trigger on `release: published` (with `workflow_dispatch` fallback for an existing tag).
+
 ## [0.1.4] - 2026-09-15
 
 ### Added
@@ -71,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.1...v0.1.2
