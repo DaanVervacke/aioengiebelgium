@@ -109,6 +109,11 @@ class EngieBeClient:
         """Expiry of the access token from its JWT ``exp`` claim, or None when unknown."""
         return self._tokens.expiry
 
+    @property
+    def subject(self) -> str | None:
+        """JWT ``sub`` claim of the access token, or None when unauthenticated or unparseable."""
+        return self._tokens.subject
+
     def is_access_token_expired(self, now: datetime) -> bool:
         """Return True when the token's expiry is known and ``now`` is at or past it."""
         return self._tokens.is_expired(now)

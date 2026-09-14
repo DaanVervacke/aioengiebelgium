@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `EngieBeClient.subject` property exposing the JWT `sub` claim of the access token, for use as a stable account identifier by integrations.
+
 ## [0.1.3] - 2026-08-25
 
 ### Changed

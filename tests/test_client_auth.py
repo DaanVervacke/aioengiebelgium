@@ -295,8 +295,11 @@ async def test_refresh_token_response_non_object_json_raises_invalid_response() 
         await client.close()
 
 
-def _jwt_with_exp(exp: float) -> str:
-    payload = _base64url(json.dumps({"exp": exp}).encode("ascii"))
+def _jwt_with_exp(exp: float, sub: str | None = None) -> str:
+    payload_dict: dict[str, Any] = {"exp": exp}
+    if sub is not None:
+        payload_dict["sub"] = sub
+    payload = _base64url(json.dumps(payload_dict).encode("ascii"))
     return f"e30.{payload}.fakesig"
 
 
@@ -338,6 +341,26 @@ def test_is_access_token_expired() -> None:
         client.is_access_token_expired(datetime(2030, 1, 1))  # noqa: DTZ001
 
     assert not EngieBeClient(access_token="opaque").is_access_token_expired(expiry)
+
+
+def test_subject_from_jwt() -> None:
+    client = EngieBeClient(access_token=_jwt_with_exp(1893456000, sub="auth0|abc123"))
+    assert client.subject == "auth0|abc123"
+    assert EngieBeClient(access_token="not-a-jwt").subject is None
+    assert EngieBeClient(access_token="a.!!!.c").subject is None
+    assert EngieBeClient().subject is None
+
+    assert EngieBeClient(access_token=_jwt_with_exp(1893456000)).subject is None
+
+    int_sub = _base64url(json.dumps({"sub": 12345}).encode("ascii"))
+    assert EngieBeClient(access_token=f"e30.{int_sub}.s").subject is None
+
+    list_payload = _base64url(b"[1]")
+    assert EngieBeClient(access_token=f"e30.{list_payload}.s").subject is None
+
+
+def test_subject_allows_empty_string() -> None:
+    assert EngieBeClient(access_token=_jwt_with_exp(1893456000, sub="")).subject == ""
 
 
 async def test_concurrent_refreshes_do_exactly_one_request(
