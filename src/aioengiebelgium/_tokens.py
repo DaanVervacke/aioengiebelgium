@@ -41,6 +41,23 @@ def _jwt_expiry(token: str) -> datetime | None:
         return None
 
 
+def _jwt_subject(token: str) -> str | None:
+    try:
+        _header, payload_b64, _signature = token.split(".")
+    except ValueError:
+        return None
+    try:
+        payload = json.loads(urlsafe_b64decode(payload_b64 + "=" * (-len(payload_b64) % 4)))
+    except ValueError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    sub = payload.get("sub")
+    if not isinstance(sub, str):
+        return None
+    return sub
+
+
 class TokenLifecycle:
     """Owns the token pair: storage, refresh, and ordered rotation delivery."""
 
@@ -78,6 +95,12 @@ class TokenLifecycle:
         if self._access_token is None:
             return None
         return _jwt_expiry(self._access_token)
+
+    @property
+    def subject(self) -> str | None:
+        if self._access_token is None:
+            return None
+        return _jwt_subject(self._access_token)
 
     def is_expired(self, now: datetime) -> bool:
         """Return True when the token's expiry is known and ``now`` is at or past it."""
