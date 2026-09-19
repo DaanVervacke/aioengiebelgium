@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from functools import partial
 from itertools import pairwise
 from typing import Any
@@ -52,6 +52,76 @@ def test_parse_customer_account_relations_missing_items() -> None:
 def test_parse_prices_empty_items() -> None:
     result = parse_prices({"items": []})
     assert result.items == ()
+
+
+@pytest.mark.parametrize(
+    ("from_value", "to_value", "expected_from", "expected_to"),
+    [
+        pytest.param("2026-08-01", "2026-09-01", date(2026, 8, 1), date(2026, 9, 1), id="dates"),
+        pytest.param(
+            "2026-08-01T12:00:00+02:00",
+            "2026-09-01T12:00:00+02:00",
+            date(2026, 8, 1),
+            date(2026, 9, 1),
+            id="datetimes",
+        ),
+        pytest.param("not-a-date", "2026-09-01", None, date(2026, 9, 1), id="invalid-start"),
+        pytest.param("2026-08-01", "not-a-date", date(2026, 8, 1), None, id="invalid-end"),
+        pytest.param(None, None, None, None, id="missing-boundaries"),
+        pytest.param("not-a-date", 123, None, None, id="invalid-boundaries"),
+    ],
+)
+def test_parse_prices_period_boundaries(
+    from_value: object,
+    to_value: object,
+    expected_from: date | None,
+    expected_to: date | None,
+) -> None:
+    result = parse_prices(
+        {
+            "items": [
+                {
+                    "ean": "541448820000000001_ID1",
+                    "prices": [{"from": from_value, "to": to_value}],
+                }
+            ]
+        }
+    )
+
+    period = result.items[0].periods[0]
+    assert period.valid_from == expected_from
+    assert period.valid_to == expected_to
+
+
+@pytest.mark.parametrize(
+    ("period", "expected_log"),
+    [
+        pytest.param({"from": "not-a-date", "to": "2026-09-01"}, True, id="malformed-start"),
+        pytest.param({"from": "2026-08-01", "to": "not-a-date"}, True, id="malformed-end"),
+        pytest.param({"to": "2026-09-01"}, False, id="missing-start"),
+        pytest.param({"from": None, "to": "2026-09-01"}, False, id="none-start"),
+        pytest.param({"from": "", "to": "2026-09-01"}, False, id="empty-start"),
+        pytest.param({"from": 123, "to": "2026-09-01"}, False, id="wrong-typed-start"),
+    ],
+)
+def test_parse_prices_period_boundaries_logs_only_malformed_values(
+    period: dict[str, object],
+    expected_log: bool,  # noqa: FBT001
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.DEBUG, logger="aioengiebelgium.parsers"):
+        parse_prices(
+            {
+                "items": [
+                    {
+                        "ean": "541448820000000001_ID1",
+                        "prices": [period],
+                    }
+                ]
+            }
+        )
+
+    assert ("malformed date value" in caplog.text) is expected_log
 
 
 def test_parse_energy_contracts_empty_dict() -> None:

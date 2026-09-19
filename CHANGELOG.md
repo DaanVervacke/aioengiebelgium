@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- `PricePeriod.valid_from` and `valid_to` are now `date | None` values instead of strings. Use `PricePeriod.contains()` to test whether a date is covered by a period.
+
 ## [0.2.0] - 2026-09-15
 
 ### Maintenance

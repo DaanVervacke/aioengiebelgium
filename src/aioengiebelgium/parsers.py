@@ -5,7 +5,7 @@ import logging
 import re
 from collections import Counter
 from collections.abc import Callable, Iterable
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from itertools import pairwise
 from types import MappingProxyType
 from typing import Any, Literal
@@ -96,6 +96,20 @@ def _as_str_or_none(value: Any) -> str | None:
 
 def _as_str(value: Any) -> str:
     return value if isinstance(value, str) else ""
+
+
+def _as_date(value: Any) -> date | None:
+    """Parse an ISO date or datetime string into a calendar date."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        try:
+            return datetime.fromisoformat(value).date()
+        except ValueError:
+            _LOGGER.debug("malformed date value: %s", value)
+            return None
 
 
 def _as_aware_datetime(value: Any) -> datetime | None:
@@ -229,8 +243,8 @@ def _parse_price_period(period: dict[str, Any]) -> PricePeriod:
     configs_raw = period.get("proportionalPriceConfigurations")
     configs = configs_raw if isinstance(configs_raw, dict) else {}
     return PricePeriod(
-        valid_from=_as_str(period.get("from")),
-        valid_to=_as_str(period.get("to")),
+        valid_from=_as_date(period.get("from")),
+        valid_to=_as_date(period.get("to")),
         vat_tariff=_as_float(period.get("vatTariff")),
         offtake=_parse_price_slots(configs.get("offtake")),
         injection=_parse_price_slots(configs.get("injection")),

@@ -123,11 +123,17 @@ class PriceSlot:
 class PricePeriod:
     """A price period with offtake and injection slots."""
 
-    valid_from: str
-    valid_to: str
+    valid_from: date | None
+    valid_to: date | None
     vat_tariff: float
     offtake: tuple[PriceSlot, ...] = ()
     injection: tuple[PriceSlot, ...] = ()
+
+    def contains(self, day: date) -> bool:
+        """Return whether ``day`` falls within this period."""
+        if self.valid_from is None or self.valid_to is None:
+            return False
+        return self.valid_from <= day < self.valid_to
 
 
 @dataclass(frozen=True, slots=True)

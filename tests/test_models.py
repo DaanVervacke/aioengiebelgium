@@ -17,6 +17,7 @@ from aioengiebelgium.models import (
     FinancialTransaction,
     HappyHourEvent,
     HappyHourWindow,
+    PricePeriod,
     ProductConfiguration,
     SolarSurplusDay,
     SolarSurplusForecasts,
@@ -31,6 +32,31 @@ from aioengiebelgium.models import (
 )
 
 _BRUSSELS = ZoneInfo("Europe/Brussels")
+
+
+@pytest.mark.parametrize(
+    ("valid_from", "valid_to", "day", "expected"),
+    [
+        pytest.param(
+            date(2026, 8, 1), date(2026, 9, 1), date(2026, 8, 1), True, id="start-inclusive"
+        ),
+        pytest.param(
+            date(2026, 8, 1), date(2026, 9, 1), date(2026, 9, 1), False, id="end-exclusive"
+        ),
+        pytest.param(None, date(2026, 9, 1), date(2026, 8, 1), False, id="missing-start"),
+        pytest.param(date(2026, 9, 1), None, date(2026, 8, 1), False, id="missing-end"),
+        pytest.param(date(2026, 9, 1), date(2026, 8, 1), date(2026, 8, 15), False, id="reversed"),
+        pytest.param(date(2026, 8, 1), date(2026, 8, 1), date(2026, 8, 1), False, id="zero-length"),
+    ],
+)
+def test_price_period_contains(
+    valid_from: date | None,
+    valid_to: date | None,
+    day: date,
+    expected: bool,  # noqa: FBT001
+) -> None:
+    period = PricePeriod(valid_from=valid_from, valid_to=valid_to, vat_tariff=6.0)
+    assert period.contains(day) is expected
 
 
 @pytest.mark.parametrize(
