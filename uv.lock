@@ -41,7 +41,7 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "ruff", specifier = ">=0.16" },
-    { name = "syrupy", specifier = ">=5.0" },
+    { name = "syrupy", specifier = ">=6.0" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
 ]
 
