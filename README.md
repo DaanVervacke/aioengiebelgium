@@ -16,6 +16,11 @@ Async Python client for the ENGIE Belgium consumer API. Requires Python >= 3.14.
 pip install aioengiebelgium
 ```
 
+## Documentation
+
+The documentation is hosted at
+[aioengiebelgium.readthedocs.io](https://aioengiebelgium.readthedocs.io/).
+
 ## Usage
 
 `tokens.json` in the example below is demo storage only. Restrict the file's

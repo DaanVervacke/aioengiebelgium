@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 
 - Replace the MkDocs site with a Sphinx API reference generated from docstrings via autodoc. The guides move to reStructuredText, and the reference now covers every exported model, enum, exception, and helper.
+- Link the hosted documentation from the README.
 
 ## [0.4.1] - 2026-09-30
 
