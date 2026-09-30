@@ -64,6 +64,7 @@ from .models import (
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
+    ean_with_delivery_point_suffix,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,6 +76,7 @@ class EngieBeClient:
     def __init__(
         self,
         session: aiohttp.ClientSession | None = None,
+        *,
         client_id: str = DEFAULT_CLIENT_ID,
         access_token: str | None = None,
         refresh_token: str | None = None,
@@ -178,8 +180,9 @@ class EngieBeClient:
         return await self._call(ENERGY_CONTRACTS, args)
 
     async def async_get_service_point(self, ean: str) -> ServicePoint:
-        """Fetch service point details for an EAN with its delivery-point suffix (e.g. _ID1)."""
-        return await self._call(SERVICE_POINT, EanArgs(ean=ean))
+        """Fetch service point details for an EAN, bare or with delivery-point suffix."""
+        normalized = ean if "_" in ean else ean_with_delivery_point_suffix(ean)
+        return await self._call(SERVICE_POINT, EanArgs(ean=normalized))
 
     async def async_get_customer_account_relations(self) -> CustomerAccountRelations:
         """Fetch customer account relations for the authenticated user."""
@@ -242,8 +245,8 @@ class EngieBeClient:
 
     async def async_get_feature_flag(
         self,
-        flag: FeatureFlagKey,
         business_agreement_number: str,
+        flag: FeatureFlagKey,
     ) -> FeatureFlag:
         """Query a boolean feature flag for a business agreement."""
         args = FlagArgs(flag=flag, ban=business_agreement_number)

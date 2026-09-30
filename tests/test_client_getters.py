@@ -42,7 +42,7 @@ from aioengiebelgium.exceptions import (
     EngieBeAuthenticationError,
     EngieBeCommunicationError,
 )
-from aioengiebelgium.models import PricesResponse
+from aioengiebelgium.models import PricesResponse, bare_ean
 
 LoadFixture = Callable[[str], dict[str, Any]]
 _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
@@ -83,7 +83,7 @@ def _feature_flag_call(flag: FeatureFlagKey) -> _ClientCall:
     """A getter call bound to ``flag`` (closure keeps the parametrize list flat)."""
 
     def _call(client: EngieBeClient) -> Awaitable[object]:
-        return client.async_get_feature_flag(flag, _BAN)
+        return client.async_get_feature_flag(_BAN, flag)
 
     return _call
 
@@ -568,7 +568,7 @@ async def test_feature_flag_401_retry_preserves_body_and_headers(
                 access_token="expired-token",
                 refresh_token="valid-refresh",
             )
-            result = await client.async_get_feature_flag(flag, _BAN)
+            result = await client.async_get_feature_flag(_BAN, flag)
         first, retry = m.requests["POST", URL(BOOLEAN_FEATURE_FLAG_BASE_URL)]
         assert retry.kwargs["json"] == first.kwargs["json"]
         assert retry.kwargs["json"]["name"] == flag.value
@@ -593,6 +593,26 @@ def test_ban_args_strip_spaces_on_construction() -> None:
     """BAN normalization is an Args invariant, independent of the getter path."""
     assert BanArgs(ban="123 456").ban == "123456"
     assert MonthArgs(ban="000 000 000 001", year=2026, month=1).ban == "000000000001"
+
+
+def test_constructor_arguments_after_session_are_keyword_only() -> None:
+    """Positional construction beyond ``session`` raises instead of silently misbinding."""
+    factory: Any = EngieBeClient
+    with pytest.raises(TypeError):
+        factory(None, "some-token")
+
+
+async def test_get_service_point_accepts_bare_ean(load_fixture: LoadFixture) -> None:
+    """A bare EAN is normalized to its delivery-point suffix on the wire."""
+    fixture = load_fixture("service_points_sample.json")
+    with aioresponses() as m:
+        m.get(_any_query(f"{PREMISES_BASE_URL}/service-points/{_EAN}"), payload=fixture)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            result = await client.async_get_service_point(bare_ean(_EAN))
+        (((_method, request_url), calls),) = m.requests.items()
+    assert request_url.path.endswith(f"/service-points/{_EAN}")
+    assert result is not None
 
 
 def test_epex_args_reject_naive_datetimes() -> None:

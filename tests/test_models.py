@@ -193,9 +193,9 @@ def test_happy_hour_is_active_start_inclusive_end_exclusive() -> None:
 def test_earliest_due_date_returns_earliest_among_open_transactions() -> None:
     details = BillingDetails(
         financial_transactions=(
-            FinancialTransaction(open_amount=10.0, due_date="2026-06-15"),
-            FinancialTransaction(open_amount=5.0, due_date="2026-05-20"),
-            FinancialTransaction(open_amount=20.0, due_date="2026-07-01"),
+            FinancialTransaction(open_amount=10.0, due_date=date(2026, 6, 15)),
+            FinancialTransaction(open_amount=5.0, due_date=date(2026, 5, 20)),
+            FinancialTransaction(open_amount=20.0, due_date=date(2026, 7, 1)),
         ),
     )
     balance = AccountBalance(details=details)
@@ -206,8 +206,8 @@ def test_earliest_due_date_returns_earliest_among_open_transactions() -> None:
 def test_earliest_due_date_no_open_transactions() -> None:
     details = BillingDetails(
         financial_transactions=(
-            FinancialTransaction(open_amount=0.0, due_date="2026-06-15"),
-            FinancialTransaction(open_amount=-5.0, due_date="2026-05-20"),
+            FinancialTransaction(open_amount=0.0, due_date=date(2026, 6, 15)),
+            FinancialTransaction(open_amount=-5.0, due_date=date(2026, 5, 20)),
         ),
     )
     balance = AccountBalance(details=details)
@@ -224,38 +224,13 @@ def test_earliest_due_date_skips_none_due_date() -> None:
         details=BillingDetails(
             financial_transactions=(
                 FinancialTransaction(open_amount=50.0, due_date=None),
-                FinancialTransaction(open_amount=30.0, due_date="2026-02-15"),
+                FinancialTransaction(open_amount=30.0, due_date=date(2026, 2, 15)),
             )
         )
     )
     result = balance.earliest_due_date(_BRUSSELS)
     assert result is not None
     assert result.day == 15
-
-
-def test_earliest_due_date_skips_unparseable_due_date() -> None:
-    details = BillingDetails(
-        financial_transactions=(
-            FinancialTransaction(open_amount=10.0, due_date="not-a-date"),
-            FinancialTransaction(open_amount=5.0, due_date="2026-05-20"),
-        ),
-    )
-    balance = AccountBalance(details=details)
-    assert balance.earliest_due_date(_BRUSSELS) == datetime(2026, 5, 20, tzinfo=_BRUSSELS)
-
-
-def test_earliest_due_date_aware_input_converts_instead_of_replacing() -> None:
-    details = BillingDetails(
-        financial_transactions=(
-            FinancialTransaction(open_amount=10.0, due_date="2026-05-20T10:00:00+00:00"),
-        ),
-    )
-    balance = AccountBalance(details=details)
-    result = balance.earliest_due_date(_BRUSSELS)
-    assert result is not None
-    assert result == datetime(2026, 5, 20, 10, 0, tzinfo=UTC)
-    assert result.hour == 12
-    assert result.utcoffset() == timedelta(hours=2)
 
 
 def _empty_week_schedule(**overrides: tuple[TouSlot, ...]) -> TouDirectionSchedule:
@@ -563,7 +538,9 @@ def test_by_ean_maps_share_bare_ean_key_domain() -> None:
     assert set(products) == {"541448800000000001", "541448800000000002"}
 
 
-def _solar_day(forecast_date: str, day_start: datetime, levels: tuple[str, ...]) -> SolarSurplusDay:
+def _solar_day(
+    forecast_date: date, day_start: datetime, levels: tuple[str, ...]
+) -> SolarSurplusDay:
     return SolarSurplusDay(
         forecast_date=forecast_date,
         details=tuple(
@@ -582,8 +559,8 @@ def _forecasts() -> SolarSurplusForecasts:
     day2_start = datetime(2026, 5, 5, 10, 0, tzinfo=UTC)
     return SolarSurplusForecasts(
         forecasts=(
-            _solar_day("2026-05-04", day1_start, ("no_data", "low_surplus", "high_surplus")),
-            _solar_day("2026-05-05", day2_start, ("no_data", "low_surplus", "high_surplus")),
+            _solar_day(date(2026, 5, 4), day1_start, ("no_data", "low_surplus", "high_surplus")),
+            _solar_day(date(2026, 5, 5), day2_start, ("no_data", "low_surplus", "high_surplus")),
         ),
     )
 
@@ -604,7 +581,7 @@ def test_slot_covering_returns_none_between_slots() -> None:
     forecasts = SolarSurplusForecasts(
         forecasts=(
             SolarSurplusDay(
-                forecast_date="2026-05-04",
+                forecast_date=date(2026, 5, 4),
                 details=(
                     SolarSurplusSlot(
                         start_time=datetime(2026, 5, 4, 10, 0, tzinfo=UTC),
@@ -629,7 +606,7 @@ def test_slots_for_local_date_filters_by_timezone_offset() -> None:
     forecasts = SolarSurplusForecasts(
         forecasts=(
             SolarSurplusDay(
-                forecast_date="2026-05-04",
+                forecast_date=date(2026, 5, 4),
                 details=(
                     SolarSurplusSlot(
                         start_time=datetime(2026, 5, 4, 23, 0, tzinfo=UTC),
@@ -668,7 +645,7 @@ def test_has_solar_true_when_high_surplus_present() -> None:
 def test_has_solar_false_when_all_no_data() -> None:
     day_start = datetime(2026, 5, 4, 10, 0, tzinfo=UTC)
     forecasts = SolarSurplusForecasts(
-        forecasts=(_solar_day("2026-05-04", day_start, ("no_data", "no_data")),),
+        forecasts=(_solar_day(date(2026, 5, 4), day_start, ("no_data", "no_data")),),
     )
     assert forecasts.has_solar() is False
 
@@ -677,7 +654,7 @@ def test_has_solar_false_with_none_level() -> None:
     forecasts = SolarSurplusForecasts(
         forecasts=(
             SolarSurplusDay(
-                forecast_date="2026-01-01",
+                forecast_date=date(2026, 1, 1),
                 details=(
                     SolarSurplusSlot(
                         start_time=datetime(2026, 1, 1, 10, tzinfo=_BRUSSELS),

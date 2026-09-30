@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 """Unofficial asynchronous Python library to interact with the ENGIE Belgium API."""
 
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
+from importlib.metadata import version as _version
 
 from ._auth import AuthFlow
 from .client import EngieBeClient
@@ -84,8 +85,8 @@ from .models import (
 )
 
 try:
-    __version__ = version("aioengiebelgium")
-except PackageNotFoundError:  # pragma: no cover
+    __version__ = _version("aioengiebelgium")
+except _PackageNotFoundError:  # pragma: no cover
     __version__ = "0.0.0"
 
 __all__ = [

@@ -149,14 +149,14 @@ invalidated immediately: always persist the new pair via `on_token_refresh`.
 | --- | --- | --- |
 | `async_get_prices(business_agreement_number)` | `PricesResponse` | Supplier energy prices for a business agreement. |
 | `async_get_energy_contracts(business_agreement_number, *, include_inactive=False)` | `EnergyContractsResponse` | Energy contracts for a business agreement. |
-| `async_get_service_point(ean)` | `ServicePoint` | Service point details; the EAN carries its delivery-point suffix (e.g. `_ID1`). |
+| `async_get_service_point(ean)` | `ServicePoint` | Service point details; accepts a bare EAN or one with its delivery-point suffix (e.g. `_ID1`). |
 | `async_get_customer_account_relations()` | `CustomerAccountRelations` | Customer account relations for the authenticated user. |
 | `async_get_monthly_peaks(business_agreement_number, year, month)` | `MonthlyPeaks` | Capacity tariff peaks for a given month. |
 | `async_get_happy_hour_event(business_agreement_number)` | `HappyHourEvent` | Today's and tomorrow's happy hour windows. |
 | `async_get_happy_hour_month_report(business_agreement_number, year, month)` | `HappyHourMonthReport` | The happy hour month report. |
 | `async_get_usage_details(business_agreement_number, start_date, end_date, granularity=UsageGranularity.HOURLY, *, include_simulation=False)` | `UsageDetailsResponse` | Energy usage details for a date range. |
 | `async_get_solar_surplus_forecasts(business_agreement_number, delivery_point_id)` | `SolarSurplusForecasts` | Solar surplus forecasts for a delivery point. |
-| `async_get_feature_flag(flag, business_agreement_number)` | `FeatureFlag` | Query a boolean feature flag for a business agreement. |
+| `async_get_feature_flag(business_agreement_number, flag)` | `FeatureFlag` | Query a boolean feature flag for a business agreement. |
 | `async_get_tou_schedules(business_agreement_number)` | `TouSchedulesResponse` | Time-of-use tariff schedules. |
 | `async_get_account_balance(business_agreement_number)` | `AccountBalance` | The billing account balance. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices; works without login. |

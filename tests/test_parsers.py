@@ -284,7 +284,7 @@ def test_parse_happy_hour_month_report_no_current(load_fixture: LoadFixture) -> 
 
     assert len(result.history) == 2
     first = result.history[0]
-    assert first.year_month == "2026-05"
+    assert first.year_month == date(2026, 5, 1)
     assert first.happy_hour is not None
     assert first.happy_hour.consumption_kwh == 8.0
     assert first.happy_hour.eligible_hours == 2
@@ -329,13 +329,13 @@ def test_parse_happy_hour_month_report_energy_history(load_fixture: LoadFixture)
     assert len(result.history) == 13
 
     first = result.history[0]
-    assert first.year_month == "2025-08"
+    assert first.year_month == date(2025, 8, 1)
     assert first.happy_hour is None
     assert first.electricity_injection == EnergyCostPair(kwh=607.901, cost=26.1)
     assert first.electricity_offtake == EnergyCostPair(kwh=15.756, cost=31.29)
 
     last = result.history[-1]
-    assert last.year_month == "2026-08"
+    assert last.year_month == date(2026, 8, 1)
     assert last.electricity_offtake is None
     assert last.electricity_injection is None
 
@@ -1635,6 +1635,7 @@ _MALFORMED_CASES = [
             "history": [
                 3,
                 {"happyHour": "no"},
+                {"yearMonth": "not-a-month", "happyHour": {"savedAmount": 1.0}},
                 {"yearMonth": "2026-05", "happyHour": {"savedAmount": 1.0}},
             ],
         },

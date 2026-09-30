@@ -112,6 +112,17 @@ def _as_date(value: Any) -> date | None:
             return None
 
 
+def _as_year_month(value: Any) -> date | None:
+    """Parse a ``YYYY-MM`` wire value into the month's start date."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return date.fromisoformat(f"{value}-01")
+    except ValueError:
+        _LOGGER.debug("malformed year-month value: %s", value)
+        return None
+
+
 def _as_aware_datetime(value: Any) -> datetime | None:
     """Parse an ISO datetime string, returning None for naive or invalid input."""
     if not isinstance(value, str):
@@ -313,12 +324,11 @@ def parse_monthly_peaks(data: dict[str, Any]) -> MonthlyPeaks:
 
 
 def _parse_financial_transaction(tx: dict[str, Any]) -> FinancialTransaction:
-    due_date_raw = tx.get("dueDate")
     return FinancialTransaction(
         type=tx.get("type"),
         due_amount=_as_float(tx.get("dueAmount")),
         open_amount=_as_float(tx.get("openAmount")),
-        due_date=due_date_raw if isinstance(due_date_raw, str) else None,
+        due_date=_as_date(tx.get("dueDate")),
         invoice_type=tx.get("invoiceType"),
     )
 
@@ -419,12 +429,10 @@ def parse_epex_prices(data: dict[str, Any], *, granularity_minutes: int = 60) ->
 
     pub_time = _as_aware_datetime(data.get("publicationTime"))
 
-    market_date = data.get("marketDate")
-
     return EpexPayload(
         slots=tuple(slots_list),
         publication_time=pub_time,
-        market_date=market_date if isinstance(market_date, str) else None,
+        market_date=_as_date(data.get("marketDate")),
         slot_duration=observed,
     )
 
@@ -488,8 +496,8 @@ def _parse_energy_cost_pair(raw: Any) -> EnergyCostPair | None:
 
 
 def _parse_month_report_history_entry(entry: dict[str, Any]) -> MonthReportHistoryEntry | None:
-    year_month = entry.get("yearMonth")
-    if not isinstance(year_month, str) or not year_month:
+    year_month = _as_year_month(entry.get("yearMonth"))
+    if year_month is None:
         return None
     hh = entry.get("happyHour")
     return MonthReportHistoryEntry(
@@ -595,7 +603,7 @@ def _parse_solar_surplus_slot(slot: dict[str, Any]) -> SolarSurplusSlot | None:
 def _parse_solar_surplus_day(day: dict[str, Any]) -> SolarSurplusDay:
     slots = _parse_items(day.get("details"), _parse_solar_surplus_slot, "solar surplus")
     return SolarSurplusDay(
-        forecast_date=_as_str(day.get("forecastDate")),
+        forecast_date=_as_date(day.get("forecastDate")),
         forecast_creation_date=_as_aware_datetime(day.get("forecastCreationDate")),
         inference_key=_normalize_vocab(day.get("inferenceKey")),
         level=_normalize_vocab(day.get("level")),

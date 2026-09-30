@@ -235,7 +235,7 @@ class FinancialTransaction:
     type: str | None = None
     due_amount: float = 0.0
     open_amount: float = 0.0
-    due_date: str | None = None
+    due_date: date | None = None
     invoice_type: str | None = None
 
 
@@ -271,18 +271,15 @@ class AccountBalance:
         """Return the earliest due date among open transactions, or ``None``."""
         if self.details is None:
             return None
-        earliest: datetime | None = None
+        earliest: date | None = None
         for tx in self.details.financial_transactions:
             if tx.open_amount <= 0 or tx.due_date is None:
                 continue
-            try:
-                due_dt = datetime.fromisoformat(tx.due_date)
-            except ValueError:
-                continue
-            due_dt = due_dt.replace(tzinfo=tz) if due_dt.tzinfo is None else due_dt.astimezone(tz)
-            if earliest is None or due_dt < earliest:
-                earliest = due_dt
-        return earliest
+            if earliest is None or tx.due_date < earliest:
+                earliest = tx.due_date
+        if earliest is None:
+            return None
+        return datetime.combine(earliest, time(), tzinfo=tz)
 
 
 @dataclass(frozen=True, slots=True)
@@ -304,7 +301,7 @@ class EpexPayload:
 
     slots: tuple[EpexSlot, ...] = ()
     publication_time: datetime | None = None
-    market_date: str | None = None
+    market_date: date | None = None
     slot_duration: timedelta = timedelta(minutes=60)
 
     def next_slot_boundary(self, now: datetime) -> datetime | None:
@@ -373,7 +370,7 @@ class EnergyCostPair:
 class MonthReportHistoryEntry:
     """One month in the month-report history."""
 
-    year_month: str
+    year_month: date
     happy_hour: HappyHourMonthData | None = None
     electricity_offtake: EnergyCostPair | None = None
     electricity_injection: EnergyCostPair | None = None
@@ -444,7 +441,7 @@ class SolarSurplusSlot:
 class SolarSurplusDay:
     """One day of solar surplus forecasts."""
 
-    forecast_date: str
+    forecast_date: date | None
     forecast_creation_date: datetime | None = None
     inference_key: str | None = None
     level: str | None = None

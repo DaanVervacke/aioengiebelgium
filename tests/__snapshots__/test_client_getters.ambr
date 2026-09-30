@@ -5,7 +5,7 @@
       financial_transactions=tuple(
         FinancialTransaction(
           due_amount=0.0,
-          due_date='2026-07-22',
+          due_date=datetime.date(2026, 7, 22),
           invoice_type='PERIODIC_INVOICE',
           open_amount=80.6,
           type='INVOICE',
@@ -320,7 +320,7 @@
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[epex_prices]
   EpexPayload(
-    market_date='2026-05-04',
+    market_date=datetime.date(2026, 5, 4),
     publication_time=datetime.datetime(2026, 5, 4, 13, 7, 21, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     slot_duration=datetime.timedelta(seconds=3600),
     slots=tuple(
@@ -527,7 +527,7 @@
           kwh=15.756,
         ),
         happy_hour=None,
-        year_month='2025-08',
+        year_month=datetime.date(2025, 8, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -539,7 +539,7 @@
           kwh=6.784,
         ),
         happy_hour=None,
-        year_month='2025-09',
+        year_month=datetime.date(2025, 9, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -551,7 +551,7 @@
           kwh=71.491,
         ),
         happy_hour=None,
-        year_month='2025-10',
+        year_month=datetime.date(2025, 10, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -563,7 +563,7 @@
           kwh=282.497,
         ),
         happy_hour=None,
-        year_month='2025-11',
+        year_month=datetime.date(2025, 11, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -575,7 +575,7 @@
           kwh=392.166,
         ),
         happy_hour=None,
-        year_month='2025-12',
+        year_month=datetime.date(2025, 12, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -587,7 +587,7 @@
           kwh=387.357,
         ),
         happy_hour=None,
-        year_month='2026-01',
+        year_month=datetime.date(2026, 1, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -599,7 +599,7 @@
           kwh=204.54,
         ),
         happy_hour=None,
-        year_month='2026-02',
+        year_month=datetime.date(2026, 2, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -611,7 +611,7 @@
           kwh=20.316,
         ),
         happy_hour=None,
-        year_month='2026-03',
+        year_month=datetime.date(2026, 3, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -623,7 +623,7 @@
           kwh=83.077,
         ),
         happy_hour=None,
-        year_month='2026-04',
+        year_month=datetime.date(2026, 4, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -635,7 +635,7 @@
           kwh=29.854,
         ),
         happy_hour=None,
-        year_month='2026-05',
+        year_month=datetime.date(2026, 5, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -647,7 +647,7 @@
           kwh=10.638,
         ),
         happy_hour=None,
-        year_month='2026-06',
+        year_month=datetime.date(2026, 6, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -659,13 +659,13 @@
           kwh=8.066,
         ),
         happy_hour=None,
-        year_month='2026-07',
+        year_month=datetime.date(2026, 7, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=None,
         electricity_offtake=None,
         happy_hour=None,
-        year_month='2026-08',
+        year_month=datetime.date(2026, 8, 1),
       ),
     ),
     partial_historical_data=True,
@@ -838,7 +838,7 @@
           ),
         ),
         forecast_creation_date=datetime.datetime(2026, 7, 7, 22, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        forecast_date='2026-07-08',
+        forecast_date=datetime.date(2026, 7, 8),
         inference_key='actuals',
         level='high_surplus',
       ),
@@ -851,7 +851,7 @@
           ),
         ),
         forecast_creation_date=datetime.datetime(2026, 7, 7, 22, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        forecast_date='2026-07-09',
+        forecast_date=datetime.date(2026, 7, 9),
         inference_key='actuals',
         level='low_surplus',
       ),
@@ -880,7 +880,7 @@
           ),
         ),
         forecast_creation_date=datetime.datetime(1970, 1, 1, 1, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
-        forecast_date='2026-07-08',
+        forecast_date=datetime.date(2026, 7, 8),
         inference_key='no_data',
         level='no_data',
       ),

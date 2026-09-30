@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- `EngieBeClient` constructor arguments after `session` are now keyword-only.
+- `async_get_feature_flag` now takes `(business_agreement_number, flag)`, ban-first like the other getters.
+- `async_get_service_point` accepts both bare and suffixed EANs; a bare EAN is normalized with its delivery-point suffix before the request.
+- `EpexPayload.market_date`, `SolarSurplusDay.forecast_date`, and `FinancialTransaction.due_date` are now `date` values instead of strings.
+- `MonthReportHistoryEntry.year_month` is now the month's start `date` instead of a `YYYY-MM` string.
+- `AccountBalance.earliest_due_date` consumes the typed `due_date` field and returns midnight in the given timezone.
+- `version` and `PackageNotFoundError` are no longer leaked into the package namespace; only `__version__` is exported.
+
 ### Documentation
 
 - Add community files: `CONTRIBUTING.md`, `SECURITY.md`, issue templates, a pull request template, and the `dependencies` label for Dependabot pull requests.
