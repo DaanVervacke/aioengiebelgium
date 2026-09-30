@@ -169,7 +169,9 @@ All exceptions derive from `EngieBeError`, which carries an optional HTTP
 | Exception | Meaning |
 | --- | --- |
 | `EngieBeError` | Base exception for all client errors. |
-| `EngieBeCommunicationError` | Communication errors: timeout, network failure, non-auth HTTP >= 400. |
+| `EngieBeClientClosedError` | The client was used after `close()`. |
+| `EngieBeCommunicationError` | Communication errors: network failure, non-auth HTTP >= 400. |
+| `EngieBeTimeoutError` | The request timed out; safe to retry. |
 | `EngieBeEpexNotPublishedError` | EPEX day-ahead prices are not yet published for the requested window (HTTP 404). |
 | `EngieBeInvalidResponseError` | A 2xx response whose body is not the expected JSON object. |
 | `EngieBeAuthenticationError` | Authentication errors: bad credentials, expired token. |
