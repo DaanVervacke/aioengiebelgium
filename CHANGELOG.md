@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AccountBalance.earliest_due_date` consumes the typed `due_date` field and returns midnight in the given timezone.
 - `version` and `PackageNotFoundError` are no longer leaked into the package namespace; only `__version__` is exported.
 
+### Added
+
+- `EngieBeTimeoutError` (subclass of `EngieBeCommunicationError`), raised instead of the generic communication error when a request exceeds its timeout.
+- `EngieBeClientClosedError` (subclass of `EngieBeError`), raised by the closed-client guard instead of the base error.
+- `skipped_entries` on `PricesResponse`, `EnergyContractsResponse`, `CustomerAccountRelations`, `MonthlyPeaks`, `HappyHourEvent`, `HappyHourMonthReport`, `UsageDetailsResponse`, `SolarSurplusForecasts`, `TouSchedulesResponse`, and `EpexPayload`: the number of malformed entries lenient parsing dropped, making truncation visible to coordinators.
+
 ### Documentation
 
 - Add community files: `CONTRIBUTING.md`, `SECURITY.md`, issue templates, a pull request template, and the `dependencies` label for Dependabot pull requests.

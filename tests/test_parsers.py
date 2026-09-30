@@ -1857,3 +1857,148 @@ def test_parse_epex_prices_dst_transition_days(base_utc: datetime, hours: int) -
         assert current.end == nxt.start
     last = result.slots[-1]
     assert last.end - last.start == timedelta(hours=1)
+
+
+def test_parse_prices_counts_skipped_entries() -> None:
+    result = parse_prices({"items": [{"ean": "541448820000000001_ID1"}, "bogus"]})
+    assert len(result.items) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_energy_contracts_counts_skipped_entries() -> None:
+    result = parse_energy_contracts({"items": [{"status": "ACTIVE"}, None]})
+    assert len(result.items) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_customer_account_relations_counts_skipped_entries() -> None:
+    result = parse_customer_account_relations(
+        {
+            "items": [
+                {"customerAccount": {"customerAccountNumber": "CA1"}},
+                {"admin": True},
+            ]
+        }
+    )
+    assert len(result.accounts) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_monthly_peaks_counts_skipped_entries() -> None:
+    result = parse_monthly_peaks(
+        {
+            "year": 2026,
+            "month": 4,
+            "dailyPeaks": [
+                {"start": "2026-04-01T00:00:00", "end": "2026-04-01T00:15:00"},
+                {
+                    "start": "2026-04-02T00:00:00+02:00",
+                    "end": "2026-04-02T00:15:00+02:00",
+                },
+            ],
+        }
+    )
+    assert len(result.daily_peaks) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_epex_prices_counts_skipped_entries() -> None:
+    result = parse_epex_prices(
+        {
+            "timeSeries": [
+                {"period": "2026-05-04T00:00:00+02:00", "value": 50.0},
+                {"period": "bogus", "value": 60.0},
+            ]
+        }
+    )
+    assert len(result.slots) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_happy_hour_event_counts_skipped_entries() -> None:
+    result = parse_happy_hour_event(
+        {
+            "today": {
+                "startTime": "2026-07-30T18:00:00+02:00",
+                "endTime": "2026-07-30T19:00:00+02:00",
+            },
+            "tomorrow": {"startTime": "bogus", "endTime": "also-bogus"},
+        }
+    )
+    assert len(result.windows) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_happy_hour_month_report_counts_skipped_entries() -> None:
+    result = parse_happy_hour_month_report(
+        {"history": [{"yearMonth": "2026-05"}, {"yearMonth": "bogus"}]}
+    )
+    assert len(result.history) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_solar_surplus_forecasts_counts_skipped_entries() -> None:
+    result = parse_solar_surplus_forecasts({"forecasts": [{"forecastDate": "2026-07-08"}, "bogus"]})
+    assert len(result.forecasts) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_tou_schedules_counts_skipped_entries() -> None:
+    result = parse_tou_schedules(
+        {"items": [{"eanWithSuffix": "541448820070000000_ID1"}, {"eanWithSuffix": 42}]}
+    )
+    assert len(result.items) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_usage_details_counts_skipped_entries() -> None:
+    result = parse_usage_details(
+        {
+            "items": [
+                {"start": "2026-05-04T00:00:00+02:00", "end": "2026-05-04T01:00:00+02:00"},
+                {"start": "2026-05-04T01:00:00", "end": "2026-05-04T02:00:00"},
+            ]
+        }
+    )
+    assert len(result.items) == 1
+    assert result.skipped_entries == 1
+
+
+@pytest.mark.parametrize(
+    ("parser", "fixture_name"),
+    [
+        pytest.param(parse_prices, "prices_sample.json", id="prices"),
+        pytest.param(
+            parse_energy_contracts,
+            "energy_contracts_dynamic_plus_fixed_gas.json",
+            id="energy_contracts",
+        ),
+        pytest.param(
+            parse_customer_account_relations,
+            "customer_account_relations_sample.json",
+            id="customer_account_relations",
+        ),
+        pytest.param(parse_monthly_peaks, "peaks_2026_04.json", id="monthly_peaks"),
+        pytest.param(parse_happy_hour_event, "happy_hour_event.json", id="happy_hour_event"),
+        pytest.param(
+            parse_happy_hour_month_report,
+            "happy_hour_month_report.json",
+            id="happy_hour_month_report",
+        ),
+        pytest.param(parse_usage_details, "usage_details_hourly.json", id="usage_details"),
+        pytest.param(
+            parse_solar_surplus_forecasts,
+            "solar_surplus_high.json",
+            id="solar_surplus_forecasts",
+        ),
+        pytest.param(parse_tou_schedules, "tou_schedules_bihoraire.json", id="tou_schedules"),
+        pytest.param(parse_epex_prices, "epex_24h.json", id="epex_prices"),
+    ],
+)
+def test_clean_payloads_have_zero_skipped_entries(
+    parser: Callable[[dict[str, Any]], Any],
+    fixture_name: str,
+    load_fixture: LoadFixture,
+) -> None:
+    """Real captured payloads parse without dropping any entry."""
+    assert parser(load_fixture(fixture_name)).skipped_entries == 0

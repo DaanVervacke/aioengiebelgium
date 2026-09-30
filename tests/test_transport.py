@@ -13,6 +13,7 @@ from aioengiebelgium.exceptions import (
     EngieBeAuthenticationError,
     EngieBeCommunicationError,
     EngieBeInvalidResponseError,
+    EngieBeTimeoutError,
 )
 
 _URL = "https://api.example.invalid/resource"
@@ -46,12 +47,13 @@ async def test_error_message_omits_response_body() -> None:
     assert str(excinfo.value) == "API error 500"
 
 
-async def test_timeout_raises_communication_error() -> None:
+async def test_timeout_raises_timeout_error() -> None:
     with aioresponses() as m:
         m.get(_URL, exception=TimeoutError("timed out"))
         async with aiohttp.ClientSession() as session:
-            with pytest.raises(EngieBeCommunicationError):
+            with pytest.raises(EngieBeTimeoutError) as excinfo:
                 await _transport.request_json(session, method="GET", url=_URL)
+    assert isinstance(excinfo.value, EngieBeCommunicationError)
 
 
 @pytest.mark.parametrize(

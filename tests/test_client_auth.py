@@ -37,6 +37,7 @@ from aioengiebelgium.const import (
 )
 from aioengiebelgium.exceptions import (
     EngieBeAuthenticationError,
+    EngieBeClientClosedError,
     EngieBeCommunicationError,
     EngieBeError,
     EngieBeInvalidResponseError,
@@ -1096,6 +1097,14 @@ async def test_closed_client_raises_engiebe_error() -> None:
     ):
         with pytest.raises(EngieBeError, match=r"^Client is closed — create a new EngieBeClient$"):
             await attempt
+
+
+async def test_closed_client_raises_client_closed_error() -> None:
+    """The closed-client guard raises the dedicated EngieBeClientClosedError."""
+    client = EngieBeClient(access_token="stored-access", refresh_token="stored-refresh")
+    await client.close()
+    with pytest.raises(EngieBeClientClosedError, match=r"^Client is closed"):
+        await client.async_get_customer_account_relations()
 
 
 async def test_closed_client_context_manager() -> None:

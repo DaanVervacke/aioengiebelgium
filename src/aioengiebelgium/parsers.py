@@ -134,14 +134,14 @@ def _as_aware_datetime(value: Any) -> datetime | None:
     return None if parsed.tzinfo is None else parsed
 
 
-def _parse_items[T](
+def _parse_items_counted[T](
     data: object,
     item_parser: Callable[[dict[str, Any]], T | None],
     label: str,
-) -> list[T]:
-    """Parse a list defensively."""
+) -> tuple[list[T], int]:
+    """Parse a list defensively, returning the items and the skipped-entry count."""
     if not isinstance(data, list):
-        return []
+        return [], 0
     n_skipped = 0
     items: list[T] = []
     for raw in data:
@@ -152,7 +152,16 @@ def _parse_items[T](
         items.append(item)
     if n_skipped:
         _LOGGER.debug("skipped %d malformed %s entries", n_skipped, label)
-    return items
+    return items, n_skipped
+
+
+def _parse_items[T](
+    data: object,
+    item_parser: Callable[[dict[str, Any]], T | None],
+    label: str,
+) -> list[T]:
+    """Parse a list defensively."""
+    return _parse_items_counted(data, item_parser, label)[0]
 
 
 def _parse_business_agreement(ag: dict[str, Any]) -> BusinessAgreement | None:
@@ -234,8 +243,10 @@ def _parse_account_relation(item: dict[str, Any]) -> AccountRelation | None:
 
 
 def parse_customer_account_relations(data: dict[str, Any]) -> CustomerAccountRelations:
-    accounts = _parse_items(data.get("items"), _parse_account_relation, "account relation")
-    return CustomerAccountRelations(accounts=tuple(accounts))
+    accounts, skipped = _parse_items_counted(
+        data.get("items"), _parse_account_relation, "account relation"
+    )
+    return CustomerAccountRelations(accounts=tuple(accounts), skipped_entries=skipped)
 
 
 def _parse_price_slot(s: dict[str, Any]) -> PriceSlot:
@@ -270,7 +281,8 @@ def _parse_ean_prices(item: dict[str, Any]) -> EanPrices:
 
 
 def parse_prices(data: dict[str, Any]) -> PricesResponse:
-    return PricesResponse(items=tuple(_parse_items(data.get("items"), _parse_ean_prices, "price")))
+    items, skipped = _parse_items_counted(data.get("items"), _parse_ean_prices, "price")
+    return PricesResponse(items=tuple(items), skipped_entries=skipped)
 
 
 def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
@@ -293,9 +305,10 @@ def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
 
 
 def parse_energy_contracts(data: dict[str, Any]) -> EnergyContractsResponse:
-    return EnergyContractsResponse(
-        items=tuple(_parse_items(data.get("items"), _parse_energy_contract, "energy contract"))
+    items, skipped = _parse_items_counted(
+        data.get("items"), _parse_energy_contract, "energy contract"
     )
+    return EnergyContractsResponse(items=tuple(items), skipped_entries=skipped)
 
 
 def _parse_peak(data: dict[str, Any]) -> Peak | None:
@@ -314,12 +327,13 @@ def _parse_peak(data: dict[str, Any]) -> Peak | None:
 def parse_monthly_peaks(data: dict[str, Any]) -> MonthlyPeaks:
     monthly_raw = data.get("peakOfTheMonth")
     monthly = _parse_peak(monthly_raw) if isinstance(monthly_raw, dict) else None
-    daily = _parse_items(data.get("dailyPeaks"), _parse_peak, "daily peak")
+    daily, skipped = _parse_items_counted(data.get("dailyPeaks"), _parse_peak, "daily peak")
     return MonthlyPeaks(
         year=_as_int(data.get("year")),
         month=_as_int(data.get("month")),
         peak_of_the_month=monthly,
         daily_peaks=tuple(daily),
+        skipped_entries=skipped,
     )
 
 
@@ -392,7 +406,7 @@ def _parse_epex_entry(entry: dict[str, Any]) -> tuple[datetime, float] | None:
 def parse_epex_prices(data: dict[str, Any], *, granularity_minutes: int = 60) -> EpexPayload:
     """Parse the EPEX day-ahead prices response."""
     requested = timedelta(minutes=granularity_minutes)
-    raw_slots = _parse_items(data.get("timeSeries"), _parse_epex_entry, "EPEX")
+    raw_slots, skipped = _parse_items_counted(data.get("timeSeries"), _parse_epex_entry, "EPEX")
 
     raw_slots.sort(key=lambda pair: pair[0])
     deduped: list[tuple[datetime, float]] = []
@@ -434,6 +448,7 @@ def parse_epex_prices(data: dict[str, Any], *, granularity_minutes: int = 60) ->
         publication_time=pub_time,
         market_date=_as_date(data.get("marketDate")),
         slot_duration=observed,
+        skipped_entries=skipped,
     )
 
 
@@ -463,7 +478,7 @@ def parse_happy_hour_event(data: dict[str, Any]) -> HappyHourEvent:
     if n_skipped:
         _LOGGER.debug("skipped %d malformed happy hour window entries", n_skipped)
     windows.sort(key=lambda w: w.start)
-    return HappyHourEvent(windows=tuple(windows))
+    return HappyHourEvent(windows=tuple(windows), skipped_entries=n_skipped)
 
 
 def _parse_happy_hour_data(raw: dict[str, Any]) -> HappyHourMonthData:
@@ -551,7 +566,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
         simulated_energy = _parse_simulated_energy(month_raw.get("simulatedEnergy"))
         simulated_cost = _parse_simulated_cost(month_raw.get("simulatedCost"))
 
-    history = _parse_items(
+    history, skipped = _parse_items_counted(
         data.get("history"), _parse_month_report_history_entry, "month report history"
     )
     year_month = data.get("yearMonth")
@@ -569,6 +584,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
         ),
         simulated_energy=simulated_energy,
         simulated_cost=simulated_cost,
+        skipped_entries=skipped,
     )
 
 
@@ -612,8 +628,10 @@ def _parse_solar_surplus_day(day: dict[str, Any]) -> SolarSurplusDay:
 
 
 def parse_solar_surplus_forecasts(data: dict[str, Any]) -> SolarSurplusForecasts:
-    days = _parse_items(data.get("forecasts"), _parse_solar_surplus_day, "solar surplus")
-    return SolarSurplusForecasts(forecasts=tuple(days))
+    days, skipped = _parse_items_counted(
+        data.get("forecasts"), _parse_solar_surplus_day, "solar surplus"
+    )
+    return SolarSurplusForecasts(forecasts=tuple(days), skipped_entries=skipped)
 
 
 _TOU_DIRECTION_PREFIX = re.compile(r"(?:^|_)(?:OFFTAKE|INJECTION)_")
@@ -736,8 +754,10 @@ def _parse_tou_schedule_item(item: dict[str, Any]) -> TouScheduleItem | None:
 
 
 def parse_tou_schedules(data: dict[str, Any]) -> TouSchedulesResponse:
-    items = _parse_items(data.get("items"), _parse_tou_schedule_item, "TOU schedule")
-    return TouSchedulesResponse(items=tuple(items))
+    items, skipped = _parse_items_counted(
+        data.get("items"), _parse_tou_schedule_item, "TOU schedule"
+    )
+    return TouSchedulesResponse(items=tuple(items), skipped_entries=skipped)
 
 
 def _parse_usage_tou_parts(
@@ -864,10 +884,10 @@ def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:
 
 
 def parse_usage_details(data: dict[str, Any]) -> UsageDetailsResponse:
-    items = _parse_items(data.get("items"), _parse_usage_item, "usage")
+    items, skipped = _parse_items_counted(data.get("items"), _parse_usage_item, "usage")
     total_raw = data.get("total")
     total = _parse_usage_item(total_raw) if isinstance(total_raw, dict) else None
-    return UsageDetailsResponse(items=tuple(items), total=total)
+    return UsageDetailsResponse(items=tuple(items), total=total, skipped_entries=skipped)
 
 
 def _parse_metering_configuration(sub: Any) -> MeteringConfiguration | None:

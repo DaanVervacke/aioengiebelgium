@@ -16,6 +16,10 @@ class EngieBeCommunicationError(EngieBeError):
     """Communication errors (timeout, network, non-auth HTTP >= 400)."""
 
 
+class EngieBeTimeoutError(EngieBeCommunicationError):
+    """A request exceeded its timeout."""
+
+
 class EngieBeEpexNotPublishedError(EngieBeCommunicationError):
     """EPEX day-ahead prices not yet published for the requested window."""
 
@@ -33,3 +37,7 @@ class EngieBeAuthenticationError(EngieBeError):
 
 class EngieBeMfaError(EngieBeAuthenticationError):
     """MFA-related errors (invalid code)."""
+
+
+class EngieBeClientClosedError(EngieBeError):
+    """The client was closed; create a new EngieBeClient."""

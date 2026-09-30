@@ -122,6 +122,7 @@
         id='22222222-2222-2222-2222-222222222222',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[customer_account_relations_multi_ban_single_can]
@@ -216,6 +217,7 @@
         id='33333333-3333-3333-3333-333333333333',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_active_only]
@@ -242,6 +244,7 @@
         status='ACTIVE',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_dynamic_elec_only]
@@ -258,12 +261,14 @@
         status='ACTIVE',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_empty]
   EnergyContractsResponse(
     items=tuple(
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_fixed_dual_fuel]
@@ -290,6 +295,7 @@
         status='ACTIVE',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_include_inactive]
@@ -316,12 +322,14 @@
         status='ACTIVE',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[epex_prices]
   EpexPayload(
     market_date=datetime.date(2026, 5, 4),
     publication_time=datetime.datetime(2026, 5, 4, 13, 7, 21, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+    skipped_entries=0,
     slot_duration=datetime.timedelta(seconds=3600),
     slots=tuple(
       EpexSlot(
@@ -473,6 +481,7 @@
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_event]
   HappyHourEvent(
+    skipped_entries=0,
     windows=tuple(
       HappyHourWindow(
         end=datetime.datetime(2026, 7, 30, 16, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
@@ -487,6 +496,7 @@
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_event_empty]
   HappyHourEvent(
+    skipped_entries=0,
     windows=tuple(
     ),
   )
@@ -510,6 +520,7 @@
     partial_year_month_data=None,
     simulated_cost=None,
     simulated_energy=None,
+    skipped_entries=0,
     year_month=None,
   )
 # ---
@@ -687,6 +698,7 @@
         kwh=131.389,
       ),
     ),
+    skipped_entries=0,
     year_month='2026-08',
   )
 # ---
@@ -719,6 +731,7 @@
       peak_kwh=0.875,
       start=datetime.datetime(2026, 4, 15, 18, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     ),
+    skipped_entries=0,
     year=2026,
   )
 # ---
@@ -784,6 +797,7 @@
         ),
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[service_point]
@@ -856,6 +870,7 @@
         level='low_surplus',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[solar_surplus_forecasts_no_data]
@@ -885,6 +900,7 @@
         level='no_data',
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[tou_schedules]
@@ -1262,6 +1278,7 @@
         ),
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[tou_schedules_flat_all_offpeak]
@@ -1519,6 +1536,7 @@
         ),
       ),
     ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[usage_details]
@@ -1677,6 +1695,7 @@
         start=datetime.datetime(2026, 7, 3, 13, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
+    skipped_entries=0,
     total=UsageItem(
       costs=None,
       electricity=ElectricityUsage(
@@ -2054,6 +2073,7 @@
         start=datetime.datetime(2026, 7, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
+    skipped_entries=0,
     total=UsageItem(
       costs=UsageElectricityBreakdown(
         injection=UsageDirectionBreakdown(
@@ -2323,6 +2343,7 @@
         start=datetime.datetime(2026, 7, 3, 13, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
+    skipped_entries=0,
     total=UsageItem(
       costs=None,
       electricity=ElectricityUsage(
@@ -2478,6 +2499,7 @@
         start=datetime.datetime(2026, 7, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
+    skipped_entries=0,
     total=UsageItem(
       costs=UsageElectricityBreakdown(
         injection=UsageDirectionBreakdown(
@@ -3106,6 +3128,7 @@
         start=datetime.datetime(2026, 8, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
+    skipped_entries=0,
     total=UsageItem(
       costs=UsageElectricityBreakdown(
         injection=UsageDirectionBreakdown(

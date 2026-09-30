@@ -47,6 +47,7 @@ from .const import (
 )
 from .exceptions import (
     EngieBeAuthenticationError,
+    EngieBeClientClosedError,
     EngieBeCommunicationError,
     EngieBeError,
 )
@@ -280,7 +281,7 @@ class EngieBeClient:
     def _raise_if_closed(self) -> None:
         if self._closed:
             msg = "Client is closed — create a new EngieBeClient"
-            raise EngieBeError(msg)
+            raise EngieBeClientClosedError(msg)
 
     def _ensure_session(self) -> aiohttp.ClientSession:
         self._raise_if_closed()

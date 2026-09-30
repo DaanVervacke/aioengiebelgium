@@ -6,11 +6,13 @@ import pytest
 
 from aioengiebelgium.exceptions import (
     EngieBeAuthenticationError,
+    EngieBeClientClosedError,
     EngieBeCommunicationError,
     EngieBeEpexNotPublishedError,
     EngieBeError,
     EngieBeInvalidResponseError,
     EngieBeMfaError,
+    EngieBeTimeoutError,
 )
 
 
@@ -18,6 +20,12 @@ def test_communication_handler_catches_epex_not_published() -> None:
     msg = "not published yet"
     with pytest.raises(EngieBeCommunicationError):
         raise EngieBeEpexNotPublishedError(msg)
+
+
+def test_communication_handler_catches_timeout_error() -> None:
+    msg = "timed out"
+    with pytest.raises(EngieBeCommunicationError):
+        raise EngieBeTimeoutError(msg)
 
 
 def test_epex_not_published_carries_404_status() -> None:
@@ -34,10 +42,12 @@ def test_authentication_handler_catches_mfa_error() -> None:
     "exception_type",
     [
         EngieBeAuthenticationError,
+        EngieBeClientClosedError,
         EngieBeCommunicationError,
         EngieBeEpexNotPublishedError,
         EngieBeInvalidResponseError,
         EngieBeMfaError,
+        EngieBeTimeoutError,
     ],
 )
 def test_all_errors_subclass_base(exception_type: type[EngieBeError]) -> None:

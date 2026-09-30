@@ -108,6 +108,7 @@ class CustomerAccountRelations:
     """Response from the customer-account-relations endpoint."""
 
     accounts: tuple[AccountRelation, ...] = ()
+    skipped_entries: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,6 +150,7 @@ class PricesResponse:
     """Response from the supplier-energy-prices endpoint."""
 
     items: tuple[EanPrices, ...] = ()
+    skipped_entries: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -175,6 +177,7 @@ class EnergyContractsResponse:
     """Response from the energy-contracts endpoint."""
 
     items: tuple[EnergyContract, ...] = ()
+    skipped_entries: int = 0
 
     def energy_products_by_ean(self) -> dict[str, str]:
         """Return a mapping of bare EAN to energy product for active contracts."""
@@ -226,6 +229,7 @@ class MonthlyPeaks:
     month: int
     peak_of_the_month: Peak | None = None
     daily_peaks: tuple[Peak, ...] = ()
+    skipped_entries: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -303,6 +307,7 @@ class EpexPayload:
     publication_time: datetime | None = None
     market_date: date | None = None
     slot_duration: timedelta = timedelta(minutes=60)
+    skipped_entries: int = 0
 
     def next_slot_boundary(self, now: datetime) -> datetime | None:
         """Return the next instant at which the current EPEX slot changes."""
@@ -331,6 +336,7 @@ class HappyHourEvent:
     """Response from the happy-hour-event endpoint."""
 
     windows: tuple[HappyHourWindow, ...] = ()
+    skipped_entries: int = 0
 
     def is_active(self, now: datetime) -> bool:
         """Return True when ``now`` falls inside any happy-hour window."""
@@ -418,6 +424,7 @@ class HappyHourMonthReport:
     partial_year_month_data: bool | None = None
     simulated_energy: SimulatedEnergy | None = None
     simulated_cost: SimulatedCost | None = None
+    skipped_entries: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -453,6 +460,7 @@ class SolarSurplusForecasts:
     """Response from the solar-surplus forecasts endpoint."""
 
     forecasts: tuple[SolarSurplusDay, ...] = ()
+    skipped_entries: int = 0
 
     def all_slots(self) -> list[SolarSurplusSlot]:
         return [slot for day in self.forecasts for slot in day.details]
@@ -633,6 +641,7 @@ class TouSchedulesResponse:
     """Response from the tou-schedules endpoint."""
 
     items: tuple[TouScheduleItem, ...] = ()
+    skipped_entries: int = 0
 
     def schedule_for_ean(self, ean_with_suffix: str) -> TouScheduleItem | None:
         """Return the item for the given EAN-with-suffix, or ``None``."""
@@ -715,6 +724,7 @@ class UsageDetailsResponse:
 
     items: tuple[UsageItem, ...] = ()
     total: UsageItem | None = None
+    skipped_entries: int = 0
 
 
 @dataclass(frozen=True, slots=True)

@@ -19,6 +19,7 @@ from .exceptions import (
     EngieBeCommunicationError,
     EngieBeError,
     EngieBeInvalidResponseError,
+    EngieBeTimeoutError,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -90,7 +91,7 @@ async def request(
         raise
     except TimeoutError as exc:
         msg = f"Timeout communicating with ENGIE API ({exc.__class__.__name__})"
-        raise EngieBeCommunicationError(msg) from exc
+        raise EngieBeTimeoutError(msg) from exc
     except (aiohttp.ClientError, socket.gaierror) as exc:
         msg = f"Error communicating with ENGIE API ({exc.__class__.__name__})"
         raise EngieBeCommunicationError(msg) from exc

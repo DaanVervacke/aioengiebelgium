@@ -19,11 +19,13 @@ from .const import (
 )
 from .exceptions import (
     EngieBeAuthenticationError,
+    EngieBeClientClosedError,
     EngieBeCommunicationError,
     EngieBeEpexNotPublishedError,
     EngieBeError,
     EngieBeInvalidResponseError,
     EngieBeMfaError,
+    EngieBeTimeoutError,
 )
 from .models import (
     AccountBalance,
@@ -108,11 +110,13 @@ __all__ = [
     "EnergyCostPair",
     "EngieBeAuthenticationError",
     "EngieBeClient",
+    "EngieBeClientClosedError",
     "EngieBeCommunicationError",
     "EngieBeEpexNotPublishedError",
     "EngieBeError",
     "EngieBeInvalidResponseError",
     "EngieBeMfaError",
+    "EngieBeTimeoutError",
     "EpexGranularity",
     "EpexPayload",
     "EpexSlot",
