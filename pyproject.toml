@@ -92,7 +92,7 @@ ignore = [
 "scripts/check_bruno_drift.py" = [
     "T201", # the drift findings are this script's whole interface
 ]
-"documentation/conf.py" = [
+"docs/conf.py" = [
     "INP001", # Sphinx configuration is a script, not an importable package module
 ]
 "tests/**" = [

@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 .mypy_cache/
 plans/
-docs/
+docs/adr/
 CONTEXT.md
 AGENTS.md
 CLAUDE.md
@@ -13,7 +13,7 @@ CLAUDE.md
 .pytest_cache/
 .coverage
 htmlcov/
-documentation/_build/
+docs/_build/
 .DS_Store
 .bruno/**/*.json
 captures/
