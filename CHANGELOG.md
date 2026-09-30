@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Maintenance
+
+- Release Drafter now resolves `breaking-change` labels as a minor version bump, matching pre-1.0 semver convention.
+
+## [0.3.0] - 2026-09-19
+
 ### Breaking changes
 
 - `PricePeriod.valid_from` and `valid_to` are now `date | None` values instead of strings. Use `PricePeriod.contains()` to test whether a date is covered by a period.
+
+### Added
+
+- `PricePeriod.contains()` helper to test whether a date falls within a period. Price period boundaries accept both ISO dates and datetimes.
 
 ## [0.2.0] - 2026-09-15
 
@@ -81,7 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.1.2...v0.1.3
