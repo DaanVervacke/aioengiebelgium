@@ -1,0 +1,54 @@
+name: Bug report
+description: Report something that is not working as expected
+labels: [bugfix]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Never paste tokens, passwords, MFA codes, or Authorization headers
+        into this report. Redact them before sharing any request or response
+        payload.
+  - type: input
+    id: package-version
+    attributes:
+      label: aioengiebelgium version
+      description: The version you have installed.
+      placeholder: 0.3.0
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: Output of `python --version`.
+      placeholder: 3.14.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Ubuntu 24.04, macOS 15, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: |
+        The smallest self-contained code snippet that triggers the bug, plus
+        the traceback if there is one. Redact all credentials first.
+      placeholder: |
+        import asyncio
+        from aioengiebelgium import EngieBeClient
+
+        ...
+    validations:
+      required: true
