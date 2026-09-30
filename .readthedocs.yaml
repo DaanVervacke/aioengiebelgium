@@ -7,8 +7,8 @@ build:
   jobs:
     install:
       - pip install --upgrade pip
-      - pip install --group docs
+      - pip install --group docs .
 
-mkdocs:
-  configuration: mkdocs.yml
+sphinx:
+  configuration: documentation/conf.py
   fail_on_warning: true

@@ -44,8 +44,8 @@ dev = [
     "types-pyyaml>=6.0.12",
 ]
 docs = [
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.7",
+    "furo>=2025.12.19",
+    "sphinx>=9.1.0",
 ]
 
 [project.urls]
@@ -91,6 +91,9 @@ ignore = [
 ]
 "scripts/check_bruno_drift.py" = [
     "T201", # the drift findings are this script's whole interface
+]
+"documentation/conf.py" = [
+    "INP001", # Sphinx configuration is a script, not an importable package module
 ]
 "tests/**" = [
     "S101",    # assert in tests
