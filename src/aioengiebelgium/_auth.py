@@ -119,6 +119,14 @@ def _state_from_body(body: str) -> str | None:
     return match.group(1) if match else None
 
 
+def _state_from_redirect(body: str, headers: Mapping[str, str]) -> str | None:
+    """Continuation state of a redirect stub: the Location header first, the body second."""
+    state = _query_param(headers.get("Location", ""), "state")
+    if state:
+        return state
+    return _state_from_body(body)
+
+
 async def _auth_request(
     session: aiohttp.ClientSession,
     method: str,
@@ -209,7 +217,7 @@ class AuthFlow:
         await self._owned.close_if_owned()
 
     async def _run_steps_8_to_13(self, mfa_code: str) -> tuple[str, str]:
-        body = await _submit_mfa_code(
+        body, mfa_headers = await _submit_mfa_code(
             self._session,
             self._mfa_challenge_state,
             mfa_code,
@@ -224,7 +232,7 @@ class AuthFlow:
             msg = "Invalid MFA code"
             raise EngieBeMfaError(msg)
 
-        if not _state_from_body(body):
+        if not _state_from_redirect(body, mfa_headers):
             msg = "MFA submission returned an unrecognized page (no continuation state)"
             raise EngieBeAuthenticationError(msg)
 
@@ -295,7 +303,7 @@ async def start_auth_flow(
         "app_scheme": "be-engie-smart",
         "cancel_redirect": "be-engie-smart://cancel-registration-redirect",
     }
-    body, _ = await request_text(
+    body, authorize_headers = await request_text(
         session,
         method="GET",
         url=f"{AUTH_BASE_URL}/authorize",
@@ -304,7 +312,7 @@ async def start_auth_flow(
         allow_redirects=False,
         timeout=timeout,
     )
-    authorize_state = _state_from_body(body)
+    authorize_state = _state_from_redirect(body, authorize_headers)
     if not authorize_state:
         msg = "Failed to extract authorize state from response"
         raise EngieBeAuthenticationError(msg)
@@ -342,6 +350,7 @@ async def start_auth_flow(
         timeout=timeout,
     ) as response:
         password_status = response.status
+        password_headers = response.headers
         body = await response.text()
 
     if password_status >= HTTPStatus.INTERNAL_SERVER_ERROR:
@@ -353,7 +362,7 @@ async def start_auth_flow(
     if _FIELD_ERROR_MARKER in body:
         msg = "Invalid credentials"
         raise EngieBeAuthenticationError(msg, status=password_status)
-    login_state = _state_from_body(body)
+    login_state = _state_from_redirect(body, password_headers)
     if not login_state:
         if password_status == HTTPStatus.BAD_REQUEST:
             msg = "Invalid credentials"
@@ -362,8 +371,8 @@ async def start_auth_flow(
         raise EngieBeAuthenticationError(msg)
     _LOGGER.debug("auth step: password submitted")
 
-    body, _ = await _resume_authorization(session, login_state, timeout=timeout)
-    mfa_challenge_state = _state_from_body(body)
+    body, resume_headers = await _resume_authorization(session, login_state, timeout=timeout)
+    mfa_challenge_state = _state_from_redirect(body, resume_headers)
     if not mfa_challenge_state:
         msg = "Failed to extract MFA challenge state"
         raise EngieBeAuthenticationError(msg)
@@ -417,7 +426,7 @@ async def _submit_mfa_code(
     mfa_form_inputs: dict[str, str],
     *,
     timeout: float = 30.0,  # noqa: ASYNC109
-) -> str:
+) -> tuple[str, Mapping[str, str]]:
     match mfa_method:
         case MfaMethod.SMS:
             path = "/u/mfa-sms-challenge"
@@ -425,7 +434,7 @@ async def _submit_mfa_code(
         case MfaMethod.EMAIL:
             path = "/u/mfa-email-challenge"
             data = {**mfa_form_inputs, "code": mfa_code, "action": "default"}
-    body, _ = await _auth_request(
+    return await _auth_request(
         session,
         "POST",
         path,
@@ -434,7 +443,6 @@ async def _submit_mfa_code(
         raise_on_error=False,
         timeout=timeout,
     )
-    return body
 
 
 async def _switch_to_email_mfa(

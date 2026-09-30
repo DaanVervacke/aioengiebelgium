@@ -40,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Request arguments are validated at the endpoint-args layer: BANs must be digits after space-stripping, EANs must be digits with an optional `_ID<n>` delivery-point suffix, and months must be 1-12 with years 2000-2100.
 - The auth-flow state fallback is scoped to the harvested form instead of any `?state=` occurrence in the page.
 
+### Fixed
+
+- The auth flow reads a redirect's continuation state from the `Location` header first, falling back to the body. Auth0 now serves anchor-less redirect stubs that body scraping alone cannot parse.
+
 ### Security
 
 - The MFA resume guard requires the callback URI with a query separator instead of a bare prefix match.

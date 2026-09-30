@@ -50,6 +50,7 @@ from tests.conftest import (
     _LOGIN_IDENTIFIER_URL,
     _LOGIN_PASSWORD_URL,
     _LOGIN_STATE,
+    _MFA_SMS_URL,
     _MFA_STATE,
     _OAUTH_STATE,
     _PASSWORD,
@@ -59,7 +60,10 @@ from tests.conftest import (
     _TOKEN_URL,
     _USERNAME,
     _callback_url,
+    _identifier_body,
+    _mfa_sms_body,
     _mfa_submit_url,
+    _password_body,
     _q,
     _redirect_body,
     _register_auth_steps_1_to_7,
@@ -1275,3 +1279,76 @@ async def test_closed_client_leaves_injected_session_usable() -> None:
         with pytest.raises(EngieBeError, match="Client is closed"):
             await client.async_get_customer_account_relations()
         assert not session.closed
+
+
+def _location_stub(path: str) -> str:
+    """Auth0's anchor-less redirect stub as served live, state sanitized."""
+    return f"<p>Found. Redirecting to {path}</p>"
+
+
+async def test_authorize_state_read_from_location_header() -> None:
+    """Live Auth0 serves the authorize redirect as an anchor-less stub; the
+    continuation state comes from the Location header, not the body."""
+    with aioresponses() as m:
+        m.get(
+            _q(_AUTHORIZE_URL),
+            status=302,
+            headers={"Location": f"/u/login/identifier?state={_OAUTH_STATE}&ui_locales=nl"},
+            body=_html_fixture("auth_redirect_stub_no_anchor.html"),
+        )
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        await flow.async_abort()
+        await client.close()
+
+    assert flow._mfa_challenge_state == _MFA_STATE
+
+
+async def test_full_flow_with_location_only_redirects() -> None:
+    """Every redirect stub carries its state in the Location header only; the
+    full login still completes."""
+    with aioresponses() as m:
+        m.get(
+            _q(_AUTHORIZE_URL),
+            status=302,
+            headers={"Location": f"/u/login/identifier?state={_OAUTH_STATE}&ui_locales=nl"},
+            body=_location_stub("/u/login/identifier?state=FAKESTATE&amp;ui_locales=nl"),
+        )
+        m.get(_q(_LOGIN_IDENTIFIER_URL), body=_identifier_body(_OAUTH_STATE))
+        m.post(_q(_LOGIN_IDENTIFIER_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/password"))
+        m.get(_q(_LOGIN_PASSWORD_URL), body=_password_body(_OAUTH_STATE))
+        m.post(
+            _q(_LOGIN_PASSWORD_URL),
+            status=302,
+            headers={"Location": f"/authorize/resume?state={_LOGIN_STATE}"},
+            body=_location_stub("/authorize/resume?state=FAKESTATE"),
+        )
+        m.get(
+            _q(_RESUME_URL),
+            status=302,
+            headers={"Location": f"/u/mfa-sms-challenge?state={_MFA_STATE}"},
+            body=_location_stub("/u/mfa-sms-challenge?state=FAKESTATE"),
+        )
+        m.get(_q(_MFA_SMS_URL), body=_mfa_sms_body(_MFA_STATE))
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            status=302,
+            headers={"Location": "/authorize/resume?state=postmfastate"},
+            body=_location_stub("/authorize/resume?state=FAKESTATE"),
+        )
+        m.get(
+            _q(_RESUME_URL),
+            status=302,
+            headers={"Location": _callback_url(state=flow._expected_state)},
+            body="",
+        )
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        access, refresh = await flow.async_submit_mfa("123456")
+        await client.close()
+
+    assert (access, refresh) == ("new-access", "new-refresh")
+    assert client.access_token == "new-access"
+    assert client.refresh_token == "new-refresh"
