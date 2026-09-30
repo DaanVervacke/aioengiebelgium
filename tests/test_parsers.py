@@ -21,6 +21,7 @@ from aioengiebelgium.models import (
 )
 from aioengiebelgium.parsers import (
     _normalize_vocab,
+    _parse_tou_grid_meter,
     parse_account_balance,
     parse_customer_account_relations,
     parse_energy_contracts,
@@ -848,6 +849,11 @@ def test_parse_tou_schedules_null_schedule() -> None:
     meter = result.items[0].grid_meter_schedules[0]
     assert meter.dgo_tgo is None
     assert meter.supplier is None
+
+
+@pytest.mark.parametrize("meter", [None, 4, "bad", []])
+def test_parse_tou_grid_meter_non_dict_is_dropped(meter: Any) -> None:
+    assert _parse_tou_grid_meter(meter) is None
 
 
 def test_parse_tou_schedules_canonicalises_optimal_timeslot_code() -> None:

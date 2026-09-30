@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Maintenance
 
+- Pin the remaining unpinned auth and parser branches with tests: primary-form state extraction, the non-callback resume guard, and the defensive hidden-input, grid-meter, and token-error fallbacks; add wire tests for a custom `client_id` and unmatched-request refusal.
 - Release Drafter now resolves `breaking-change` labels as a minor version bump, matching pre-1.0 semver convention.
 - The CI gate installs the built wheel into a clean virtual environment and imports `EngieBeClient` from outside the repository.
 - The source distribution now includes the LICENSE file.

@@ -133,3 +133,12 @@ async def test_request_text_location_lookup_is_case_insensitive() -> None:
             text, headers = await _transport.request_text(session, method="GET", url=_URL)
     assert text == "hello"
     assert headers.get("Location") == "https://example.invalid/next"
+
+
+async def test_unmatched_request_raises() -> None:
+    """No registered mock means the request raises; nothing reaches the network."""
+    with aioresponses():
+        async with aiohttp.ClientSession() as session:
+            with pytest.raises(EngieBeCommunicationError, match="ClientConnectionError") as excinfo:
+                await _transport.request_json(session, method="GET", url=_URL)
+    assert isinstance(excinfo.value.__cause__, aiohttp.ClientConnectionError)

@@ -248,8 +248,17 @@ async def test_refresh_token_endpoint_401_maps_to_authentication_error() -> None
     [
         (400, '{"error":"invalid_request"}', "application/json"),
         (403, "denied", "text/plain"),
+        (400, "[1, 2, 3]", "application/json"),
+        (403, '"denied"', "application/json"),
+        (400, '{"error": 42}', "application/json"),
     ],
-    ids=["json_other_error", "non_json_body"],
+    ids=[
+        "json_other_error",
+        "non_json_body",
+        "json_non_object_400",
+        "json_non_object_403",
+        "json_non_string_error",
+    ],
 )
 async def test_refresh_token_endpoint_4xx_without_invalid_grant_stays_communication_error(
     status: int,
@@ -480,26 +489,17 @@ async def test_login_posts_carry_credentials_and_form_fields() -> None:
 
 
 async def test_start_authentication_failure_closes_created_session(
-    monkeypatch: pytest.MonkeyPatch,
+    created_sessions: list[aiohttp.ClientSession],
 ) -> None:
     """A failing start closes the session the client created internally."""
-    created: list[aiohttp.ClientSession] = []
-    original_session_cls = aiohttp.ClientSession
-
-    def _tracking_session(*args: Any, **kwargs: Any) -> aiohttp.ClientSession:
-        session = original_session_cls(*args, **kwargs)
-        created.append(session)
-        return session
-
-    monkeypatch.setattr(aiohttp, "ClientSession", _tracking_session)
     with aioresponses() as m:
         m.get(_q(_AUTHORIZE_URL), body="<html>no state here</html>")
         client = EngieBeClient()
         with pytest.raises(EngieBeAuthenticationError):
             await client.async_start_authentication(_USERNAME, _PASSWORD)
 
-    assert len(created) == 1
-    assert created[0].closed
+    assert len(created_sessions) == 1
+    assert created_sessions[0].closed
 
 
 async def test_start_authentication_failure_keeps_injected_session_open() -> None:
@@ -552,6 +552,17 @@ def test_state_from_body_falls_back_to_link_when_action_stateless() -> None:
     assert _state_from_body(body) == "linkstate"
 
 
+def test_state_from_body_prefers_primary_form_state_over_link() -> None:
+    """A page carrying the state in both places yields the primary form's value."""
+    body = (
+        '<form data-form-primary="true">'
+        '<input type="hidden" name="state" value="formstate"/>'
+        "</form>"
+        '<a href="/continue?state=linkstate">go</a>'
+    )
+    assert _state_from_body(body) == "formstate"
+
+
 def test_state_from_body_reads_link_when_no_form() -> None:
     assert _state_from_body('<a href="/x?state=abc123">x</a>') == "abc123"
 
@@ -588,6 +599,16 @@ def test_harvest_keeps_missing_value_as_empty_string() -> None:
         '<form data-form-primary="true"><input type="hidden" id="passkey" name="passkey"/></form>'
     )
     assert _harvest_hidden_inputs(body) == {"passkey": ""}
+
+
+def test_harvest_skips_hidden_input_without_name() -> None:
+    body = (
+        '<form data-form-primary="true">'
+        '<input type="hidden" value="nameless"/>'
+        '<input type="hidden" name="state" value="named"/>'
+        "</form>"
+    )
+    assert _harvest_hidden_inputs(body) == {"state": "named"}
 
 
 async def test_wrong_password_detected_before_state_extraction() -> None:
@@ -706,6 +727,21 @@ async def test_token_exchange_carries_code_and_verifier_matching_challenge() -> 
     assert sent_challenge == recomputed
 
 
+async def test_custom_client_id_reaches_authorize_and_token_endpoints() -> None:
+    """A caller-supplied client_id is used on both the authorize GET and the token POST."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient(client_id="custom-id")
+        flow = await _start_flow(client)
+        _register_submit_shortcircuit(m, state=flow._expected_state)
+        await flow.async_submit_mfa("123456")
+        (authorize,) = _recorded(m, "GET", "/authorize")
+        (token_post,) = _recorded(m, "POST", "/oauth/token")
+
+    assert authorize.kwargs["params"]["client_id"] == "custom-id"
+    assert token_post.kwargs["data"]["client_id"] == "custom-id"
+
+
 async def test_request_timeout_reaches_every_auth_flow_request(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -762,6 +798,33 @@ async def test_submit_mfa_state_mismatch_raises(
             body="",
         )
         with pytest.raises(EngieBeAuthenticationError, match="OAuth state mismatch"):
+            await flow.async_submit_mfa("123456")
+
+    assert created_sessions[0].closed
+    assert client.access_token is None
+
+
+async def test_submit_mfa_resume_to_non_callback_location_raises(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A resume Location that is not the callback URI is the resume-guard error."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            body=_redirect_body("postmfastate", "/authorize/resume"),
+        )
+        m.get(
+            _q(_RESUME_URL),
+            status=302,
+            headers={"Location": "https://auth.example.invalid/u/interstitial"},
+            body="",
+        )
+        with pytest.raises(
+            EngieBeAuthenticationError, match="Resume did not redirect to the callback"
+        ):
             await flow.async_submit_mfa("123456")
 
     assert created_sessions[0].closed
