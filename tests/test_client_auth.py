@@ -1246,7 +1246,7 @@ async def test_closed_client_raises_engiebe_error() -> None:
         client.async_refresh_token(),
         client.async_start_authentication(_USERNAME, _PASSWORD),
     ):
-        with pytest.raises(EngieBeError, match=r"^Client is closed — create a new EngieBeClient$"):
+        with pytest.raises(EngieBeError, match=r"^Client is closed. Create a new EngieBeClient$"):
             await attempt
 
 

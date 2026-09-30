@@ -40,4 +40,4 @@ class EngieBeMfaError(EngieBeAuthenticationError):
 
 
 class EngieBeClientClosedError(EngieBeError):
-    """The client was closed; create a new EngieBeClient."""
+    """The client was closed. Create a new EngieBeClient."""

@@ -42,7 +42,7 @@ An endpoint change is complete only when all of the following are present:
 1. A frozen `Endpoint` row in `src/aioengiebelgium/_endpoints.py` with the
    complete wire contract.
 2. A typed `EngieBeClient` getter.
-3. A captured real payload under `tests/fixtures/`; do not guess fixture
+3. A captured real payload under `tests/fixtures/`. Do not guess fixture
    shapes.
 4. A Bruno mirror whose request and docs satisfy `scripts.check_bruno_drift`.
 5. An entry under `[Unreleased]` in `CHANGELOG.md`.
@@ -73,5 +73,5 @@ subject.
 
 Every pull request must carry one of the seven repository labels
 (`breaking-change`, `new-feature`, `enhancement`, `bugfix`, `maintenance`,
-`documentation`, `dependencies`); CI fails otherwise. Dependabot pull requests
+`documentation`, `dependencies`). CI fails otherwise. Dependabot pull requests
 are labeled `dependencies` automatically.

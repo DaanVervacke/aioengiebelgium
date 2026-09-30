@@ -280,7 +280,7 @@ class EngieBeClient:
 
     def _raise_if_closed(self) -> None:
         if self._closed:
-            msg = "Client is closed — create a new EngieBeClient"
+            msg = "Client is closed. Create a new EngieBeClient"
             raise EngieBeClientClosedError(msg)
 
     def _ensure_session(self) -> aiohttp.ClientSession:

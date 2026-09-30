@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `EngieBeClient` constructor arguments after `session` are now keyword-only.
 - `async_get_feature_flag` now takes `(business_agreement_number, flag)`, ban-first like the other getters.
-- `async_get_service_point` accepts both bare and suffixed EANs; a bare EAN is normalized with its delivery-point suffix before the request.
+- `async_get_service_point` accepts both bare and suffixed EANs. A bare EAN is normalized with its delivery-point suffix before the request.
 - `EpexPayload.market_date`, `SolarSurplusDay.forecast_date`, and `FinancialTransaction.due_date` are now `date` values instead of strings.
 - `MonthReportHistoryEntry.year_month` is now the month's start `date` instead of a `YYYY-MM` string.
 - `AccountBalance.earliest_due_date` consumes the typed `due_date` field and returns midnight in the given timezone.
-- `version` and `PackageNotFoundError` are no longer leaked into the package namespace; only `__version__` is exported.
+- `version` and `PackageNotFoundError` are no longer leaked into the package namespace. Only `__version__` is exported.
 
 ### Added
 
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Maintenance
 
-- Pin the remaining unpinned auth and parser branches with tests: primary-form state extraction, the non-callback resume guard, and the defensive hidden-input, grid-meter, and token-error fallbacks; add wire tests for a custom `client_id` and unmatched-request refusal.
+- Pin the remaining unpinned auth and parser branches with tests: primary-form state extraction, the non-callback resume guard, and the defensive hidden-input, grid-meter, and token-error fallbacks. Add wire tests for a custom `client_id` and unmatched-request refusal.
 - Release Drafter now resolves `breaking-change` labels as a minor version bump, matching pre-1.0 semver convention.
 - The CI gate installs the built wheel into a clean virtual environment and imports `EngieBeClient` from outside the repository.
 - The source distribution now includes the LICENSE file.

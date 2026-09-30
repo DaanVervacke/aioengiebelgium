@@ -391,4 +391,4 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     ACCOUNT_BALANCE,
     EPEX_PRICES,
 )
-"""Every endpoint descriptor; the wire-contract tests iterate this registry."""
+"""Every endpoint descriptor. The wire-contract tests iterate this registry."""
