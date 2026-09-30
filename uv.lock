@@ -50,7 +50,7 @@ dev = [
 ]
 docs = [
     { name = "mkdocs", specifier = ">=1.6.1" },
-    { name = "mkdocs-material", specifier = ">=9.6" },
+    { name = "mkdocs-material", specifier = ">=9.7.7" },
 ]
 
 [[package]]
