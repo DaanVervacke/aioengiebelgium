@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Maintenance
 
 - Release Drafter now resolves `breaking-change` labels as a minor version bump, matching pre-1.0 semver convention.
+- The CI gate installs the built wheel into a clean virtual environment and imports `EngieBeClient` from outside the repository.
+- The source distribution now includes the LICENSE file.
 
 ## [0.3.0] - 2026-09-19
 
