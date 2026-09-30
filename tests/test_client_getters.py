@@ -16,7 +16,17 @@ from aioresponses import aioresponses
 from syrupy.assertion import SnapshotAssertion
 from yarl import URL
 
-from aioengiebelgium._endpoints import CATALOG, BanArgs, Endpoint, EpexArgs, MonthArgs
+from aioengiebelgium._endpoints import (
+    CATALOG,
+    BanArgs,
+    ContractsArgs,
+    EanArgs,
+    Endpoint,
+    EpexArgs,
+    FlagArgs,
+    MonthArgs,
+    SolarArgs,
+)
 from aioengiebelgium.client import EngieBeClient
 from aioengiebelgium.const import (
     ACCOUNTS_BASE_URL,
@@ -593,6 +603,44 @@ def test_ban_args_strip_spaces_on_construction() -> None:
     """BAN normalization is an Args invariant, independent of the getter path."""
     assert BanArgs(ban="123 456").ban == "123456"
     assert MonthArgs(ban="000 000 000 001", year=2026, month=1).ban == "000000000001"
+
+
+def test_ban_args_reject_non_digit_ban() -> None:
+    """A BAN that is not digits after space-stripping is rejected at construction."""
+    with pytest.raises(ValueError, match="business agreement number must be digits"):
+        BanArgs(ban="123a")
+    with pytest.raises(ValueError, match="business agreement number must be digits"):
+        ContractsArgs(ban="12 34b", include_inactive=False)
+    with pytest.raises(ValueError, match="business agreement number must be digits"):
+        MonthArgs(ban="x", year=2026, month=1)
+    with pytest.raises(ValueError, match="business agreement number must be digits"):
+        SolarArgs(ban="12.3", delivery_point_id=_DELIVERY_POINT_ID)
+    with pytest.raises(ValueError, match="business agreement number must be digits"):
+        FlagArgs(flag=FeatureFlagKey.TOU_IS_ACTIVE, ban="123-456")
+
+
+def test_ean_args_reject_malformed_ean() -> None:
+    """An EAN must be digits with an optional _ID<n> delivery-point suffix."""
+    with pytest.raises(ValueError, match="EAN must be digits"):
+        EanArgs(ean="54144886000000000A")
+    with pytest.raises(ValueError, match="EAN must be digits"):
+        EanArgs(ean="541448860000000001_IDx")
+    with pytest.raises(ValueError, match="EAN must be digits"):
+        EanArgs(ean="541448860000000001_ID")
+    assert EanArgs(ean="541448860000000001").ean == "541448860000000001"
+    assert EanArgs(ean=_EAN).ean == _EAN
+
+
+def test_month_args_reject_out_of_range_month_and_year() -> None:
+    """Month and year outside the wire contract's plausible range are rejected."""
+    with pytest.raises(ValueError, match="month must be between 1 and 12"):
+        MonthArgs(ban=_BAN, year=2026, month=0)
+    with pytest.raises(ValueError, match="month must be between 1 and 12"):
+        MonthArgs(ban=_BAN, year=2026, month=13)
+    with pytest.raises(ValueError, match="year must be between 2000 and 2100"):
+        MonthArgs(ban=_BAN, year=1999, month=1)
+    with pytest.raises(ValueError, match="year must be between 2000 and 2100"):
+        MonthArgs(ban=_BAN, year=2101, month=1)
 
 
 def test_constructor_arguments_after_session_are_keyword_only() -> None:

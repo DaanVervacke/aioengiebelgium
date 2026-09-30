@@ -36,6 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release Drafter now resolves `breaking-change` labels as a minor version bump, matching pre-1.0 semver convention.
 - The CI gate installs the built wheel into a clean virtual environment and imports `EngieBeClient` from outside the repository.
 - The source distribution now includes the LICENSE file.
+- The auth-flow form harvester html-unescapes hidden-input values and accepts single-quoted `value` attributes.
+- Request arguments are validated at the endpoint-args layer: BANs must be digits after space-stripping, EANs must be digits with an optional `_ID<n>` delivery-point suffix, and month/year requests must fall in a plausible range.
+- The auth-flow state fallback is scoped to the harvested form instead of any `?state=` occurrence in the page.
+
+### Security
+
+- The MFA resume guard requires the callback URI with a query separator instead of a bare prefix match.
+- Removed a live OAuth token capture from the local, gitignored captures directory.
 
 ## [0.3.0] - 2026-09-19
 

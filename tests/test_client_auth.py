@@ -488,6 +488,22 @@ async def test_login_posts_carry_credentials_and_form_fields() -> None:
     }
 
 
+async def test_entity_encoded_hidden_input_is_decoded_and_reposted() -> None:
+    """An entity-encoded hidden input is html-unescaped before it is re-posted."""
+    with aioresponses() as m:
+        m.get(
+            _q(_LOGIN_IDENTIFIER_URL),
+            body=_html_fixture("auth_page_identifier_entity_encoded.html"),
+        )
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        (identifier_post,) = _recorded(m, "POST", "/u/login/identifier")
+        await flow.async_abort()
+
+    assert identifier_post.kwargs["data"]["extra-context"] == '{"k":"v"}'
+
+
 async def test_start_authentication_failure_closes_created_session(
     created_sessions: list[aiohttp.ClientSession],
 ) -> None:
@@ -571,6 +587,38 @@ def test_state_from_body_returns_none_without_state() -> None:
     assert _state_from_body("<html>no state here</html>") is None
 
 
+def test_state_from_body_ignores_links_outside_the_primary_form() -> None:
+    """A primary form without a state input must not adopt a foreign link's state."""
+    body = (
+        '<form data-form-primary="true">'
+        '<input type="hidden" name="action" value="default"/>'
+        "</form>"
+        '<a href="/elsewhere?state=foreign">go</a>'
+    )
+    assert _state_from_body(body) is None
+
+
+def test_state_from_body_falls_back_to_state_within_the_form_scope() -> None:
+    """A primary form without a hidden state yields a state carried inside that form."""
+    body = (
+        '<form data-form-primary="true">'
+        '<a href="/x?state=inscope">go</a>'
+        "</form>"
+        '<a href="/y?state=foreign">elsewhere</a>'
+    )
+    assert _state_from_body(body) == "inscope"
+
+
+def test_state_from_body_ignores_state_outside_anchor_hrefs() -> None:
+    """A formless redirect body yields state from an anchor href only, not loose text."""
+    assert _state_from_body("<p>?state=loose-text</p>") is None
+
+
+def test_state_from_body_reads_first_stateful_anchor_in_redirect_body() -> None:
+    body = '<a href="/x">first</a><a href="/y?state=second">go</a>'
+    assert _state_from_body(body) == "second"
+
+
 def test_harvest_scopes_to_primary_form_and_ignores_secondary() -> None:
     """Multi-form pages must not leak sibling-form fields into the primary POST body."""
     body = (
@@ -609,6 +657,15 @@ def test_harvest_skips_hidden_input_without_name() -> None:
         "</form>"
     )
     assert _harvest_hidden_inputs(body) == {"state": "named"}
+
+
+def test_harvest_accepts_single_quoted_value_attributes() -> None:
+    body = (
+        '<form data-form-primary="true">'
+        '<input type="hidden" name="state" value=\'single-quoted\'/>'
+        "</form>"
+    )
+    assert _harvest_hidden_inputs(body) == {"state": "single-quoted"}
 
 
 async def test_wrong_password_detected_before_state_extraction() -> None:
@@ -820,6 +877,33 @@ async def test_submit_mfa_resume_to_non_callback_location_raises(
             _q(_RESUME_URL),
             status=302,
             headers={"Location": "https://auth.example.invalid/u/interstitial"},
+            body="",
+        )
+        with pytest.raises(
+            EngieBeAuthenticationError, match="Resume did not redirect to the callback"
+        ):
+            await flow.async_submit_mfa("123456")
+
+    assert created_sessions[0].closed
+    assert client.access_token is None
+
+
+async def test_submit_mfa_callback_prefix_without_query_raises(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A Location extending the callback URI without a query separator is not the callback."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            body=_redirect_body("postmfastate", "/authorize/resume"),
+        )
+        m.get(
+            _q(_RESUME_URL),
+            status=302,
+            headers={"Location": f"{REDIRECT_URI}attacker"},
             body="",
         )
         with pytest.raises(

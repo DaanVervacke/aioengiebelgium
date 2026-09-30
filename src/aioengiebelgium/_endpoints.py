@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 """Endpoint catalog: every wire fact for each API endpoint lives in one descriptor."""
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
@@ -111,6 +112,20 @@ def _normalize_ban(value: str) -> str:
     return value.replace(" ", "")
 
 
+_BAN_RE = re.compile(r"[0-9]+")
+_EAN_RE = re.compile(r"[0-9]+(?:_ID[0-9]+)?")
+_MIN_MONTH = 1
+_MAX_MONTH = 12
+_MIN_YEAR = 2000
+_MAX_YEAR = 2100
+
+
+def _validate_ban(ban: str) -> None:
+    if not _BAN_RE.fullmatch(ban):
+        msg = f"business agreement number must be digits: {ban!r}"
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True, slots=True)
 class NoArgs:
     """Args for endpoints that take no caller input."""
@@ -122,11 +137,17 @@ class BanArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
 
 
 @dataclass(frozen=True, slots=True)
 class EanArgs:
     ean: str
+
+    def __post_init__(self) -> None:
+        if not _EAN_RE.fullmatch(self.ean):
+            msg = f"EAN must be digits with an optional _ID<n> suffix: {self.ean!r}"
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,6 +158,13 @@ class MonthArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
+        if not _MIN_MONTH <= self.month <= _MAX_MONTH:
+            msg = f"month must be between {_MIN_MONTH} and {_MAX_MONTH}: {self.month}"
+            raise ValueError(msg)
+        if not _MIN_YEAR <= self.year <= _MAX_YEAR:
+            msg = f"year must be between {_MIN_YEAR} and {_MAX_YEAR}: {self.year}"
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,6 +174,7 @@ class ContractsArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
 
 
 @dataclass(frozen=True, slots=True)
@@ -167,6 +196,7 @@ class SolarArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +206,7 @@ class FlagArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
 
 
 @dataclass(frozen=True, slots=True)

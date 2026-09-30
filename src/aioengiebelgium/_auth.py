@@ -3,6 +3,7 @@
 """OAuth2/PKCE + MFA authentication flow for the ENGIE Belgium API."""
 
 import hashlib
+import html
 import logging
 import os
 import re
@@ -44,9 +45,10 @@ _BROWSER_HEADERS: dict[str, str] = {
 }
 
 _STATE_IN_URL_RE = re.compile(r"[?&]state=([a-zA-Z0-9_-]+)")
+_ANCHOR_HREF_RE = re.compile(r'<a\b[^>]*\bhref="([^"]*)"', re.IGNORECASE)
 _HIDDEN_INPUT_RE = re.compile(r'<input\b[^>]*\btype="hidden"[^>]*>', re.IGNORECASE)
 _INPUT_NAME_RE = re.compile(r'\bname="([^"]+)"')
-_INPUT_VALUE_RE = re.compile(r'\bvalue="([^"]*)"')
+_INPUT_VALUE_RE = re.compile(r"""\bvalue=(["'])(.*?)\1""")
 
 _PRIMARY_FORM = 'data-form-primary="true"'
 _PICK_AUTHENTICATOR_FORM = "ulp-action-form-pick-authenticator"
@@ -71,16 +73,17 @@ def _query_param(url: str, name: str) -> str | None:
     return values[0] if values else None
 
 
-def _harvest_hidden_inputs(body: str, *, form_marker: str = _PRIMARY_FORM) -> dict[str, str]:
-    """Return {name: value} for all hidden inputs inside the first form matching form_marker."""
+def _form_scope(body: str, *, form_marker: str = _PRIMARY_FORM) -> str | None:
+    """Inner HTML of the first form matching ``form_marker``, or None when absent."""
     pattern = re.compile(
         rf"<form\b[^>]*\b{re.escape(form_marker)}(?![\w-])[^>]*>(.*?)</form>",
         re.DOTALL | re.IGNORECASE,
     )
     match = pattern.search(body)
-    if not match:
-        return {}
-    scope = match.group(1)
+    return match.group(1) if match else None
+
+
+def _hidden_inputs_in(scope: str) -> dict[str, str]:
     result: dict[str, str] = {}
     for tag_match in _HIDDEN_INPUT_RE.finditer(scope):
         tag = tag_match.group(0)
@@ -88,16 +91,31 @@ def _harvest_hidden_inputs(body: str, *, form_marker: str = _PRIMARY_FORM) -> di
         if not name_match:
             continue
         value_match = _INPUT_VALUE_RE.search(tag)
-        result[name_match.group(1)] = value_match.group(1) if value_match else ""
+        result[name_match.group(1)] = html.unescape(value_match.group(2)) if value_match else ""
     return result
 
 
+def _harvest_hidden_inputs(body: str, *, form_marker: str = _PRIMARY_FORM) -> dict[str, str]:
+    """Return {name: value} for all hidden inputs inside the first form matching form_marker."""
+    scope = _form_scope(body, form_marker=form_marker)
+    return {} if scope is None else _hidden_inputs_in(scope)
+
+
 def _state_from_body(body: str) -> str | None:
-    """Extract state: primary form's hidden ``state`` input, else ``?state=`` in URL."""
-    state = _harvest_hidden_inputs(body).get("state")
+    """Extract state: the primary form's hidden ``state`` input, else ``?state=``
+    within that form's scope. A formless Auth0 redirect body carries the state
+    in its redirect link only."""
+    scope = _form_scope(body)
+    if scope is None:
+        for href_match in _ANCHOR_HREF_RE.finditer(body):
+            state_match = _STATE_IN_URL_RE.search(href_match.group(1))
+            if state_match:
+                return state_match.group(1)
+        return None
+    state = _hidden_inputs_in(scope).get("state")
     if state:
         return state
-    match = _STATE_IN_URL_RE.search(body)
+    match = _STATE_IN_URL_RE.search(scope)
     return match.group(1) if match else None
 
 
@@ -215,7 +233,7 @@ class AuthFlow:
         )
 
         location = resp_headers.get("Location", "")
-        if not location.startswith(REDIRECT_URI):
+        if not location.startswith(f"{REDIRECT_URI}?"):
             msg = "Resume did not redirect to the callback"
             raise EngieBeAuthenticationError(msg)
         auth_code = self._extract_callback_code(location)
