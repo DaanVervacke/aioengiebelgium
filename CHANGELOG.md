@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Re-land the README API reference: constructor, token state, authentication, all 13 data getters, and the exception taxonomy.
+- Document the token-rotation contract and the tokenless EPEX day-ahead endpoint.
+- Add CI, PyPI version, Python versions, and MIT license badges plus an unofficial-API disclaimer.
+
 ### Maintenance
 
 - Release Drafter now resolves `breaking-change` labels as a minor version bump, matching pre-1.0 semver convention.
