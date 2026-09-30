@@ -13,6 +13,7 @@ CLAUDE.md
 .pytest_cache/
 .coverage
 htmlcov/
+site/
 .DS_Store
 .bruno/**/*.json
 captures/

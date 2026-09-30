@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Add a MkDocs documentation site under `documentation/` with a Read the Docs build configuration in `.readthedocs.yaml`. The site covers the quickstart, the MFA login flow, the token-rotation contract, the tokenless EPEX endpoint, and the full client API.
+
 ## [0.4.0] - 2026-09-30
 
 ### Breaking changes

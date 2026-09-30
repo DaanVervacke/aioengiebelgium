@@ -43,11 +43,16 @@ dev = [
     "pyyaml>=6.0.2",
     "types-pyyaml>=6.0.12",
 ]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6",
+]
 
 [project.urls]
 Homepage = "https://github.com/DaanVervacke/aioengiebelgium"
 Repository = "https://github.com/DaanVervacke/aioengiebelgium"
 Issues = "https://github.com/DaanVervacke/aioengiebelgium/issues"
+Documentation = "https://aioengiebelgium.readthedocs.io/"
 Changelog = "https://github.com/DaanVervacke/aioengiebelgium/blob/main/CHANGELOG.md"
 
 [tool.uv]
