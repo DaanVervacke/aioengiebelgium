@@ -21,12 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `EngieBeTimeoutError` (subclass of `EngieBeCommunicationError`), raised instead of the generic communication error when a request exceeds its timeout.
 - `EngieBeClientClosedError` (subclass of `EngieBeError`), raised by the closed-client guard instead of the base error.
-- `skipped_entries` on `PricesResponse`, `EnergyContractsResponse`, `CustomerAccountRelations`, `MonthlyPeaks`, `HappyHourEvent`, `HappyHourMonthReport`, `UsageDetailsResponse`, `SolarSurplusForecasts`, `TouSchedulesResponse`, and `EpexPayload`: the number of malformed entries lenient parsing dropped, making truncation visible to coordinators.
+- `skipped_entries` on `PricesResponse`, `EnergyContractsResponse`, `CustomerAccountRelations`, `MonthlyPeaks`, `HappyHourEvent`, `HappyHourMonthReport`, `UsageDetailsResponse`, `SolarSurplusForecasts`, `TouSchedulesResponse`, and `EpexPayload`: the number of malformed entries that lenient parsing dropped. A non-zero count signals a truncated response.
 
 ### Documentation
 
 - Add community files: `CONTRIBUTING.md`, `SECURITY.md`, issue templates, a pull request template, and the `dependencies` label for Dependabot pull requests.
-- Re-land the README API reference: constructor, token state, authentication, all 13 data getters, and the exception taxonomy.
+- Document the full client API in the README: constructor, token state, authentication, all 13 data getters, and the exception taxonomy.
 - Document the token-rotation contract and the tokenless EPEX day-ahead endpoint.
 - Add CI, PyPI version, Python versions, and MIT license badges plus an unofficial-API disclaimer.
 
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The CI gate installs the built wheel into a clean virtual environment and imports `EngieBeClient` from outside the repository.
 - The source distribution now includes the LICENSE file.
 - The auth-flow form harvester html-unescapes hidden-input values and accepts single-quoted `value` attributes.
-- Request arguments are validated at the endpoint-args layer: BANs must be digits after space-stripping, EANs must be digits with an optional `_ID<n>` delivery-point suffix, and month/year requests must fall in a plausible range.
+- Request arguments are validated at the endpoint-args layer: BANs must be digits after space-stripping, EANs must be digits with an optional `_ID<n>` delivery-point suffix, and months must be 1-12 with years 2000-2100.
 - The auth-flow state fallback is scoped to the harvested form instead of any `?state=` occurrence in the page.
 
 ### Security

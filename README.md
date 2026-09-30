@@ -5,14 +5,10 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/aioengiebelgium.svg)](https://pypi.org/project/aioengiebelgium/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> Unofficial, reverse-engineered client for the ENGIE Belgium consumer API.
-> It is not endorsed by ENGIE and may break without notice whenever ENGIE
-> changes their API.
+Async Python client for the ENGIE Belgium consumer API. Requires Python >= 3.14.
 
-Unofficial asynchronous Python library to interact with
-the ENGIE Belgium API.
-
-Requires Python >= 3.14.
+> Unofficial and reverse-engineered: not endorsed by ENGIE, and it may break
+> without notice whenever ENGIE changes their API.
 
 ## Install
 
@@ -22,7 +18,7 @@ pip install aioengiebelgium
 
 ## Usage
 
-`tokens.json` in the example below is demo storage only — restrict the file's
+`tokens.json` in the example below is demo storage only. Restrict the file's
 permissions or use your application's secure storage for the token pair.
 
 ```python
@@ -140,8 +136,7 @@ asyncio.run(main())
 | `async_refresh_token()` | `tuple[str, str]` | Refreshes the tokens and returns `(new_access_token, new_refresh_token)`. |
 | `close()` | `None` | Closes the client; the session is closed only if this client created it. |
 
-ENGIE rotates the refresh token on every refresh and the previous one is
-invalidated immediately: always persist the new pair via `on_token_refresh`.
+Persist every rotated pair via `on_token_refresh`; see [Token rotation](#token-rotation).
 
 ### Data getters
 

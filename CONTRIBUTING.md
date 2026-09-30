@@ -37,7 +37,7 @@ access. Your pull request must pass this gate completely.
 
 ## Adding an endpoint
 
-An endpoint change is complete only when all five of the following are present:
+An endpoint change is complete only when all of the following are present:
 
 1. A frozen `Endpoint` row in `src/aioengiebelgium/_endpoints.py` with the
    complete wire contract.
