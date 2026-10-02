@@ -1,6 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
-
 from enum import Enum, StrEnum
 from importlib.metadata import version as _pkg_version
 

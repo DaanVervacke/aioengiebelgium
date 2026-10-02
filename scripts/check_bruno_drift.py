@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """Fail when the Bruno collection has drifted away from the API client."""
 
 from __future__ import annotations

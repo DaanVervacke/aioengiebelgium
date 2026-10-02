@@ -1,6 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
-
 from http import HTTPStatus
 
 

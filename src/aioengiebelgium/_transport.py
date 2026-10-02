@@ -1,6 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
-
 import asyncio
 import logging
 import socket

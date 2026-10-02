@@ -13,7 +13,7 @@ Async Python client for the ENGIE Belgium consumer API. Requires Python >= 3.14.
 ## Install
 
 ```bash
-pip install aioengiebelgium
+uv add aioengiebelgium
 ```
 
 ## Documentation

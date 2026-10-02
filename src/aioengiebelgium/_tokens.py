@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """Token lifecycle: the OAuth token pair, its lock, rotation, and delivery."""
 
 import asyncio

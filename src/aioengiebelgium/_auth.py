@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """OAuth2/PKCE + MFA authentication flow for the ENGIE Belgium API."""
 
 import hashlib
