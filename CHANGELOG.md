@@ -9,10 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Maintenance
 
-- The toolchain runs on uv end to end: the check gate builds the wheel and audits dependencies with `uv audit` instead of pip-audit, releases publish with `uv publish` and PEP 740 attestations, and Read the Docs installs through native uv sync.
-- The README and the quickstart install with `uv add aioengiebelgium`, and the uv requirement is now 0.12.21.
-- A security workflow runs bandit on pull requests and a weekly full-lock dependency audit, a ruff pre-commit configuration tracks the locked ruff, and commits follow Conventional Commits like the other libraries.
-- Source files no longer carry copyright headers, matching the other libraries: ruff ignores CPY001 globally and the MIT license stays recorded in the LICENSE file and the pyproject metadata.
+- Complete the uv toolchain migration
+- Migrate the release drafter config and label workflows
+- Manage the changelog with git-cliff
 
 ## [0.4.2] - 2026-09-30
 
