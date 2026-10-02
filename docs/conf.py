@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """Sphinx configuration for the aioengiebelgium documentation."""
 
 from importlib.metadata import PackageNotFoundError

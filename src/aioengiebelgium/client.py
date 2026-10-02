@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """The public EngieBeClient entry point."""
 
 import logging

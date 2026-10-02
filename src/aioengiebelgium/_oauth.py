@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """OAuth token-endpoint primitive: the grant POST and its error taxonomy."""
 
 import json

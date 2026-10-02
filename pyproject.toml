@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.11.32,<0.13"]
+requires = ["uv_build>=0.12.21,<0.13"]
 build-backend = "uv_build"
 
 [project]
@@ -39,7 +39,6 @@ dev = [
     "mypy>=1.13",
     "ruff>=0.16",
     "coverage[toml]>=7.15.2",
-    "pip-audit>=2.7",
     "pyyaml>=6.0.2",
     "types-pyyaml>=6.0.12",
 ]
@@ -56,7 +55,7 @@ Documentation = "https://aioengiebelgium.readthedocs.io/"
 Changelog = "https://github.com/DaanVervacke/aioengiebelgium/blob/main/CHANGELOG.md"
 
 [tool.uv]
-required-version = ">=0.11.32,<0.13"
+required-version = ">=0.12.21,<0.13"
 
 [tool.uv.build-backend]
 source-include = ["LICENSE"]
@@ -73,36 +72,29 @@ docstring-code-format = true
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "D",       # pydocstyle (we keep docstrings minimal)
-    "COM812",  # trailing-comma (conflicts with formatter)
-    "ISC001",  # single-line-implicit-string-concatenation (conflicts with formatter)
-    "ANN401",  # Any in parser/auth signatures — inputs are genuinely untyped API dicts
-    "PLR0913", # many-arg functions — request helpers and auth flows need them
-    "PLR0917", # many positional args — same reason
-    "TC001",   # TYPE_CHECKING — PEP 649 (Python 3.14) makes these moot
-    "TC002",   # TYPE_CHECKING for third-party imports — same reason
-    "TC003",   # TYPE_CHECKING for stdlib imports — same reason
+    "D",
+    "COM812",
+    "ISC001",
+    "ANN401",
+    "PLR0913",
+    "PLR0917",
+    "TC001",
+    "TC002",
+    "TC003",
+    "CPY001",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/check.py" = [
-    "T201", # gate runner prints the command it is about to run
-    "S603", # subprocess runs a fixed, hardcoded command tuple
-]
-"scripts/check_bruno_drift.py" = [
-    "T201", # the drift findings are this script's whole interface
-]
-"docs/conf.py" = [
-    "INP001", # Sphinx configuration is a script, not an importable package module
-]
+"scripts/check.py" = ["T201", "S603"]
+"scripts/check_bruno_drift.py" = ["T201"]
+"docs/conf.py" = ["INP001"]
 "tests/**" = [
-    "S101",    # assert in tests
-    "S105",    # hardcoded test tokens
-    "S106",    # hardcoded password args
-    "SLF001",  # private member access in tests
-    "PLR2004", # magic values in assertions
-    "CPY001",  # copyright header
-    "RUF059",  # unpacked unused vars (_refresh)
+    "S101",
+    "S105",
+    "S106",
+    "SLF001",
+    "PLR2004",
+    "RUF059",
 ]
 
 [tool.pytest.ini_options]

@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """Unofficial asynchronous Python library to interact with the ENGIE Belgium API."""
 
 from importlib.metadata import PackageNotFoundError as _PackageNotFoundError

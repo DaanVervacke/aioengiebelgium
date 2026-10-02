@@ -6,7 +6,7 @@ Install
 
 .. code-block:: bash
 
-   pip install aioengiebelgium
+   uv add aioengiebelgium
 
 First login
 -----------

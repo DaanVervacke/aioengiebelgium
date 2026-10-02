@@ -1,5 +1,3 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """Endpoint catalog: every wire fact for each API endpoint lives in one descriptor."""
 
 import re

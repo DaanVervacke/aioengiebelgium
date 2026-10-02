@@ -1,8 +1,6 @@
-# Copyright (c) 2026 Daan Vervacke
-# SPDX-License-Identifier: MIT
 """Local CI gate: run every check tool in order and exit with the first failure's code.
 
-Mirrors the full CI check suite (format -> lint -> type-check -> test -> coverage -> audit).
+Mirrors the full CI check suite: format, lint, types, tests, coverage, build, audit.
 """
 
 import subprocess
@@ -16,7 +14,8 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
     ("uv", "run", "python", "-m", "scripts.check_bruno_drift"),
     ("uv", "run", "coverage", "run", "-m", "pytest"),
     ("uv", "run", "coverage", "report"),
-    ("uv", "run", "pip-audit"),
+    ("uv", "build"),
+    ("uv", "audit", "--locked", "--preview-features", "audit-command"),
 )
 
 

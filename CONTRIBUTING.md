@@ -5,7 +5,7 @@ for ENGIE Belgium's reverse-engineered consumer API, targeting Python >= 3.14.
 
 ## Setup
 
-Use [uv](https://docs.astral.sh/uv/) (>= 0.11.32, < 0.13) to install the
+Use [uv](https://docs.astral.sh/uv/) (>= 0.12.21, < 0.13) to install the
 environment:
 
 ```bash
@@ -29,10 +29,11 @@ mypy src tests scripts
 python -m scripts.check_bruno_drift
 coverage run -m pytest
 coverage report
-pip-audit
+uv build
+uv audit
 ```
 
-Coverage measures branches in `src/` and requires 98%. `pip-audit` needs network
+Coverage measures branches in `src/` and requires 98%. `uv audit` needs network
 access. Your pull request must pass this gate completely.
 
 ## Adding an endpoint
@@ -57,10 +58,9 @@ heading.
 
 ## Commit style
 
-One humanized subject line, no body. Write it as a sentence describing the
-change, for example: `Add the EPEX day-ahead endpoint`. Do not use
-conventional-commit prefixes or mention the plan or issue number in the
-subject.
+One conventional-commit subject line, no body. Write the description as a
+humanized sentence, for example: `chore: add the EPEX day-ahead endpoint`. Do
+not mention the plan or issue number in the subject.
 
 ## Deprecation policy
 
