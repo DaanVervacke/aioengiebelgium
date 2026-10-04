@@ -433,7 +433,7 @@ def parse_epex_prices(data: dict[str, Any], *, granularity_minutes: int = 60) ->
         EpexSlot(
             start=start,
             end=starts[i + 1] if i + 1 < len(starts) else start + observed,
-            value_eur_per_kwh=value / EPEX_MWH_TO_KWH,
+            value_eur_per_kwh=round(value / EPEX_MWH_TO_KWH, 6),
         )
         for i, (start, value) in enumerate(raw_slots)
     ]

@@ -345,7 +345,7 @@
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 3, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
         start=datetime.datetime(2026, 5, 4, 2, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        value_eur_per_kwh=0.10776999999999999,
+        value_eur_per_kwh=0.10777,
       ),
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 4, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
@@ -375,12 +375,12 @@
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 9, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
         start=datetime.datetime(2026, 5, 4, 8, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        value_eur_per_kwh=0.11553000000000001,
+        value_eur_per_kwh=0.11553,
       ),
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 10, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
         start=datetime.datetime(2026, 5, 4, 9, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        value_eur_per_kwh=0.09509999999999999,
+        value_eur_per_kwh=0.0951,
       ),
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 11, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
@@ -390,12 +390,12 @@
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 12, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
         start=datetime.datetime(2026, 5, 4, 11, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        value_eur_per_kwh=0.040100000000000004,
+        value_eur_per_kwh=0.0401,
       ),
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 13, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
         start=datetime.datetime(2026, 5, 4, 12, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
-        value_eur_per_kwh=0.020399999999999998,
+        value_eur_per_kwh=0.0204,
       ),
       EpexSlot(
         end=datetime.datetime(2026, 5, 4, 14, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),

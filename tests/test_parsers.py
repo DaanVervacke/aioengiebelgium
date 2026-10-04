@@ -199,6 +199,18 @@ def test_parse_epex_prices_48h(load_fixture: LoadFixture) -> None:
     assert starts == sorted(starts)
 
 
+def test_parse_epex_prices_rounds_eur_per_kwh() -> None:
+    data = {
+        "timeSeries": [
+            {"period": "2026-05-04T01:00:00+02:00", "value": 164.87},
+            {"period": "2026-05-04T02:00:00+02:00", "value": 62.0},
+        ]
+    }
+    result = parse_epex_prices(data)
+    assert result.slots[0].value_eur_per_kwh == 0.16487
+    assert result.slots[1].value_eur_per_kwh == 0.062
+
+
 def test_parse_epex_prices_empty_time_series() -> None:
     result = parse_epex_prices({"timeSeries": []})
     assert result.slots == ()
