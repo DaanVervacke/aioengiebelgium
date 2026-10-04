@@ -1294,6 +1294,25 @@ def test_parse_epex_prices_ignores_single_interior_gap() -> None:
     }
     result = parse_epex_prices(data, granularity_minutes=60)
     assert result.slot_duration == timedelta(hours=1)
+    assert result.slots[1].end == datetime.fromisoformat("2026-05-04T02:00:00+02:00")
+    assert result.slots[2].start == datetime.fromisoformat("2026-05-04T03:00:00+02:00")
+
+
+def test_parse_epex_prices_trims_slot_before_skipped_entry() -> None:
+    """The slot before a skipped entry keeps one step instead of stretching over the gap."""
+    data = {
+        "timeSeries": [
+            {"period": "2026-05-04T00:00:00+02:00", "value": 100.0},
+            {"period": "2026-05-04T01:00:00+02:00", "value": 101.0},
+            {"period": None, "value": 102.0},
+            {"period": "2026-05-04T03:00:00+02:00", "value": 103.0},
+        ],
+    }
+    result = parse_epex_prices(data, granularity_minutes=60)
+    assert result.skipped_entries == 1
+    assert len(result.slots) == 3
+    assert result.slots[1].end - result.slots[1].start == timedelta(hours=1)
+    assert result.slots[1].end < result.slots[2].start
 
 
 def test_normalize_vocab_lowercases_and_passes_non_str_through() -> None:

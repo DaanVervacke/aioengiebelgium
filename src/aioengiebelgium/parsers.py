@@ -429,14 +429,18 @@ def parse_epex_prices(data: dict[str, Any], *, granularity_minutes: int = 60) ->
     else:
         observed = requested
 
-    slots_list = [
-        EpexSlot(
-            start=start,
-            end=starts[i + 1] if i + 1 < len(starts) else start + observed,
-            value_eur_per_kwh=round(value / EPEX_MWH_TO_KWH, 6),
+    slots_list = []
+    for i, (start, value) in enumerate(raw_slots):
+        end = start + observed
+        if i + 1 < len(starts):
+            end = min(starts[i + 1], end)
+        slots_list.append(
+            EpexSlot(
+                start=start,
+                end=end,
+                value_eur_per_kwh=round(value / EPEX_MWH_TO_KWH, 6),
+            )
         )
-        for i, (start, value) in enumerate(raw_slots)
-    ]
 
     pub_time = _as_aware_datetime(data.get("publicationTime"))
 
