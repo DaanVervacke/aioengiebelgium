@@ -106,6 +106,9 @@ Models
 .. autoclass:: aioengiebelgium.HappyHourComparison
    :members:
 
+.. autoclass:: aioengiebelgium.HappyHourEligibility
+   :members:
+
 .. autoclass:: aioengiebelgium.HappyHourEvent
    :members:
 
@@ -113,6 +116,9 @@ Models
    :members:
 
 .. autoclass:: aioengiebelgium.HappyHourMonthReport
+   :members:
+
+.. autoclass:: aioengiebelgium.HappyHourServiceStatus
    :members:
 
 .. autoclass:: aioengiebelgium.HappyHourWindow

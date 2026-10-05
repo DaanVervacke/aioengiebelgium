@@ -768,6 +768,24 @@
     value=True,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[happy_hour_eligibility_eligible]
+  HappyHourEligibility(
+    eligible=True,
+    reasons=tuple(
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[happy_hour_eligibility_not_eligible]
+  HappyHourEligibility(
+    eligible=False,
+    reasons=tuple(
+      'OTHER',
+      'WRONG_CONTRACT_TYPE',
+    ),
+    skipped_entries=0,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_event]
   HappyHourEvent(
     skipped_entries=0,
@@ -1268,6 +1286,18 @@
     ),
     skipped_entries=0,
     year_month='2026-08',
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[happy_hour_service_active]
+  HappyHourServiceStatus(
+    status='ACTIVE',
+    status_date=datetime.datetime(2024, 5, 1, 9, 15, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[happy_hour_service_not_activated]
+  HappyHourServiceStatus(
+    status='NOT_ACTIVATED',
+    status_date=None,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[meter_reads_date_range]

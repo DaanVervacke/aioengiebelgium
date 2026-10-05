@@ -1047,3 +1047,20 @@ class BudgetBillingPlanDetails:
     has_meter_replacement: bool = False
     contract_periods: tuple[BudgetBillingPlanContractPeriod, ...] = ()
     skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class HappyHourEligibility:
+    """Response from the happy-hour-eligibility endpoint."""
+
+    eligible: bool | None = None
+    reasons: tuple[str, ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class HappyHourServiceStatus:
+    """Response from the happy-hour-service endpoint."""
+
+    status: str | None = None
+    status_date: datetime | None = None

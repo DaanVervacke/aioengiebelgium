@@ -40,8 +40,10 @@ from .models import (
     EnergyContractsResponse,
     EpexPayload,
     FeatureFlag,
+    HappyHourEligibility,
     HappyHourEvent,
     HappyHourMonthReport,
+    HappyHourServiceStatus,
     MeterReadsResponse,
     MonthlyBilledBudget,
     MonthlyPeaks,
@@ -60,8 +62,10 @@ from .parsers import (
     parse_energy_contracts,
     parse_epex_prices,
     parse_feature_flag,
+    parse_happy_hour_eligibility,
     parse_happy_hour_event,
     parse_happy_hour_month_report,
+    parse_happy_hour_service_status,
     parse_meter_reads,
     parse_monthly_billed_budget,
     parse_monthly_peaks,
@@ -476,6 +480,22 @@ BUDGET_BILLING_PLAN: Endpoint[BanArgs, BudgetBillingPlanDetails] = Endpoint(
     parse=lambda raw, _a: parse_budget_billing_plan_details(raw),
 )
 
+HAPPY_HOUR_ELIGIBILITY: Endpoint[BanArgs, HappyHourEligibility] = Endpoint(
+    name="happy_hour_eligibility",
+    method="GET",
+    url=lambda a: (
+        f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{a.ban}/happy-hour-eligibility"
+    ),
+    parse=lambda raw, _a: parse_happy_hour_eligibility(raw),
+)
+
+HAPPY_HOUR_SERVICE_STATUS: Endpoint[BanArgs, HappyHourServiceStatus] = Endpoint(
+    name="happy_hour_service_status",
+    method="GET",
+    url=lambda a: f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{a.ban}/happy-hour-service",
+    parse=lambda raw, _a: parse_happy_hour_service_status(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -505,6 +525,8 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     MONTHLY_BILLED_BUDGET,
     BILLING_PERIOD_USAGE,
     BUDGET_BILLING_PLAN,
+    HAPPY_HOUR_ELIGIBILITY,
+    HAPPY_HOUR_SERVICE_STATUS,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

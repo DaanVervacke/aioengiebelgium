@@ -37,9 +37,11 @@ from .models import (
     FinancialTransaction,
     GasUsage,
     HappyHourComparison,
+    HappyHourEligibility,
     HappyHourEvent,
     HappyHourMonthData,
     HappyHourMonthReport,
+    HappyHourServiceStatus,
     HappyHourWindow,
     MeasuredDataWindow,
     MeteringConfiguration,
@@ -110,6 +112,10 @@ def _as_float_or_none(value: Any) -> float | None:
 
 def _as_int_or_none(value: Any) -> int | None:
     return _as_int(value) if value is not None else None
+
+
+def _as_bool_or_none(value: Any) -> bool | None:
+    return value if isinstance(value, bool) else None
 
 
 def _as_str_or_none(value: Any) -> str | None:
@@ -1325,4 +1331,25 @@ def parse_budget_billing_plan_details(data: dict[str, Any]) -> BudgetBillingPlan
         has_meter_replacement=bool(data.get("hasMeterReplacement")),
         contract_periods=tuple(period for period, _skipped in periods),
         skipped_entries=plan_skipped + proposal_skipped + periods_skipped + nested_skipped,
+    )
+
+
+def parse_happy_hour_eligibility(data: dict[str, Any]) -> HappyHourEligibility:
+    raw_reasons = data.get("reasons")
+    candidates = raw_reasons if isinstance(raw_reasons, list) else []
+    reasons = tuple(reason for reason in candidates if isinstance(reason, str) and reason)
+    skipped = len(candidates) - len(reasons)
+    if skipped:
+        _LOGGER.debug("skipped %d malformed happy hour eligibility reason entries", skipped)
+    return HappyHourEligibility(
+        eligible=_as_bool_or_none(data.get("eligible")),
+        reasons=reasons,
+        skipped_entries=skipped,
+    )
+
+
+def parse_happy_hour_service_status(data: dict[str, Any]) -> HappyHourServiceStatus:
+    return HappyHourServiceStatus(
+        status=_as_str_or_none(data.get("status")),
+        status_date=_as_aware_datetime(data.get("statusDate")),
     )

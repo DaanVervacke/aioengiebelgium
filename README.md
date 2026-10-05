@@ -164,6 +164,8 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_monthly_billed_budget(business_agreement_number)` | `MonthlyBilledBudget` | Costs so far, expected costs and the monthly payment status of the current billed budget period. ENGIE answers HTTP 500 for a contract without a monthly billed budget. |
 | `async_get_billing_period_usage(business_agreement_number)` | `BillingPeriodUsage` | Cost used so far in the current billing period, the expected yearly invoice and their ratio. When ENGIE cannot compute the cost, only `used_amount_failure_reason` is set (for example `MISSING_DATA`). |
 | `async_get_budget_billing_plan_details(business_agreement_number)` | `BudgetBillingPlanDetails` | The budget billing plan of the current billing period: amounts, payment slices, the amounts it can be set to, ENGIE's proposed new amount and the same details per energy contract. A business agreement without an adjustable plan returns only the flags. |
+| `async_get_happy_hour_eligibility(business_agreement_number)` | `HappyHourEligibility` | Whether the business agreement can activate the happy hour service, with ENGIE's reason codes when it cannot. |
+| `async_get_happy_hour_service_status(business_agreement_number)` | `HappyHourServiceStatus` | The happy hour service status (for example `ACTIVE` or `NOT_ACTIVATED`) and when it last changed. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
 
 ### Exceptions

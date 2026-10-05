@@ -14,6 +14,8 @@ from aioengiebelgium.models import (
     BillingPeriodUsage,
     EnergyCostPair,
     GasUsage,
+    HappyHourEligibility,
+    HappyHourServiceStatus,
     SimulatedCost,
     SimulatedCostFlow,
     SimulatedEnergy,
@@ -32,8 +34,10 @@ from aioengiebelgium.parsers import (
     parse_energy_contracts,
     parse_epex_prices,
     parse_feature_flag,
+    parse_happy_hour_eligibility,
     parse_happy_hour_event,
     parse_happy_hour_month_report,
+    parse_happy_hour_service_status,
     parse_meter_reads,
     parse_monthly_billed_budget,
     parse_monthly_peaks,
@@ -1860,6 +1864,16 @@ _NULLED_PAYLOADS = [
         },
         id="budget_billing_plan",
     ),
+    pytest.param(
+        parse_happy_hour_eligibility,
+        {"eligible": None, "reasons": None},
+        id="happy_hour_eligibility",
+    ),
+    pytest.param(
+        parse_happy_hour_service_status,
+        {"status": None, "statusDate": None},
+        id="happy_hour_service_status",
+    ),
 ]
 
 
@@ -2216,6 +2230,18 @@ _MALFORMED_CASES = [
         ),
         id="budget_billing_plan",
     ),
+    pytest.param(
+        parse_happy_hour_eligibility,
+        {"eligible": "true", "reasons": ["OTHER", 4, None, ""]},
+        lambda r: r.eligible is None and r.reasons == ("OTHER",) and r.skipped_entries == 3,
+        id="happy_hour_eligibility",
+    ),
+    pytest.param(
+        parse_happy_hour_service_status,
+        {"status": 5, "statusDate": "2024-05-01T09:15:00"},
+        lambda r: r.status is None and r.status_date is None,
+        id="happy_hour_service_status",
+    ),
 ]
 
 
@@ -2517,6 +2543,11 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
             "budget_billing_plan_monthly.json",
             id="budget_billing_plan",
         ),
+        pytest.param(
+            parse_happy_hour_eligibility,
+            "happy_hour_eligibility_not_eligible.json",
+            id="happy_hour_eligibility",
+        ),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -2688,3 +2719,20 @@ def test_parse_budget_billing_plan_flags_only_fixture(load_fixture: LoadFixture)
     assert result.plan_updatable is False
     assert result.contract_periods == ()
     assert result.skipped_entries == 0
+
+
+def test_parse_happy_hour_eligibility_fixtures(load_fixture: LoadFixture) -> None:
+    eligible = parse_happy_hour_eligibility(load_fixture("happy_hour_eligibility_eligible.json"))
+    assert eligible == HappyHourEligibility(eligible=True)
+    blocked = parse_happy_hour_eligibility(load_fixture("happy_hour_eligibility_not_eligible.json"))
+    assert blocked.eligible is False
+    assert blocked.reasons == ("OTHER", "WRONG_CONTRACT_TYPE")
+
+
+def test_parse_happy_hour_service_status_fixtures(load_fixture: LoadFixture) -> None:
+    active = parse_happy_hour_service_status(load_fixture("happy_hour_service_active.json"))
+    assert active.status == "ACTIVE"
+    assert active.status_date is not None
+    assert active.status_date.utcoffset() == timedelta(hours=2)
+    never = parse_happy_hour_service_status(load_fixture("happy_hour_service_not_activated.json"))
+    assert never == HappyHourServiceStatus(status="NOT_ACTIVATED")

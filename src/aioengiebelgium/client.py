@@ -17,8 +17,10 @@ from ._endpoints import (
     ENERGY_CONTRACTS,
     EPEX_PRICES,
     FEATURE_FLAG,
+    HAPPY_HOUR_ELIGIBILITY,
     HAPPY_HOUR_EVENT,
     HAPPY_HOUR_MONTH_REPORT,
+    HAPPY_HOUR_SERVICE_STATUS,
     METER_READS,
     MONTHLY_BILLED_BUDGET,
     MONTHLY_PEAKS,
@@ -64,8 +66,10 @@ from .models import (
     EnergyContractsResponse,
     EpexPayload,
     FeatureFlag,
+    HappyHourEligibility,
     HappyHourEvent,
     HappyHourMonthReport,
+    HappyHourServiceStatus,
     MeterReadsResponse,
     MonthlyBilledBudget,
     MonthlyPeaks,
@@ -323,6 +327,20 @@ class EngieBeClient:
     ) -> BudgetBillingPlanDetails:
         """Fetch the budget billing plan of the billing period with its limits and proposal."""
         return await self._call(BUDGET_BILLING_PLAN, BanArgs(ban=business_agreement_number))
+
+    async def async_get_happy_hour_eligibility(
+        self,
+        business_agreement_number: str,
+    ) -> HappyHourEligibility:
+        """Fetch whether the business agreement can activate the happy hour service."""
+        return await self._call(HAPPY_HOUR_ELIGIBILITY, BanArgs(ban=business_agreement_number))
+
+    async def async_get_happy_hour_service_status(
+        self,
+        business_agreement_number: str,
+    ) -> HappyHourServiceStatus:
+        """Fetch the status of the happy hour service."""
+        return await self._call(HAPPY_HOUR_SERVICE_STATUS, BanArgs(ban=business_agreement_number))
 
     async def async_get_epex_prices(
         self,

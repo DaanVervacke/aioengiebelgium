@@ -1,0 +1,7 @@
+{
+  "eligible": false,
+  "reasons": [
+    "OTHER",
+    "WRONG_CONTRACT_TYPE"
+  ]
+}

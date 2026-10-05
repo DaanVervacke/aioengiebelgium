@@ -644,6 +644,46 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "happy_hour_eligibility": (
+        _WireCase(
+            id="happy_hour_eligibility_eligible",
+            fixture_name="happy_hour_eligibility_eligible.json",
+            call=lambda c: c.async_get_happy_hour_eligibility(_BAN),
+            request_method="GET",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-eligibility",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="happy_hour_eligibility_not_eligible",
+            fixture_name="happy_hour_eligibility_not_eligible.json",
+            call=lambda c: c.async_get_happy_hour_eligibility(_BAN),
+            request_method="GET",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-eligibility",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "happy_hour_service_status": (
+        _WireCase(
+            id="happy_hour_service_active",
+            fixture_name="happy_hour_service_active.json",
+            call=lambda c: c.async_get_happy_hour_service_status(_BAN),
+            request_method="GET",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-service",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="happy_hour_service_not_activated",
+            fixture_name="happy_hour_service_not_activated.json",
+            call=lambda c: c.async_get_happy_hour_service_status(_BAN),
+            request_method="GET",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-service",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
