@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Before 1.0, breaking changes ship as minor bumps.
 
+## [0.5.0] - 2026-10-05
+
+### Features
+
+- Add service points and meter reads getters
+- Add gas costs, electricity netto and yearly granularity to usage details
+- Add replaced peak and day filter to monthly peaks
+- Add combined schedule to time-of-use schedules
+- Add green level and gas month report fields
+- Add monthly billed budget getter
+- Add billing period usage getter
+- Add budget billing plan details getter
+- Add happy hour eligibility and service status getters
+- Add happy hour service activation and cancellation
+- Add energy score getter
+
+### Maintenance
+
+- Refresh the changelog version links
+- Align the changelog tooling with the library family
+- Bump the feature flag app version to 5.0.0.1168
+
 ## [0.4.5] - 2026-10-04
 
 ### Bug Fixes
@@ -163,7 +185,8 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Initial release.
 
-[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.5...HEAD
+[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.5...v0.5.0
 [0.4.5]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.2...v0.4.3
