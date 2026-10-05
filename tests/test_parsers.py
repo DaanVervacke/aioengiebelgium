@@ -32,6 +32,7 @@ from aioengiebelgium.parsers import (
     parse_happy_hour_event,
     parse_happy_hour_month_report,
     parse_meter_reads,
+    parse_monthly_billed_budget,
     parse_monthly_peaks,
     parse_prices,
     parse_service_point,
@@ -1796,6 +1797,22 @@ _NULLED_PAYLOADS = [
         },
         id="meter_reads",
     ),
+    pytest.param(
+        parse_monthly_billed_budget,
+        {
+            "from": None,
+            "to": None,
+            "alreadyUsedAmount": None,
+            "alreadyUsedAmountRatio": None,
+            "alreadyPaidAmount": None,
+            "expectedCostAmount": None,
+            "expectedMonthCostAmount": None,
+            "currentMonthCostAmount": None,
+            "lastInvoicedAmount": None,
+            "payments": [{"date": "2024-01-01", "status": None}, {"date": None}],
+        },
+        id="monthly_billed_budget",
+    ),
 ]
 
 
@@ -2090,6 +2107,22 @@ _MALFORMED_CASES = [
         ),
         id="meter_reads",
     ),
+    pytest.param(
+        parse_monthly_billed_budget,
+        {
+            "from": "not-a-date",
+            "alreadyUsedAmount": "bad",
+            "payments": [9, {"date": "bad"}, {"status": "PAID"}, {"date": "2024-02-01"}],
+        },
+        lambda r: (
+            r.start_date is None
+            and r.already_used_amount == 0.0
+            and len(r.payments) == 1
+            and r.payments[0].status is None
+            and r.skipped_entries == 3
+        ),
+        id="monthly_billed_budget",
+    ),
 ]
 
 
@@ -2381,6 +2414,11 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
         pytest.param(parse_epex_prices, "epex_24h.json", id="epex_prices"),
         pytest.param(parse_service_points, "service_points_dual_fuel.json", id="service_points"),
         pytest.param(parse_meter_reads, "meter_reads_history.json", id="meter_reads"),
+        pytest.param(
+            parse_monthly_billed_budget,
+            "monthly_billed_budget.json",
+            id="monthly_billed_budget",
+        ),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -2481,3 +2519,22 @@ def test_parse_meter_reads_latest_fixture_keeps_index_ranges(load_fixture: LoadF
     assert all(register.minimum_index_read_range is not None for register in registers)
     assert all(register.maximum_index_read_range is not None for register in registers)
     assert {register.unit for register in registers} <= {"KWH", "M_3"}
+
+
+def test_parse_monthly_billed_budget_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_monthly_billed_budget(load_fixture("monthly_billed_budget.json"))
+    assert (result.start_date, result.end_date) == (date(2024, 1, 1), date(2024, 12, 31))
+    assert len(result.payments) == 12
+    assert {payment.status for payment in result.payments} == {"PAID", "INVOICED", "NOT_INVOICED"}
+    assert result.already_used_amount is not None
+    assert result.expected_cost_amount is not None
+    assert result.already_used_amount_ratio == pytest.approx(
+        result.already_used_amount / result.expected_cost_amount, abs=0.005
+    )
+
+
+def test_parse_monthly_billed_budget_empty_payload() -> None:
+    result = parse_monthly_billed_budget({})
+    assert result.payments == ()
+    assert result.expected_cost_amount is None
+    assert result.skipped_entries == 0

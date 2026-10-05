@@ -915,3 +915,28 @@ class MeterReadsResponse:
 
     items: tuple[MeterRead, ...] = ()
     skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class PaymentSlice:
+    """One monthly payment of a budget and its billing status."""
+
+    payment_date: date
+    status: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MonthlyBilledBudget:
+    """Response from the monthly-billed-budgets endpoint."""
+
+    start_date: date | None = None
+    end_date: date | None = None
+    already_used_amount: float | None = None
+    already_used_amount_ratio: float | None = None
+    already_paid_amount: float | None = None
+    expected_cost_amount: float | None = None
+    expected_month_cost_amount: float | None = None
+    current_month_cost_amount: float | None = None
+    last_invoiced_amount: float | None = None
+    payments: tuple[PaymentSlice, ...] = ()
+    skipped_entries: int = 0

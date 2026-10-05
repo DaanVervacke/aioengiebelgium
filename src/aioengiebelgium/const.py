@@ -11,6 +11,7 @@ BOOLEAN_FEATURE_FLAG_BASE_URL = (
     "https://api.engie.be/engie/ms/feature-flags/customer/v1/boolean-feature-flags/_query"
 )
 BILLING_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v1"
+BILLING_V2_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v2"
 BUSINESS_AGREEMENTS_BASE_URL = "https://api.engie.be/engie/ms/business-agreements/customer/v1"
 EPEX_BASE_URL = "https://api.engie.be/engie/ms/pricing/v1/public/prices/epex"
 

@@ -1,0 +1,76 @@
+info:
+  name: Monthly billed budget
+  type: http
+  seq: 2
+  tags:
+  - data
+  - live
+http:
+  method: GET
+  url: '{{billingV2BaseUrl}}/business-agreements/{{ENGIE_BAN}}/monthly-billed-budgets'
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  auth: inherit
+runtime:
+  scripts:
+  - type: tests
+    code: |-
+      test("responds 200, or 500 without a monthly billed budget", function () {
+        expect([200, 500]).to.include(res.getStatus());
+      });
+
+      test("path variables all resolved", function () {
+        const raw = req.getUrl();
+        const path = raw.replace(/^https?:\/\//, '');
+        let problem = 'none';
+        if (path.indexOf('//') !== -1) { problem = 'empty path segment'; }
+        else if (raw.indexOf('{{') !== -1 || raw.indexOf('%7B%7B') !== -1) {
+          problem = 'unresolved variable';
+        }
+        expect(problem).to.equal('none');
+      });
+
+      test("returns payments", function () {
+        if (res.getStatus() !== 200) { return; }
+        const value = res.getBody().payments;
+        expect(Array.isArray(value) ? 'array' : typeof value).to.equal('array');
+      });
+
+      test("payments carry a date and a status", function () {
+        if (res.getStatus() !== 200) { return; }
+        const rows = res.getBody().payments || [];
+        const malformed = rows.filter(function (p) { return !(p.date && p.status); });
+        expect(malformed.length).to.equal(0);
+      });
+
+      test("amounts are numbers", function () {
+        if (res.getStatus() !== 200) { return; }
+        const body = res.getBody();
+        const keys = ['alreadyUsedAmount', 'alreadyPaidAmount', 'expectedCostAmount'];
+        const malformed = keys.filter(function (k) { return typeof body[k] !== 'number'; });
+        expect(malformed.length).to.equal(0);
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  Costs and monthly payments of the current billed budget period.
+
+  Mirrors EngieBeClient::async_get_monthly_billed_budget.
+
+  from and to bound the period. alreadyUsedAmount, expectedCostAmount,
+  alreadyPaidAmount, lastInvoicedAmount, currentMonthCostAmount and
+  expectedMonthCostAmount are EUR. alreadyUsedAmountRatio is
+  alreadyUsedAmount divided by expectedCostAmount. Payment statuses seen:
+  PAID, INVOICED and NOT_INVOICED.
+
+  ENGIE answers HTTP 500 for a business agreement without a monthly
+  billed budget, so the status test accepts 500 and the shape tests run
+  only on 200.
+
+  Parsed by parsers.py into MonthlyBilledBudget in models.py.

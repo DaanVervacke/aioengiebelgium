@@ -42,6 +42,9 @@ variables:
   - name: billingBaseUrl
     value: https://api.engie.be/engie/ms/billing/customer/v1
     description: ""
+  - name: billingV2BaseUrl
+    value: https://api.engie.be/engie/ms/billing/customer/v2
+    description: ""
   - name: businessAgreementsBaseUrl
     value: https://api.engie.be/engie/ms/business-agreements/customer/v1
     description: ""

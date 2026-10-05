@@ -18,6 +18,7 @@ from ._endpoints import (
     HAPPY_HOUR_EVENT,
     HAPPY_HOUR_MONTH_REPORT,
     METER_READS,
+    MONTHLY_BILLED_BUDGET,
     MONTHLY_PEAKS,
     PRICES,
     SERVICE_POINT,
@@ -62,6 +63,7 @@ from .models import (
     HappyHourEvent,
     HappyHourMonthReport,
     MeterReadsResponse,
+    MonthlyBilledBudget,
     MonthlyPeaks,
     PricesResponse,
     ServicePoint,
@@ -296,6 +298,13 @@ class EngieBeClient:
             end_date=end_date,
         )
         return await self._call(METER_READS, args)
+
+    async def async_get_monthly_billed_budget(
+        self,
+        business_agreement_number: str,
+    ) -> MonthlyBilledBudget:
+        """Fetch the costs and monthly payments of the current billed budget period."""
+        return await self._call(MONTHLY_BILLED_BUDGET, BanArgs(ban=business_agreement_number))
 
     async def async_get_epex_prices(
         self,

@@ -11,6 +11,7 @@ from typing import Any, NoReturn
 from .const import (
     ACCOUNTS_BASE_URL,
     BILLING_BASE_URL,
+    BILLING_V2_BASE_URL,
     BOOLEAN_FEATURE_FLAG_BASE_URL,
     BUSINESS_AGREEMENTS_BASE_URL,
     ENERGY_INSIGHTS_V2_BASE_URL,
@@ -40,6 +41,7 @@ from .models import (
     HappyHourEvent,
     HappyHourMonthReport,
     MeterReadsResponse,
+    MonthlyBilledBudget,
     MonthlyPeaks,
     PricesResponse,
     ServicePoint,
@@ -57,6 +59,7 @@ from .parsers import (
     parse_happy_hour_event,
     parse_happy_hour_month_report,
     parse_meter_reads,
+    parse_monthly_billed_budget,
     parse_monthly_peaks,
     parse_prices,
     parse_service_point,
@@ -448,6 +451,13 @@ METER_READS: Endpoint[MeterReadsArgs, MeterReadsResponse] = Endpoint(
     parse=lambda raw, _a: parse_meter_reads(raw),
 )
 
+MONTHLY_BILLED_BUDGET: Endpoint[BanArgs, MonthlyBilledBudget] = Endpoint(
+    name="monthly_billed_budget",
+    method="GET",
+    url=lambda a: f"{BILLING_V2_BASE_URL}/business-agreements/{a.ban}/monthly-billed-budgets",
+    parse=lambda raw, _a: parse_monthly_billed_budget(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -474,6 +484,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     ACCOUNT_BALANCE,
     SERVICE_POINTS,
     METER_READS,
+    MONTHLY_BILLED_BUDGET,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

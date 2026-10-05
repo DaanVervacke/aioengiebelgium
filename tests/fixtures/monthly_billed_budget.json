@@ -1,0 +1,61 @@
+{
+  "alreadyPaidAmount": 1200.0,
+  "alreadyUsedAmount": 1260.0,
+  "alreadyUsedAmountRatio": 0.7,
+  "currentMonthCostAmount": 12.4,
+  "expectedCostAmount": 1800.0,
+  "expectedMonthCostAmount": 150.0,
+  "from": "2024-01-01",
+  "lastInvoicedAmount": 145.3,
+  "payments": [
+    {
+      "date": "2024-01-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-02-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-03-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-04-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-05-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-06-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-07-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-08-01",
+      "status": "PAID"
+    },
+    {
+      "date": "2024-09-01",
+      "status": "INVOICED"
+    },
+    {
+      "date": "2024-10-01",
+      "status": "NOT_INVOICED"
+    },
+    {
+      "date": "2024-11-01",
+      "status": "NOT_INVOICED"
+    },
+    {
+      "date": "2024-12-01",
+      "status": "NOT_INVOICED"
+    }
+  ],
+  "to": "2024-12-31"
+}

@@ -42,8 +42,10 @@ from .models import (
     MeterRead,
     MeterReadsResponse,
     MeterRegisterRead,
+    MonthlyBilledBudget,
     MonthlyPeaks,
     MonthReportHistoryEntry,
+    PaymentSlice,
     Peak,
     PricePeriod,
     PriceSlot,
@@ -1153,3 +1155,29 @@ def _parse_meter_read(item: dict[str, Any]) -> MeterRead | None:
 def parse_meter_reads(data: dict[str, Any]) -> MeterReadsResponse:
     items, skipped = _parse_items_counted(data.get("items"), _parse_meter_read, "meter read")
     return MeterReadsResponse(items=tuple(items), skipped_entries=skipped)
+
+
+def _parse_payment_slice(raw: dict[str, Any]) -> PaymentSlice | None:
+    payment_date = _as_date(raw.get("date"))
+    if payment_date is None:
+        return None
+    return PaymentSlice(payment_date=payment_date, status=_as_str_or_none(raw.get("status")))
+
+
+def parse_monthly_billed_budget(data: dict[str, Any]) -> MonthlyBilledBudget:
+    payments, skipped = _parse_items_counted(
+        data.get("payments"), _parse_payment_slice, "budget payment"
+    )
+    return MonthlyBilledBudget(
+        start_date=_as_date(data.get("from")),
+        end_date=_as_date(data.get("to")),
+        already_used_amount=_as_float_or_none(data.get("alreadyUsedAmount")),
+        already_used_amount_ratio=_as_float_or_none(data.get("alreadyUsedAmountRatio")),
+        already_paid_amount=_as_float_or_none(data.get("alreadyPaidAmount")),
+        expected_cost_amount=_as_float_or_none(data.get("expectedCostAmount")),
+        expected_month_cost_amount=_as_float_or_none(data.get("expectedMonthCostAmount")),
+        current_month_cost_amount=_as_float_or_none(data.get("currentMonthCostAmount")),
+        last_invoiced_amount=_as_float_or_none(data.get("lastInvoicedAmount")),
+        payments=tuple(payments),
+        skipped_entries=skipped,
+    )

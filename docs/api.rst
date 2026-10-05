@@ -124,7 +124,13 @@ Models
 .. autoclass:: aioengiebelgium.MonthReportHistoryEntry
    :members:
 
+.. autoclass:: aioengiebelgium.MonthlyBilledBudget
+   :members:
+
 .. autoclass:: aioengiebelgium.MonthlyPeaks
+   :members:
+
+.. autoclass:: aioengiebelgium.PaymentSlice
    :members:
 
 .. autoclass:: aioengiebelgium.Peak
