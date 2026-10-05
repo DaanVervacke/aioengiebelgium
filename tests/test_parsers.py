@@ -27,6 +27,7 @@ from aioengiebelgium.parsers import (
     _parse_tou_grid_meter,
     parse_account_balance,
     parse_billing_period_usage,
+    parse_budget_billing_plan_details,
     parse_customer_account_relations,
     parse_energy_contracts,
     parse_epex_prices,
@@ -1827,6 +1828,38 @@ _NULLED_PAYLOADS = [
         },
         id="billing_period_usage",
     ),
+    pytest.param(
+        parse_budget_billing_plan_details,
+        {
+            "businessAgreementId": None,
+            "startDate": None,
+            "hasCHM": None,
+            "budgetBillingPlanUpdatable": None,
+            "budgetBillingPlan": {
+                "currentAmount": None,
+                "remainingSlices": None,
+                "nextPartialInvoiceDate": None,
+                "paymentSlices": None,
+            },
+            "bbpUpdateLimits": {"lowerLimit": None, "upperLimit": None},
+            "bbpProposal": {
+                "changeType": None,
+                "proposedAmount": None,
+                "significant": None,
+                "evaluationContext": [{"event": None, "weight": None, "changeType": None}],
+            },
+            "periodDetailsPerContract": [
+                {
+                    "contractId": None,
+                    "division": None,
+                    "budgetBillingPlan": None,
+                    "bbpProposal": None,
+                    "isContractForCHM": None,
+                },
+            ],
+        },
+        id="budget_billing_plan",
+    ),
 ]
 
 
@@ -2153,6 +2186,36 @@ _MALFORMED_CASES = [
         ),
         id="billing_period_usage",
     ),
+    pytest.param(
+        parse_budget_billing_plan_details,
+        {
+            "budgetBillingPlan": {
+                "remainingSlices": "bad",
+                "paymentSlices": [1, {"date": "bad"}, {"date": "2024-01-01", "status": "PAID"}],
+            },
+            "bbpUpdateLimits": "bad",
+            "bbpProposal": {"evaluationContext": [2, {"event": "INDEX", "weight": "bad"}]},
+            "periodDetailsPerContract": [
+                3,
+                {"budgetBillingPlan": {"slices": [{"status": "PAID"}]}, "bbpProposal": "bad"},
+            ],
+        },
+        lambda r: (
+            r.plan is not None
+            and r.plan.remaining_slices == 0
+            and len(r.plan.payment_slices) == 1
+            and r.update_limits is None
+            and r.proposal is not None
+            and len(r.proposal.evaluation_context) == 1
+            and r.proposal.evaluation_context[0].weight == 0.0
+            and len(r.contract_periods) == 1
+            and r.contract_periods[0].proposal is None
+            and r.contract_periods[0].plan is not None
+            and r.contract_periods[0].plan.payment_slices == ()
+            and r.skipped_entries == 5
+        ),
+        id="budget_billing_plan",
+    ),
 ]
 
 
@@ -2449,6 +2512,11 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
             "monthly_billed_budget.json",
             id="monthly_billed_budget",
         ),
+        pytest.param(
+            parse_budget_billing_plan_details,
+            "budget_billing_plan_monthly.json",
+            id="budget_billing_plan",
+        ),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -2584,3 +2652,39 @@ def test_parse_billing_period_usage_fixture(load_fixture: LoadFixture) -> None:
 def test_parse_billing_period_usage_failure_reason_only(load_fixture: LoadFixture) -> None:
     result = parse_billing_period_usage(load_fixture("billing_period_usage_missing_data.json"))
     assert result == BillingPeriodUsage(used_amount_failure_reason="MISSING_DATA")
+
+
+def test_parse_budget_billing_plan_monthly_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_budget_billing_plan_details(load_fixture("budget_billing_plan_monthly.json"))
+    assert result.plan is not None
+    assert result.plan.billing_cycle == "MONTHLY"
+    assert {s.status for s in result.plan.payment_slices} == {"PAID", "NOT_INVOICED"}
+    paid = [s for s in result.plan.payment_slices if s.status == "PAID"]
+    assert result.plan.current_amount is not None
+    assert result.plan.amount_paid == pytest.approx(len(paid) * result.plan.current_amount)
+    assert result.proposal is not None
+    assert [f.event for f in result.proposal.evaluation_context] == ["CONTRACT", "INDEX"]
+    assert result.proposal.evaluation_context[0].weight == 0.0
+    (period,) = result.contract_periods
+    assert period.division == "ELECTRICITY"
+    assert period.plan is not None
+    assert len(period.plan.payment_slices) == len(result.plan.payment_slices)
+
+
+def test_parse_budget_billing_plan_null_payment_slices_fall_back_to_slices() -> None:
+    """A null paymentSlices key falls back to the per-contract slices key."""
+    result = parse_budget_billing_plan_details(
+        {"budgetBillingPlan": {"paymentSlices": None, "slices": [{"date": "2024-01-11"}]}}
+    )
+    assert result.plan is not None
+    assert [s.payment_date for s in result.plan.payment_slices] == [date(2024, 1, 11)]
+
+
+def test_parse_budget_billing_plan_flags_only_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_budget_billing_plan_details(load_fixture("budget_billing_plan_flags_only.json"))
+    assert result.plan is None
+    assert result.proposal is None
+    assert result.update_limits is None
+    assert result.plan_updatable is False
+    assert result.contract_periods == ()
+    assert result.skipped_entries == 0

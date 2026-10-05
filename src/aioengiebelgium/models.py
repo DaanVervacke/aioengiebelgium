@@ -952,3 +952,98 @@ class BillingPeriodUsage:
     used_amount: float | None = None
     used_amount_ratio: float | None = None
     used_amount_failure_reason: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetBillingPlanProposalFactor:
+    """One event weighed in a budget billing plan proposal."""
+
+    event: str | None = None
+    weight: float | None = None
+    change_type: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetBillingPlanProposal:
+    """A proposed new budget billing plan amount."""
+
+    change_type: str | None = None
+    simulation_date: date | None = None
+    proposed_amount: float | None = None
+    significant: bool = False
+    outlier: bool = False
+    evaluation_context: tuple[BudgetBillingPlanProposalFactor, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetBillingPlanLimits:
+    """The lowest and highest amounts a budget billing plan can be set to."""
+
+    lower_limit: float | None = None
+    upper_limit: float | None = None
+    exceptional_limit: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetBillingPlan:
+    """A budget billing plan with its amounts and payment slices."""
+
+    current_amount: float | None = None
+    monthly_amount: float | None = None
+    billing_cycle: str | None = None
+    remaining_slices: int | None = None
+    amount_paid: float | None = None
+    billing_cycle_total: float | None = None
+    next_partial_invoice_date: date | None = None
+    payment_slices: tuple[PaymentSlice, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetBillingPlanContractPeriod:
+    """Budget billing plan details of one energy contract in the billing period."""
+
+    contract_id: str | None = None
+    energy_contract_configuration_id: str | None = None
+    division: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    is_contract_for_chm: bool = False
+    is_contract_for_bana: bool = False
+    is_contract_for_uncommon_registers: bool = False
+    plan: BudgetBillingPlan | None = None
+    plan_updatable: bool = False
+    plan_updatable_information: str | None = None
+    update_limits: BudgetBillingPlanLimits | None = None
+    proposal: BudgetBillingPlanProposal | None = None
+    proposal_evaluation_status: str | None = None
+    expected_periodic_invoice_amount: float | None = None
+    remaining_amount: float | None = None
+    has_insufficient_history_after_move: bool = False
+    has_meter_replacement: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetBillingPlanDetails:
+    """Response from the billing-period-bbp-details endpoint."""
+
+    business_agreement_id: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    plan: BudgetBillingPlan | None = None
+    plan_updatable: bool = False
+    plan_updatable_information: str | None = None
+    update_limits: BudgetBillingPlanLimits | None = None
+    proposal: BudgetBillingPlanProposal | None = None
+    proposal_evaluation_status: str | None = None
+    expected_periodic_invoice_amount: float | None = None
+    remaining_amount: float | None = None
+    has_different_billing_cycle: bool = False
+    has_different_invoice_frequencies: bool = False
+    has_unaligned_billing_periods: bool = False
+    has_chm: bool = False
+    has_bana: bool = False
+    has_uncommon_registers: bool = False
+    has_insufficient_history_after_move: bool = False
+    has_meter_replacement: bool = False
+    contract_periods: tuple[BudgetBillingPlanContractPeriod, ...] = ()
+    skipped_entries: int = 0

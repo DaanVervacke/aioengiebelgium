@@ -1,0 +1,194 @@
+{
+  "businessAgreementId": "000000000001",
+  "hasDifferentBillingCycle": false,
+  "hasDifferentInvoiceFrequencies": false,
+  "hasUnalignedBillingPeriods": false,
+  "hasCHM": false,
+  "hasBANA": false,
+  "hasUncommonRegisters": false,
+  "budgetBillingPlanUpdatable": true,
+  "bbpProposal": {
+    "changeType": "DECREASE",
+    "simulationDate": "2024-10-05",
+    "proposedAmount": 58.0,
+    "evaluationContext": [
+      {
+        "event": "CONTRACT",
+        "weight": "0E-15",
+        "changeType": "NONE"
+      },
+      {
+        "event": "INDEX",
+        "weight": "0.024318775201453",
+        "changeType": "INCREASE"
+      }
+    ],
+    "outlier": false,
+    "significant": true
+  },
+  "bbpProposalEvaluationStatus": "COMPLETED",
+  "bbpUpdateLimits": {
+    "lowerLimit": 10,
+    "upperLimit": 870,
+    "exceptionalLimit": 10
+  },
+  "budgetBillingPlan": {
+    "currentAmount": 62.0,
+    "billingCycle": "MONTHLY",
+    "remainingSlices": 1,
+    "amountPaid": 620.0,
+    "billingCycleTotal": 682.0,
+    "monthlyAmount": 62.0,
+    "nextPartialInvoiceDate": "2024-10-11",
+    "paymentSlices": [
+      {
+        "date": "2023-12-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-01-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-02-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-03-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-04-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-05-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-06-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-07-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-08-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-09-01",
+        "status": "PAID"
+      },
+      {
+        "date": "2024-10-01",
+        "status": "NOT_INVOICED"
+      }
+    ]
+  },
+  "budgetBillingPlanUpdatableInformation": "ADAPT_BBP_POSSIBLE",
+  "endDate": "2024-11-11",
+  "expectedPeriodicInvoiceAmount": -38.21,
+  "hasInsufficientHistoryAfterMove": false,
+  "hasMeterReplacement": false,
+  "periodDetailsPerContract": [
+    {
+      "contractId": "1000000001",
+      "energyContractConfigurationId": "2000000001",
+      "division": "ELECTRICITY",
+      "startDate": "2023-11-09",
+      "endDate": "2024-11-11",
+      "isContractForCHM": false,
+      "isContractForBANA": false,
+      "isContractForUncommonRegisters": false,
+      "bbpProposal": {
+        "changeType": "DECREASE",
+        "simulationDate": "2024-10-05",
+        "proposedAmount": 58.0,
+        "evaluationContext": [
+          {
+            "event": "CONTRACT",
+            "weight": "0E-15",
+            "changeType": "NONE"
+          },
+          {
+            "event": "INDEX",
+            "weight": "0.024318775201453",
+            "changeType": "INCREASE"
+          }
+        ],
+        "outlier": false,
+        "significant": true
+      },
+      "bbpProposalEvaluationStatus": "COMPLETED",
+      "bbpUpdateLimits": {
+        "lowerLimit": 10,
+        "upperLimit": 870,
+        "exceptionalLimit": 10
+      },
+      "budgetBillingPlan": {
+        "currentAmount": 62.0,
+        "billingCycle": "MONTHLY",
+        "remainingSlices": 1,
+        "slices": [
+          {
+            "date": "2023-12-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-01-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-02-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-03-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-04-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-05-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-06-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-07-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-08-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-09-11",
+            "status": "PAID"
+          },
+          {
+            "date": "2024-10-11",
+            "status": "NOT_INVOICED"
+          }
+        ],
+        "amountPaid": 620.0,
+        "billingCycleTotal": 682.0,
+        "nextPartialInvoiceDate": "2024-10-11"
+      },
+      "budgetBillingPlanUpdatable": true,
+      "budgetBillingPlanUpdatableInformation": "ADAPT_BBP_POSSIBLE",
+      "expectedPeriodicInvoiceAmount": -38.21,
+      "hasInsufficientHistoryAfterMove": false,
+      "hasMeterReplacement": false,
+      "remainingAmount": 6.37
+    }
+  ],
+  "remainingAmount": 6.37,
+  "startDate": "2023-11-09"
+}

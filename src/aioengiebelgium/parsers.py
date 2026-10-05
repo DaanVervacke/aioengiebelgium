@@ -14,6 +14,12 @@ from .models import (
     BillingDetails,
     BillingOverview,
     BillingPeriodUsage,
+    BudgetBillingPlan,
+    BudgetBillingPlanContractPeriod,
+    BudgetBillingPlanDetails,
+    BudgetBillingPlanLimits,
+    BudgetBillingPlanProposal,
+    BudgetBillingPlanProposalFactor,
     BusinessAgreement,
     ConsumptionAddress,
     ContractInfo,
@@ -100,6 +106,10 @@ def _as_int(value: Any) -> int:
 
 def _as_float_or_none(value: Any) -> float | None:
     return _as_float(value) if value is not None else None
+
+
+def _as_int_or_none(value: Any) -> int | None:
+    return _as_int(value) if value is not None else None
 
 
 def _as_str_or_none(value: Any) -> str | None:
@@ -1192,4 +1202,127 @@ def parse_billing_period_usage(data: dict[str, Any]) -> BillingPeriodUsage:
         used_amount=_as_float_or_none(data.get("usedAmount")),
         used_amount_ratio=_as_float_or_none(data.get("usedAmountRatio")),
         used_amount_failure_reason=_as_str_or_none(data.get("usedAmountFailureReason")),
+    )
+
+
+def _parse_bbp_proposal_factor(raw: dict[str, Any]) -> BudgetBillingPlanProposalFactor:
+    return BudgetBillingPlanProposalFactor(
+        event=_as_str_or_none(raw.get("event")),
+        weight=_as_float_or_none(raw.get("weight")),
+        change_type=_as_str_or_none(raw.get("changeType")),
+    )
+
+
+def _parse_bbp_proposal(sub: Any) -> tuple[BudgetBillingPlanProposal | None, int]:
+    if not isinstance(sub, dict):
+        return None, 0
+    factors, skipped = _parse_items_counted(
+        sub.get("evaluationContext"), _parse_bbp_proposal_factor, "proposal factor"
+    )
+    proposal = BudgetBillingPlanProposal(
+        change_type=_as_str_or_none(sub.get("changeType")),
+        simulation_date=_as_date(sub.get("simulationDate")),
+        proposed_amount=_as_float_or_none(sub.get("proposedAmount")),
+        significant=bool(sub.get("significant")),
+        outlier=bool(sub.get("outlier")),
+        evaluation_context=tuple(factors),
+    )
+    return proposal, skipped
+
+
+def _parse_bbp_limits(sub: Any) -> BudgetBillingPlanLimits | None:
+    if not isinstance(sub, dict):
+        return None
+    return BudgetBillingPlanLimits(
+        lower_limit=_as_float_or_none(sub.get("lowerLimit")),
+        upper_limit=_as_float_or_none(sub.get("upperLimit")),
+        exceptional_limit=_as_float_or_none(sub.get("exceptionalLimit")),
+    )
+
+
+def _parse_budget_billing_plan(sub: Any) -> tuple[BudgetBillingPlan | None, int]:
+    if not isinstance(sub, dict):
+        return None, 0
+    raw_slices = sub.get("paymentSlices") or sub.get("slices")
+    slices, skipped = _parse_items_counted(raw_slices, _parse_payment_slice, "payment slice")
+    plan = BudgetBillingPlan(
+        current_amount=_as_float_or_none(sub.get("currentAmount")),
+        monthly_amount=_as_float_or_none(sub.get("monthlyAmount")),
+        billing_cycle=_as_str_or_none(sub.get("billingCycle")),
+        remaining_slices=_as_int_or_none(sub.get("remainingSlices")),
+        amount_paid=_as_float_or_none(sub.get("amountPaid")),
+        billing_cycle_total=_as_float_or_none(sub.get("billingCycleTotal")),
+        next_partial_invoice_date=_as_date(sub.get("nextPartialInvoiceDate")),
+        payment_slices=tuple(slices),
+    )
+    return plan, skipped
+
+
+def _parse_bbp_contract_period(
+    raw: dict[str, Any],
+) -> tuple[BudgetBillingPlanContractPeriod, int]:
+    plan, plan_skipped = _parse_budget_billing_plan(raw.get("budgetBillingPlan"))
+    proposal, proposal_skipped = _parse_bbp_proposal(raw.get("bbpProposal"))
+    period = BudgetBillingPlanContractPeriod(
+        contract_id=_as_str_or_none(raw.get("contractId")),
+        energy_contract_configuration_id=_as_str_or_none(raw.get("energyContractConfigurationId")),
+        division=_as_str_or_none(raw.get("division")),
+        start_date=_as_date(raw.get("startDate")),
+        end_date=_as_date(raw.get("endDate")),
+        is_contract_for_chm=bool(raw.get("isContractForCHM")),
+        is_contract_for_bana=bool(raw.get("isContractForBANA")),
+        is_contract_for_uncommon_registers=bool(raw.get("isContractForUncommonRegisters")),
+        plan=plan,
+        plan_updatable=bool(raw.get("budgetBillingPlanUpdatable")),
+        plan_updatable_information=_as_str_or_none(
+            raw.get("budgetBillingPlanUpdatableInformation")
+        ),
+        update_limits=_parse_bbp_limits(raw.get("bbpUpdateLimits")),
+        proposal=proposal,
+        proposal_evaluation_status=_as_str_or_none(raw.get("bbpProposalEvaluationStatus")),
+        expected_periodic_invoice_amount=_as_float_or_none(
+            raw.get("expectedPeriodicInvoiceAmount")
+        ),
+        remaining_amount=_as_float_or_none(raw.get("remainingAmount")),
+        has_insufficient_history_after_move=bool(raw.get("hasInsufficientHistoryAfterMove")),
+        has_meter_replacement=bool(raw.get("hasMeterReplacement")),
+    )
+    return period, plan_skipped + proposal_skipped
+
+
+def parse_budget_billing_plan_details(data: dict[str, Any]) -> BudgetBillingPlanDetails:
+    plan, plan_skipped = _parse_budget_billing_plan(data.get("budgetBillingPlan"))
+    proposal, proposal_skipped = _parse_bbp_proposal(data.get("bbpProposal"))
+    periods, periods_skipped = _parse_items_counted(
+        data.get("periodDetailsPerContract"),
+        _parse_bbp_contract_period,
+        "budget billing plan contract period",
+    )
+    nested_skipped = sum(skipped for _period, skipped in periods)
+    return BudgetBillingPlanDetails(
+        business_agreement_id=_as_str_or_none(data.get("businessAgreementId")),
+        start_date=_as_date(data.get("startDate")),
+        end_date=_as_date(data.get("endDate")),
+        plan=plan,
+        plan_updatable=bool(data.get("budgetBillingPlanUpdatable")),
+        plan_updatable_information=_as_str_or_none(
+            data.get("budgetBillingPlanUpdatableInformation")
+        ),
+        update_limits=_parse_bbp_limits(data.get("bbpUpdateLimits")),
+        proposal=proposal,
+        proposal_evaluation_status=_as_str_or_none(data.get("bbpProposalEvaluationStatus")),
+        expected_periodic_invoice_amount=_as_float_or_none(
+            data.get("expectedPeriodicInvoiceAmount")
+        ),
+        remaining_amount=_as_float_or_none(data.get("remainingAmount")),
+        has_different_billing_cycle=bool(data.get("hasDifferentBillingCycle")),
+        has_different_invoice_frequencies=bool(data.get("hasDifferentInvoiceFrequencies")),
+        has_unaligned_billing_periods=bool(data.get("hasUnalignedBillingPeriods")),
+        has_chm=bool(data.get("hasCHM")),
+        has_bana=bool(data.get("hasBANA")),
+        has_uncommon_registers=bool(data.get("hasUncommonRegisters")),
+        has_insufficient_history_after_move=bool(data.get("hasInsufficientHistoryAfterMove")),
+        has_meter_replacement=bool(data.get("hasMeterReplacement")),
+        contract_periods=tuple(period for period, _skipped in periods),
+        skipped_entries=plan_skipped + proposal_skipped + periods_skipped + nested_skipped,
     )

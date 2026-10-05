@@ -12,6 +12,7 @@ from ._auth import AuthFlow, start_auth_flow
 from ._endpoints import (
     ACCOUNT_BALANCE,
     BILLING_PERIOD_USAGE,
+    BUDGET_BILLING_PLAN,
     CUSTOMER_ACCOUNT_RELATIONS,
     ENERGY_CONTRACTS,
     EPEX_PRICES,
@@ -58,6 +59,7 @@ from .exceptions import (
 from .models import (
     AccountBalance,
     BillingPeriodUsage,
+    BudgetBillingPlanDetails,
     CustomerAccountRelations,
     EnergyContractsResponse,
     EpexPayload,
@@ -314,6 +316,13 @@ class EngieBeClient:
     ) -> BillingPeriodUsage:
         """Fetch the cost used so far in the billing period against the expected yearly invoice."""
         return await self._call(BILLING_PERIOD_USAGE, BanArgs(ban=business_agreement_number))
+
+    async def async_get_budget_billing_plan_details(
+        self,
+        business_agreement_number: str,
+    ) -> BudgetBillingPlanDetails:
+        """Fetch the budget billing plan of the billing period with its limits and proposal."""
+        return await self._call(BUDGET_BILLING_PLAN, BanArgs(ban=business_agreement_number))
 
     async def async_get_epex_prices(
         self,

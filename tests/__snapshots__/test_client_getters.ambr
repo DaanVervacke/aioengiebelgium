@@ -62,6 +62,230 @@
     used_amount_ratio=None,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[budget_billing_plan_flags_only]
+  BudgetBillingPlanDetails(
+    business_agreement_id='000000000001',
+    contract_periods=tuple(
+    ),
+    end_date=None,
+    expected_periodic_invoice_amount=None,
+    has_bana=False,
+    has_chm=False,
+    has_different_billing_cycle=False,
+    has_different_invoice_frequencies=False,
+    has_insufficient_history_after_move=False,
+    has_meter_replacement=False,
+    has_unaligned_billing_periods=False,
+    has_uncommon_registers=False,
+    plan=None,
+    plan_updatable=False,
+    plan_updatable_information=None,
+    proposal=None,
+    proposal_evaluation_status=None,
+    remaining_amount=None,
+    skipped_entries=0,
+    start_date=None,
+    update_limits=None,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[budget_billing_plan_monthly]
+  BudgetBillingPlanDetails(
+    business_agreement_id='000000000001',
+    contract_periods=tuple(
+      BudgetBillingPlanContractPeriod(
+        contract_id='1000000001',
+        division='ELECTRICITY',
+        end_date=datetime.date(2024, 11, 11),
+        energy_contract_configuration_id='2000000001',
+        expected_periodic_invoice_amount=-38.21,
+        has_insufficient_history_after_move=False,
+        has_meter_replacement=False,
+        is_contract_for_bana=False,
+        is_contract_for_chm=False,
+        is_contract_for_uncommon_registers=False,
+        plan=BudgetBillingPlan(
+          amount_paid=620.0,
+          billing_cycle='MONTHLY',
+          billing_cycle_total=682.0,
+          current_amount=62.0,
+          monthly_amount=None,
+          next_partial_invoice_date=datetime.date(2024, 10, 11),
+          payment_slices=tuple(
+            PaymentSlice(
+              payment_date=datetime.date(2023, 12, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 1, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 2, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 3, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 4, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 5, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 6, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 7, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 8, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 9, 11),
+              status='PAID',
+            ),
+            PaymentSlice(
+              payment_date=datetime.date(2024, 10, 11),
+              status='NOT_INVOICED',
+            ),
+          ),
+          remaining_slices=1,
+        ),
+        plan_updatable=True,
+        plan_updatable_information='ADAPT_BBP_POSSIBLE',
+        proposal=BudgetBillingPlanProposal(
+          change_type='DECREASE',
+          evaluation_context=tuple(
+            BudgetBillingPlanProposalFactor(
+              change_type='NONE',
+              event='CONTRACT',
+              weight=0.0,
+            ),
+            BudgetBillingPlanProposalFactor(
+              change_type='INCREASE',
+              event='INDEX',
+              weight=0.024318775201453,
+            ),
+          ),
+          outlier=False,
+          proposed_amount=58.0,
+          significant=True,
+          simulation_date=datetime.date(2024, 10, 5),
+        ),
+        proposal_evaluation_status='COMPLETED',
+        remaining_amount=6.37,
+        start_date=datetime.date(2023, 11, 9),
+        update_limits=BudgetBillingPlanLimits(
+          exceptional_limit=10.0,
+          lower_limit=10.0,
+          upper_limit=870.0,
+        ),
+      ),
+    ),
+    end_date=datetime.date(2024, 11, 11),
+    expected_periodic_invoice_amount=-38.21,
+    has_bana=False,
+    has_chm=False,
+    has_different_billing_cycle=False,
+    has_different_invoice_frequencies=False,
+    has_insufficient_history_after_move=False,
+    has_meter_replacement=False,
+    has_unaligned_billing_periods=False,
+    has_uncommon_registers=False,
+    plan=BudgetBillingPlan(
+      amount_paid=620.0,
+      billing_cycle='MONTHLY',
+      billing_cycle_total=682.0,
+      current_amount=62.0,
+      monthly_amount=62.0,
+      next_partial_invoice_date=datetime.date(2024, 10, 11),
+      payment_slices=tuple(
+        PaymentSlice(
+          payment_date=datetime.date(2023, 12, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 1, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 2, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 3, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 4, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 5, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 6, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 7, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 8, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 9, 1),
+          status='PAID',
+        ),
+        PaymentSlice(
+          payment_date=datetime.date(2024, 10, 1),
+          status='NOT_INVOICED',
+        ),
+      ),
+      remaining_slices=1,
+    ),
+    plan_updatable=True,
+    plan_updatable_information='ADAPT_BBP_POSSIBLE',
+    proposal=BudgetBillingPlanProposal(
+      change_type='DECREASE',
+      evaluation_context=tuple(
+        BudgetBillingPlanProposalFactor(
+          change_type='NONE',
+          event='CONTRACT',
+          weight=0.0,
+        ),
+        BudgetBillingPlanProposalFactor(
+          change_type='INCREASE',
+          event='INDEX',
+          weight=0.024318775201453,
+        ),
+      ),
+      outlier=False,
+      proposed_amount=58.0,
+      significant=True,
+      simulation_date=datetime.date(2024, 10, 5),
+    ),
+    proposal_evaluation_status='COMPLETED',
+    remaining_amount=6.37,
+    skipped_entries=0,
+    start_date=datetime.date(2023, 11, 9),
+    update_limits=BudgetBillingPlanLimits(
+      exceptional_limit=10.0,
+      lower_limit=10.0,
+      upper_limit=870.0,
+    ),
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[customer_account_relations]
   CustomerAccountRelations(
     accounts=tuple(

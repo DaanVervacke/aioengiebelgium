@@ -624,6 +624,26 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "budget_billing_plan": (
+        _WireCase(
+            id="budget_billing_plan_monthly",
+            fixture_name="budget_billing_plan_monthly.json",
+            call=lambda c: c.async_get_budget_billing_plan_details(_BAN),
+            request_method="GET",
+            url=f"{BILLING_V2_BASE_URL}/business-agreements/{_BAN}/billing-period-bbp-details",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="budget_billing_plan_flags_only",
+            fixture_name="budget_billing_plan_flags_only.json",
+            call=lambda c: c.async_get_budget_billing_plan_details(_BAN),
+            request_method="GET",
+            url=f"{BILLING_V2_BASE_URL}/business-agreements/{_BAN}/billing-period-bbp-details",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",

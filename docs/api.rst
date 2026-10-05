@@ -37,6 +37,24 @@ Models
 .. autoclass:: aioengiebelgium.BillingPeriodUsage
    :members:
 
+.. autoclass:: aioengiebelgium.BudgetBillingPlan
+   :members:
+
+.. autoclass:: aioengiebelgium.BudgetBillingPlanContractPeriod
+   :members:
+
+.. autoclass:: aioengiebelgium.BudgetBillingPlanDetails
+   :members:
+
+.. autoclass:: aioengiebelgium.BudgetBillingPlanLimits
+   :members:
+
+.. autoclass:: aioengiebelgium.BudgetBillingPlanProposal
+   :members:
+
+.. autoclass:: aioengiebelgium.BudgetBillingPlanProposalFactor
+   :members:
+
 .. autoclass:: aioengiebelgium.BusinessAgreement
    :members:
 

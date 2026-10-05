@@ -1,0 +1,13 @@
+{
+  "businessAgreementId": "000000000001",
+  "hasDifferentBillingCycle": false,
+  "hasDifferentInvoiceFrequencies": false,
+  "hasUnalignedBillingPeriods": false,
+  "hasCHM": false,
+  "hasBANA": false,
+  "hasUncommonRegisters": false,
+  "budgetBillingPlanUpdatable": false,
+  "hasInsufficientHistoryAfterMove": false,
+  "hasMeterReplacement": false,
+  "periodDetailsPerContract": []
+}
