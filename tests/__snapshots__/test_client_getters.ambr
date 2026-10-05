@@ -2311,6 +2311,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-0.004,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2323,11 +2324,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -2349,6 +2354,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-0.004,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2361,11 +2367,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 1, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -2387,6 +2397,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-0.022,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2399,11 +2410,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=1.776,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 7, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -2425,6 +2440,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-2.953,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2437,11 +2453,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 13, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
@@ -2465,6 +2485,7 @@
           supplier_parts=tuple(
           ),
         ),
+        netto=-2.983,
         offtake=UsageDirectionBreakdown(
           amount_sum=None,
           distribution_parts=tuple(
@@ -2477,11 +2498,15 @@
         ),
       ),
       gas=GasUsage(
+        cost=None,
         kwh=1.776,
       ),
+      gas_and_electricity_cost=None,
       partial_data=False,
       simulated_costs=None,
       simulated_energy=None,
+      simulated_gas=None,
+      simulated_gas_and_electricity_cost=None,
       start=datetime.datetime(2026, 7, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     ),
   )
@@ -2514,6 +2539,7 @@
               ),
             ),
           ),
+          netto=1.25,
           offtake=UsageDirectionBreakdown(
             amount_sum=1.69,
             distribution_parts=tuple(
@@ -2568,6 +2594,7 @@
               ),
             ),
           ),
+          netto=-8.433,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2593,11 +2620,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=0.59,
           kwh=1.361,
         ),
+        gas_and_electricity_cost=1.84,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -2625,6 +2656,7 @@
               ),
             ),
           ),
+          netto=1.07,
           offtake=UsageDirectionBreakdown(
             amount_sum=1.27,
             distribution_parts=tuple(
@@ -2679,6 +2711,7 @@
               ),
             ),
           ),
+          netto=-3.866,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2704,11 +2737,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=0.48,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=1.55,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 2, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -2736,6 +2773,7 @@
               ),
             ),
           ),
+          netto=0.29,
           offtake=UsageDirectionBreakdown(
             amount_sum=1.08,
             distribution_parts=tuple(
@@ -2790,6 +2828,7 @@
               ),
             ),
           ),
+          netto=-19.057,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2815,11 +2854,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=0.63,
           kwh=1.772,
         ),
+        gas_and_electricity_cost=0.92,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
@@ -2849,6 +2892,7 @@
             ),
           ),
         ),
+        netto=48.62,
         offtake=UsageDirectionBreakdown(
           amount_sum=57.33,
           distribution_parts=tuple(
@@ -2903,6 +2947,7 @@
             ),
           ),
         ),
+        netto=-119.615,
         offtake=UsageDirectionBreakdown(
           amount_sum=None,
           distribution_parts=tuple(
@@ -2928,11 +2973,15 @@
         ),
       ),
       gas=GasUsage(
+        cost=16.01,
         kwh=19.325,
       ),
+      gas_and_electricity_cost=64.63,
       partial_data=False,
       simulated_costs=None,
       simulated_energy=None,
+      simulated_gas=None,
+      simulated_gas_and_electricity_cost=None,
       start=datetime.datetime(2026, 7, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     ),
   )
@@ -2959,6 +3008,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-0.004,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -2971,11 +3021,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -2997,6 +3051,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-0.004,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3009,11 +3064,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 1, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -3035,6 +3094,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-0.022,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3047,11 +3107,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=1.776,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 7, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -3073,6 +3137,7 @@
             supplier_parts=tuple(
             ),
           ),
+          netto=-2.953,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3085,11 +3150,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=None,
           kwh=0.0,
         ),
+        gas_and_electricity_cost=None,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 3, 13, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
@@ -3113,6 +3182,7 @@
           supplier_parts=tuple(
           ),
         ),
+        netto=-2.983,
         offtake=UsageDirectionBreakdown(
           amount_sum=None,
           distribution_parts=tuple(
@@ -3125,11 +3195,15 @@
         ),
       ),
       gas=GasUsage(
+        cost=None,
         kwh=1.776,
       ),
+      gas_and_electricity_cost=None,
       partial_data=False,
       simulated_costs=None,
       simulated_energy=None,
+      simulated_gas=None,
+      simulated_gas_and_electricity_cost=None,
       start=datetime.datetime(2026, 7, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     ),
   )
@@ -3162,6 +3236,7 @@
               ),
             ),
           ),
+          netto=48.62,
           offtake=UsageDirectionBreakdown(
             amount_sum=57.33,
             distribution_parts=tuple(
@@ -3216,6 +3291,7 @@
               ),
             ),
           ),
+          netto=-119.615,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3241,11 +3317,15 @@
           ),
         ),
         gas=GasUsage(
+          cost=16.01,
           kwh=19.325,
         ),
+        gas_and_electricity_cost=64.63,
         partial_data=False,
         simulated_costs=None,
         simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
         start=datetime.datetime(2026, 7, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
@@ -3275,6 +3355,7 @@
             ),
           ),
         ),
+        netto=48.62,
         offtake=UsageDirectionBreakdown(
           amount_sum=57.33,
           distribution_parts=tuple(
@@ -3329,6 +3410,7 @@
             ),
           ),
         ),
+        netto=-119.615,
         offtake=UsageDirectionBreakdown(
           amount_sum=None,
           distribution_parts=tuple(
@@ -3354,11 +3436,15 @@
         ),
       ),
       gas=GasUsage(
+        cost=16.01,
         kwh=19.325,
       ),
+      gas_and_electricity_cost=64.63,
       partial_data=False,
       simulated_costs=None,
       simulated_energy=None,
+      simulated_gas=None,
+      simulated_gas_and_electricity_cost=None,
       start=datetime.datetime(2026, 7, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     ),
   )
@@ -3391,6 +3477,7 @@
               ),
             ),
           ),
+          netto=-20.85,
           offtake=UsageDirectionBreakdown(
             amount_sum=28.88,
             distribution_parts=tuple(
@@ -3445,6 +3532,7 @@
               ),
             ),
           ),
+          netto=-442.533,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3470,6 +3558,7 @@
           ),
         ),
         gas=None,
+        gas_and_electricity_cost=-20.85,
         partial_data=False,
         simulated_costs=UsageElectricityBreakdown(
           injection=UsageDirectionBreakdown(
@@ -3495,6 +3584,7 @@
               ),
             ),
           ),
+          netto=-6.36,
           offtake=UsageDirectionBreakdown(
             amount_sum=55.65,
             distribution_parts=tuple(
@@ -3543,6 +3633,7 @@
               ),
             ),
           ),
+          netto=-650.419,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3567,6 +3658,8 @@
             ),
           ),
         ),
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=-6.36,
         start=datetime.datetime(2026, 6, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -3594,6 +3687,7 @@
               ),
             ),
           ),
+          netto=-17.69,
           offtake=UsageDirectionBreakdown(
             amount_sum=31.19,
             distribution_parts=tuple(
@@ -3648,6 +3742,7 @@
               ),
             ),
           ),
+          netto=-544.081,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3673,6 +3768,7 @@
           ),
         ),
         gas=None,
+        gas_and_electricity_cost=-17.69,
         partial_data=False,
         simulated_costs=UsageElectricityBreakdown(
           injection=UsageDirectionBreakdown(
@@ -3698,6 +3794,7 @@
               ),
             ),
           ),
+          netto=-6.05,
           offtake=UsageDirectionBreakdown(
             amount_sum=61.05,
             distribution_parts=tuple(
@@ -3746,6 +3843,7 @@
               ),
             ),
           ),
+          netto=-682.914,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3770,6 +3868,8 @@
             ),
           ),
         ),
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=-6.05,
         start=datetime.datetime(2026, 7, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
       UsageItem(
@@ -3778,6 +3878,7 @@
         end=datetime.datetime(2026, 8, 2, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
         energy=None,
         gas=None,
+        gas_and_electricity_cost=None,
         partial_data=True,
         simulated_costs=UsageElectricityBreakdown(
           injection=UsageDirectionBreakdown(
@@ -3803,6 +3904,7 @@
               ),
             ),
           ),
+          netto=-0.16,
           offtake=UsageDirectionBreakdown(
             amount_sum=1.99,
             distribution_parts=tuple(
@@ -3851,6 +3953,7 @@
               ),
             ),
           ),
+          netto=-20.641,
           offtake=UsageDirectionBreakdown(
             amount_sum=None,
             distribution_parts=tuple(
@@ -3875,6 +3978,8 @@
             ),
           ),
         ),
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=-0.16,
         start=datetime.datetime(2026, 8, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
       ),
     ),
@@ -3904,6 +4009,7 @@
             ),
           ),
         ),
+        netto=-38.53,
         offtake=UsageDirectionBreakdown(
           amount_sum=60.07,
           distribution_parts=tuple(
@@ -3958,6 +4064,7 @@
             ),
           ),
         ),
+        netto=-986.614,
         offtake=UsageDirectionBreakdown(
           amount_sum=None,
           distribution_parts=tuple(
@@ -3983,6 +4090,7 @@
         ),
       ),
       gas=None,
+      gas_and_electricity_cost=-38.53,
       partial_data=False,
       simulated_costs=UsageElectricityBreakdown(
         injection=UsageDirectionBreakdown(
@@ -4008,6 +4116,7 @@
             ),
           ),
         ),
+        netto=-12.57,
         offtake=UsageDirectionBreakdown(
           amount_sum=118.69,
           distribution_parts=tuple(
@@ -4056,6 +4165,7 @@
             ),
           ),
         ),
+        netto=-1353.974,
         offtake=UsageDirectionBreakdown(
           amount_sum=None,
           distribution_parts=tuple(
@@ -4080,7 +4190,737 @@
           ),
         ),
       ),
+      simulated_gas=None,
+      simulated_gas_and_electricity_cost=-12.57,
       start=datetime.datetime(2026, 6, 3, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+    ),
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[usage_details_yearly_dual_fuel]
+  UsageDetailsResponse(
+    items=tuple(
+      UsageItem(
+        costs=UsageElectricityBreakdown(
+          injection=None,
+          netto=2266.96,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=2266.96,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2266.96,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=2266.96,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2266.96,
+              ),
+            ),
+          ),
+        ),
+        electricity=ElectricityUsage(
+          injection_kwh=0.0,
+          netto_kwh=1580.05,
+          offtake_kwh=1580.05,
+        ),
+        end=datetime.datetime(2023, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
+        energy=UsageElectricityBreakdown(
+          injection=None,
+          netto=1580.05,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1580.05,
+              ),
+            ),
+            kwh_sum=1580.05,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=1580.05,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1580.05,
+              ),
+            ),
+          ),
+        ),
+        gas=GasUsage(
+          cost=730.39,
+          kwh=2178.82,
+        ),
+        gas_and_electricity_cost=2997.35,
+        partial_data=False,
+        simulated_costs=None,
+        simulated_energy=None,
+        simulated_gas=None,
+        simulated_gas_and_electricity_cost=None,
+        start=datetime.datetime(2022, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
+      ),
+      UsageItem(
+        costs=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=21.19,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=21.19,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=21.19,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=21.19,
+              ),
+            ),
+          ),
+          netto=1944.43,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=1965.62,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1965.62,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=1965.62,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1965.62,
+              ),
+            ),
+          ),
+        ),
+        electricity=ElectricityUsage(
+          injection_kwh=753.39,
+          netto_kwh=1271.96,
+          offtake_kwh=2025.35,
+        ),
+        end=datetime.datetime(2024, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
+        energy=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=753.39,
+              ),
+            ),
+            kwh_sum=753.39,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=753.39,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=753.39,
+              ),
+            ),
+          ),
+          netto=1271.96,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2025.35,
+              ),
+            ),
+            kwh_sum=2025.35,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=2025.35,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2025.35,
+              ),
+            ),
+          ),
+        ),
+        gas=GasUsage(
+          cost=1380.56,
+          kwh=1761.0,
+        ),
+        gas_and_electricity_cost=3324.99,
+        partial_data=False,
+        simulated_costs=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=35.43,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=35.43,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=35.43,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=35.43,
+              ),
+            ),
+          ),
+          netto=2600.96,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=2636.39,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2636.39,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=2636.39,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2636.39,
+              ),
+            ),
+          ),
+        ),
+        simulated_energy=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=299.68,
+              ),
+            ),
+            kwh_sum=299.68,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=299.68,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=299.68,
+              ),
+            ),
+          ),
+          netto=747.02,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1046.7,
+              ),
+            ),
+            kwh_sum=1046.7,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=1046.7,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1046.7,
+              ),
+            ),
+          ),
+        ),
+        simulated_gas=GasUsage(
+          cost=1001.83,
+          kwh=3410.34,
+        ),
+        simulated_gas_and_electricity_cost=3602.79,
+        start=datetime.datetime(2023, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
+      ),
+      UsageItem(
+        costs=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=176.08,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=176.08,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=176.08,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=176.08,
+              ),
+            ),
+          ),
+          netto=1556.95,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=1733.03,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1733.03,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=1733.03,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1733.03,
+              ),
+            ),
+          ),
+        ),
+        electricity=ElectricityUsage(
+          injection_kwh=1713.72,
+          netto_kwh=503.89,
+          offtake_kwh=2217.61,
+        ),
+        end=datetime.datetime(2024, 10, 5, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        energy=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1713.72,
+              ),
+            ),
+            kwh_sum=1713.72,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=1713.72,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1713.72,
+              ),
+            ),
+          ),
+          netto=503.89,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2217.61,
+              ),
+            ),
+            kwh_sum=2217.61,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=2217.61,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2217.61,
+              ),
+            ),
+          ),
+        ),
+        gas=GasUsage(
+          cost=683.85,
+          kwh=4096.96,
+        ),
+        gas_and_electricity_cost=2240.8,
+        partial_data=False,
+        simulated_costs=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=65.9,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=65.9,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=65.9,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=65.9,
+              ),
+            ),
+          ),
+          netto=1081.46,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=1147.36,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1147.36,
+              ),
+            ),
+            kwh_sum=None,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=1147.36,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=1147.36,
+              ),
+            ),
+          ),
+        ),
+        simulated_energy=UsageElectricityBreakdown(
+          injection=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=627.86,
+              ),
+            ),
+            kwh_sum=627.86,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=627.86,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=627.86,
+              ),
+            ),
+          ),
+          netto=2074.92,
+          offtake=UsageDirectionBreakdown(
+            amount_sum=None,
+            distribution_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2702.78,
+              ),
+            ),
+            kwh_sum=2702.78,
+            parts=tuple(
+              UsageTouCrossPart(
+                distribution_slot_code='TOTAL_HOURS',
+                supplier_slot_code='TOTAL_HOURS',
+                value=2702.78,
+              ),
+            ),
+            supplier_parts=tuple(
+              UsageTouPart(
+                slot_code='TOTAL_HOURS',
+                value=2702.78,
+              ),
+            ),
+          ),
+        ),
+        simulated_gas=GasUsage(
+          cost=2069.03,
+          kwh=2149.15,
+        ),
+        simulated_gas_and_electricity_cost=3150.49,
+        start=datetime.datetime(2024, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
+      ),
+    ),
+    skipped_entries=0,
+    total=UsageItem(
+      costs=UsageElectricityBreakdown(
+        injection=UsageDirectionBreakdown(
+          amount_sum=105.38,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=105.38,
+            ),
+          ),
+          kwh_sum=None,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=105.38,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=105.38,
+            ),
+          ),
+        ),
+        netto=1576.65,
+        offtake=UsageDirectionBreakdown(
+          amount_sum=1682.03,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1682.03,
+            ),
+          ),
+          kwh_sum=None,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=1682.03,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1682.03,
+            ),
+          ),
+        ),
+      ),
+      electricity=ElectricityUsage(
+        injection_kwh=1109.64,
+        netto_kwh=169.89,
+        offtake_kwh=1279.53,
+      ),
+      end=datetime.datetime(2024, 10, 5, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      energy=UsageElectricityBreakdown(
+        injection=UsageDirectionBreakdown(
+          amount_sum=None,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1109.64,
+            ),
+          ),
+          kwh_sum=1109.64,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=1109.64,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1109.64,
+            ),
+          ),
+        ),
+        netto=169.89,
+        offtake=UsageDirectionBreakdown(
+          amount_sum=None,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1279.53,
+            ),
+          ),
+          kwh_sum=1279.53,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=1279.53,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1279.53,
+            ),
+          ),
+        ),
+      ),
+      gas=GasUsage(
+        cost=713.02,
+        kwh=4375.11,
+      ),
+      gas_and_electricity_cost=2289.67,
+      partial_data=False,
+      simulated_costs=UsageElectricityBreakdown(
+        injection=UsageDirectionBreakdown(
+          amount_sum=66.83,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=66.83,
+            ),
+          ),
+          kwh_sum=None,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=66.83,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=66.83,
+            ),
+          ),
+        ),
+        netto=1731.11,
+        offtake=UsageDirectionBreakdown(
+          amount_sum=1797.94,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1797.94,
+            ),
+          ),
+          kwh_sum=None,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=1797.94,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1797.94,
+            ),
+          ),
+        ),
+      ),
+      simulated_energy=UsageElectricityBreakdown(
+        injection=UsageDirectionBreakdown(
+          amount_sum=None,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=489.83,
+            ),
+          ),
+          kwh_sum=489.83,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=489.83,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=489.83,
+            ),
+          ),
+        ),
+        netto=535.33,
+        offtake=UsageDirectionBreakdown(
+          amount_sum=None,
+          distribution_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1025.16,
+            ),
+          ),
+          kwh_sum=1025.16,
+          parts=tuple(
+            UsageTouCrossPart(
+              distribution_slot_code='TOTAL_HOURS',
+              supplier_slot_code='TOTAL_HOURS',
+              value=1025.16,
+            ),
+          ),
+          supplier_parts=tuple(
+            UsageTouPart(
+              slot_code='TOTAL_HOURS',
+              value=1025.16,
+            ),
+          ),
+        ),
+      ),
+      simulated_gas=GasUsage(
+        cost=1654.01,
+        kwh=4561.8,
+      ),
+      simulated_gas_and_electricity_cost=3385.12,
+      start=datetime.datetime(2022, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
     ),
   )
 # ---

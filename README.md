@@ -154,7 +154,7 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_monthly_peaks(business_agreement_number, year, month)` | `MonthlyPeaks` | Capacity tariff peaks for a given month. |
 | `async_get_happy_hour_event(business_agreement_number)` | `HappyHourEvent` | Today's and tomorrow's happy hour windows. |
 | `async_get_happy_hour_month_report(business_agreement_number, year, month)` | `HappyHourMonthReport` | The happy hour month report. |
-| `async_get_usage_details(business_agreement_number, start_date, end_date, granularity=UsageGranularity.HOURLY, *, include_simulation=False)` | `UsageDetailsResponse` | Energy usage details for a date range. |
+| `async_get_usage_details(business_agreement_number, start_date, end_date, granularity=UsageGranularity.HOURLY, *, include_simulation=False)` | `UsageDetailsResponse` | Energy usage and costs for a date range, per hour, day, month or year. Gas energy (kWh) and cost come back next to electricity when the business agreement has a gas contract. |
 | `async_get_solar_surplus_forecasts(business_agreement_number, delivery_point_id)` | `SolarSurplusForecasts` | Solar surplus forecasts for a delivery point. |
 | `async_get_feature_flag(business_agreement_number, flag)` | `FeatureFlag` | Query a boolean feature flag for a business agreement. |
 | `async_get_tou_schedules(business_agreement_number)` | `TouSchedulesResponse` | Time-of-use tariff schedules. |

@@ -106,3 +106,9 @@ docs: |-
   energy.electricity.{offtake,injection}.kWhSum and energy.gas.kWh,
   plus costs.electricity.{offtake,injection}.amountSum and costs.gas
   when costs are imported.
+
+  granularity also accepts DAILY, MONTHLY and YEARLY. The parser
+  reads energy.electricity.netto and costs.electricity.netto,
+  costs.gas and costs.gasAndElectricitySum, and the same gas and sum
+  fields under simulatedEnergy and simulatedCosts. costs.gas is a bare
+  number, while energy.gas is an object with kWh.

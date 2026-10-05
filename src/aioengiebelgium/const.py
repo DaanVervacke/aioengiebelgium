@@ -88,6 +88,7 @@ class UsageGranularity(StrEnum):
     HOURLY = "HOURLY"
     DAILY = "DAILY"
     MONTHLY = "MONTHLY"
+    YEARLY = "YEARLY"
 
 
 class MfaMethod(StrEnum):

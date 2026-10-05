@@ -837,6 +837,7 @@ def _parse_usage_electricity_energy(data: Any) -> UsageElectricityBreakdown | No
     return UsageElectricityBreakdown(
         offtake=_parse_usage_energy_direction(data.get("offtake")),
         injection=_parse_usage_energy_direction(data.get("injection")),
+        netto=_as_float_or_none(data.get("netto")),
     )
 
 
@@ -846,11 +847,23 @@ def _parse_usage_electricity_costs(data: Any) -> UsageElectricityBreakdown | Non
     return UsageElectricityBreakdown(
         offtake=_parse_usage_cost_direction(data.get("offtake")),
         injection=_parse_usage_cost_direction(data.get("injection")),
+        netto=_as_float_or_none(data.get("netto")),
     )
 
 
 def _usage_electricity_block(data: Any) -> Any:
     return data.get("electricity") if isinstance(data, dict) else None
+
+
+def _usage_cost_value(data: Any, key: str) -> float | None:
+    return _as_float_or_none(data.get(key)) if isinstance(data, dict) else None
+
+
+def _parse_usage_gas(energy: Any, costs: Any) -> GasUsage | None:
+    gas_raw = energy.get("gas") if isinstance(energy, dict) else None
+    if not isinstance(gas_raw, dict):
+        return None
+    return GasUsage(kwh=_as_float(gas_raw.get("kWh")), cost=_usage_cost_value(costs, "gas"))
 
 
 def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:
@@ -859,36 +872,35 @@ def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:
     if start is None or end is None:
         return None
     electricity = None
-    gas = None
     energy = raw.get("energy")
-    if isinstance(energy, dict):
-        elec = energy.get("electricity")
-        if isinstance(elec, dict):
-            offtake = elec.get("offtake")
-            injection = elec.get("injection")
-            electricity = ElectricityUsage(
-                offtake_kwh=_as_float(offtake.get("kWhSum") if isinstance(offtake, dict) else 0),
-                injection_kwh=_as_float(
-                    injection.get("kWhSum") if isinstance(injection, dict) else 0
-                ),
-                netto_kwh=_as_float(elec.get("netto")),
-            )
-        gas_raw = energy.get("gas")
-        if isinstance(gas_raw, dict):
-            gas = GasUsage(kwh=_as_float(gas_raw.get("kWh")))
+    elec = _usage_electricity_block(energy)
+    if isinstance(elec, dict):
+        offtake = elec.get("offtake")
+        injection = elec.get("injection")
+        electricity = ElectricityUsage(
+            offtake_kwh=_as_float(offtake.get("kWhSum") if isinstance(offtake, dict) else 0),
+            injection_kwh=_as_float(injection.get("kWhSum") if isinstance(injection, dict) else 0),
+            netto_kwh=_as_float(elec.get("netto")),
+        )
+    costs = raw.get("costs")
+    simulated_energy = raw.get("simulatedEnergy")
+    simulated_costs = raw.get("simulatedCosts")
     return UsageItem(
         start=start,
         end=end,
         partial_data=bool(raw.get("partialData", False)),
         electricity=electricity,
-        gas=gas,
-        energy=_parse_usage_electricity_energy(_usage_electricity_block(energy)),
-        costs=_parse_usage_electricity_costs(_usage_electricity_block(raw.get("costs"))),
+        gas=_parse_usage_gas(energy, costs),
+        energy=_parse_usage_electricity_energy(elec),
+        costs=_parse_usage_electricity_costs(_usage_electricity_block(costs)),
         simulated_energy=_parse_usage_electricity_energy(
-            _usage_electricity_block(raw.get("simulatedEnergy"))
+            _usage_electricity_block(simulated_energy)
         ),
-        simulated_costs=_parse_usage_electricity_costs(
-            _usage_electricity_block(raw.get("simulatedCosts"))
+        simulated_costs=_parse_usage_electricity_costs(_usage_electricity_block(simulated_costs)),
+        gas_and_electricity_cost=_usage_cost_value(costs, "gasAndElectricitySum"),
+        simulated_gas=_parse_usage_gas(simulated_energy, simulated_costs),
+        simulated_gas_and_electricity_cost=_usage_cost_value(
+            simulated_costs, "gasAndElectricitySum"
         ),
     )
 

@@ -12,6 +12,7 @@ import pytest
 
 from aioengiebelgium.models import (
     EnergyCostPair,
+    GasUsage,
     SimulatedCost,
     SimulatedCostFlow,
     SimulatedEnergy,
@@ -596,6 +597,38 @@ def test_parse_usage_details_flat_fixture_has_no_tou_parts(load_fixture: LoadFix
     assert item.costs is None
     assert item.simulated_energy is None
     assert item.simulated_costs is None
+
+
+def test_parse_usage_details_yearly_dual_fuel_gas_and_cost_totals(
+    load_fixture: LoadFixture,
+) -> None:
+    result = parse_usage_details(load_fixture("usage_details_yearly_dual_fuel.json"))
+    first, second = result.items[0], result.items[1]
+
+    assert first.start == datetime(2022, 1, 1, tzinfo=ZoneInfo("Europe/Brussels"))
+    assert first.end == datetime(2023, 1, 1, tzinfo=ZoneInfo("Europe/Brussels"))
+    assert first.gas == GasUsage(kwh=2178.82, cost=730.39)
+    assert first.gas_and_electricity_cost == 2997.35
+    assert first.costs is not None
+    assert first.costs.netto == 2266.96
+    assert first.energy is not None
+    assert first.energy.netto == 1580.05
+    assert first.simulated_gas is None
+    assert first.simulated_gas_and_electricity_cost is None
+
+    assert second.simulated_gas == GasUsage(kwh=3410.34, cost=1001.83)
+    assert second.simulated_gas_and_electricity_cost == 3602.79
+    assert result.total is not None
+    assert result.total.gas is not None
+    assert result.total.gas.cost is not None
+
+
+def test_parse_usage_details_electricity_only_has_no_gas_cost(load_fixture: LoadFixture) -> None:
+    item = parse_usage_details(load_fixture("usage_details_tou_simulated.json")).items[0]
+
+    assert item.gas is None
+    assert item.gas_and_electricity_cost is not None
+    assert item.simulated_gas is None
 
 
 def test_parse_usage_details_tou_part_and_direction_tolerate_malformed_data() -> None:
@@ -1541,6 +1574,13 @@ _NULLED_PAYLOADS = [
                         },
                         "gas": {"kWh": None},
                     },
+                    "costs": {
+                        "electricity": {"offtake": {"amountSum": None}, "netto": None},
+                        "gas": None,
+                        "gasAndElectricitySum": None,
+                    },
+                    "simulatedEnergy": {"gas": None},
+                    "simulatedCosts": {"gas": None, "gasAndElectricitySum": None},
                 },
                 {"start": None, "end": None},
             ],
@@ -1778,6 +1818,9 @@ _MALFORMED_CASES = [
                     "start": "2026-05-04T01:00:00+02:00",
                     "end": "2026-05-04T02:00:00+02:00",
                     "energy": {"electricity": "x", "gas": 5},
+                    "costs": "bad",
+                    "simulatedEnergy": {"gas": "bad"},
+                    "simulatedCosts": ["bad"],
                 },
             ]
         },
@@ -1786,6 +1829,8 @@ _MALFORMED_CASES = [
             and r.items[0].electricity is None
             and r.items[1].electricity is None
             and r.items[1].gas is None
+            and r.items[1].gas_and_electricity_cost is None
+            and r.items[1].simulated_gas is None
         ),
         id="usage_details",
     ),

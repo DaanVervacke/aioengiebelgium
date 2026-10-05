@@ -373,6 +373,26 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             },
             expected_user_agent=USER_AGENT_NATIVE,
         ),
+        _WireCase(
+            id="usage_details_yearly_dual_fuel",
+            fixture_name="usage_details_yearly_dual_fuel.json",
+            call=lambda c: c.async_get_usage_details(
+                _BAN,
+                date(2022, 1, 1),
+                date(2024, 10, 5),
+                UsageGranularity.YEARLY,
+                include_simulation=True,
+            ),
+            request_method="GET",
+            url=_USAGE_DETAILS_URL,
+            expected_params={
+                "startDate": "2022-01-01",
+                "endDate": "2024-10-05",
+                "granularity": "YEARLY",
+                "includeSimulation": "true",
+            },
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
     ),
     "solar_surplus_forecasts": (
         _WireCase(

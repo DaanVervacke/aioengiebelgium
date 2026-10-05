@@ -662,6 +662,7 @@ class GasUsage:
     """Gas usage data."""
 
     kwh: float = 0.0
+    cost: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -698,11 +699,12 @@ class UsageElectricityBreakdown:
 
     offtake: UsageDirectionBreakdown | None = None
     injection: UsageDirectionBreakdown | None = None
+    netto: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class UsageItem:
-    """A single usage period (hourly, daily, or monthly)."""
+    """A single usage period (hourly, daily, monthly, or yearly)."""
 
     start: datetime
     end: datetime
@@ -713,6 +715,9 @@ class UsageItem:
     costs: UsageElectricityBreakdown | None = None
     simulated_energy: UsageElectricityBreakdown | None = None
     simulated_costs: UsageElectricityBreakdown | None = None
+    gas_and_electricity_cost: float | None = None
+    simulated_gas: GasUsage | None = None
+    simulated_gas_and_electricity_cost: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
