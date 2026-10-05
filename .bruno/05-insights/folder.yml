@@ -7,5 +7,6 @@ request:
 docs: |-
   Peaks, Happy Hours, time-of-use schedules, solar surplus, historical
   usage, service point data sources, meter reads, the billing period
-  usage and the happy hour service. Date windows are computed by each
-  request's pre-request script, so nothing needs editing before a run.
+  usage, the happy hour service and the energy score. Date windows are
+  computed by each request's pre-request script, so nothing needs
+  editing before a run.

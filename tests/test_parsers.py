@@ -13,6 +13,12 @@ import pytest
 from aioengiebelgium.models import (
     BillingPeriodUsage,
     EnergyCostPair,
+    EnergyScore,
+    EnergyScoreActions,
+    EnergyScoreCriteria,
+    EnergyScoreDataAvailability,
+    EnergyScoreDetails,
+    EnergyScoreQuestionAnswer,
     GasUsage,
     HappyHourEligibility,
     HappyHourServiceStatus,
@@ -32,6 +38,7 @@ from aioengiebelgium.parsers import (
     parse_budget_billing_plan_details,
     parse_customer_account_relations,
     parse_energy_contracts,
+    parse_energy_score,
     parse_epex_prices,
     parse_feature_flag,
     parse_happy_hour_eligibility,
@@ -1874,6 +1881,47 @@ _NULLED_PAYLOADS = [
         {"status": None, "statusDate": None},
         id="happy_hour_service_status",
     ),
+    pytest.param(
+        parse_energy_score,
+        {
+            "businessAgreementNumber": None,
+            "score": None,
+            "lastUpdated": None,
+            "scoring": {
+                "consumptionAvailability": None,
+                "energyQuestion": None,
+                "hasCheckedMonthlyGraph": None,
+                "sobrietyElectricity": None,
+                "sobrietyGas": None,
+            },
+            "actions": {
+                "activateAutomaticData": None,
+                "enterMeterReads": None,
+                "presentEnergyQuestion": None,
+            },
+            "details": {
+                "contractConfiguration": None,
+                "viewedEnergyScoreDetails": None,
+                "hasCheckedMonthlyGraphDetails": None,
+                "energyQuestionDetails": {
+                    "id": None,
+                    "answerScoreValue": None,
+                    "answerBool": None,
+                    "answerLabel": None,
+                },
+                "consumptionGranularityAvailabilityDetails": {
+                    "electricity": {
+                        "meterType": None,
+                        "automaticDataFlow": None,
+                        "hasMeterReadsInCurrentMonth": None,
+                        "hasConsumptionDataEndOfMonth": None,
+                    },
+                    "gas": None,
+                },
+            },
+        },
+        id="energy_score",
+    ),
 ]
 
 
@@ -2241,6 +2289,34 @@ _MALFORMED_CASES = [
         {"status": 5, "statusDate": "2024-05-01T09:15:00"},
         lambda r: r.status is None and r.status_date is None,
         id="happy_hour_service_status",
+    ),
+    pytest.param(
+        parse_energy_score,
+        {
+            "score": 3,
+            "lastUpdated": "not-a-date",
+            "scoring": {"consumptionAvailability": "true", "sobrietyGas": 1},
+            "actions": [],
+            "details": {
+                "contractConfiguration": "",
+                "energyQuestionDetails": "Ja",
+                "consumptionGranularityAvailabilityDetails": {
+                    "electricity": ["DIGITAL"],
+                    "gas": {"meterType": 7, "hasMeterReadsInCurrentMonth": "no"},
+                },
+            },
+        },
+        lambda r: (
+            r.score is None
+            and r.last_updated is None
+            and r.criteria == EnergyScoreCriteria()
+            and r.actions is None
+            and r.details.contract_configuration is None
+            and r.details.energy_question is None
+            and r.details.electricity is None
+            and r.details.gas == EnergyScoreDataAvailability()
+        ),
+        id="energy_score",
     ),
 ]
 
@@ -2736,3 +2812,85 @@ def test_parse_happy_hour_service_status_fixtures(load_fixture: LoadFixture) -> 
     assert active.status_date.utcoffset() == timedelta(hours=2)
     never = parse_happy_hour_service_status(load_fixture("happy_hour_service_not_activated.json"))
     assert never == HappyHourServiceStatus(status="NOT_ACTIVATED")
+
+
+def test_parse_energy_score_single_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_energy_score(load_fixture("energy_score_single.json"))
+    assert result == EnergyScore(
+        business_agreement_number="000000000001",
+        score="A",
+        last_updated=date(2024, 10, 2),
+        criteria=EnergyScoreCriteria(
+            consumption_availability=True,
+            energy_question=True,
+            has_checked_monthly_graph=True,
+            sobriety_electricity=True,
+        ),
+        actions=EnergyScoreActions(
+            activate_automatic_data=False,
+            enter_meter_reads=False,
+            present_energy_question=False,
+        ),
+        details=EnergyScoreDetails(
+            contract_configuration="SINGLE",
+            viewed_energy_score_details=True,
+            has_checked_monthly_graph_details=True,
+            energy_question=EnergyScoreQuestionAnswer(
+                question_id=11, answer_score_value=1, answer_bool=True, answer_label="Ja"
+            ),
+            electricity=EnergyScoreDataAvailability(
+                meter_type="DIGITAL",
+                automatic_data_flow="YES",
+                has_meter_reads_in_current_month=True,
+                has_consumption_data_end_of_month=True,
+            ),
+        ),
+    )
+
+
+def test_parse_energy_score_dual_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_energy_score(load_fixture("energy_score_dual.json"))
+    assert result.score == "C"
+    assert result.criteria is not None
+    assert result.criteria.energy_question is False
+    assert result.criteria.sobriety_gas is True
+    assert result.actions is not None
+    assert result.actions.present_energy_question is True
+    assert result.details is not None
+    assert result.details.contract_configuration == "DUAL"
+    assert result.details.viewed_energy_score_details is False
+    assert result.details.energy_question is None
+    assert result.details.has_checked_monthly_graph_details is None
+    assert result.details.gas is not None
+    assert result.details.gas.has_consumption_data_end_of_month is False
+
+
+@pytest.mark.parametrize(
+    ("fixture_name", "absent"),
+    [
+        pytest.param("energy_score_single.json", "sobriety_gas", id="single_has_no_gas"),
+        pytest.param("energy_score_dual.json", "has_checked_monthly_graph", id="dual_has_no_graph"),
+    ],
+)
+def test_parse_energy_score_absent_criteria_are_none(
+    fixture_name: str, absent: str, load_fixture: LoadFixture
+) -> None:
+    """A criterion missing from the payload does not count for the contract, so it is None."""
+    criteria = parse_energy_score(load_fixture(fixture_name)).criteria
+    assert criteria is not None
+    assert getattr(criteria, absent) is None
+
+
+def test_parse_energy_score_empty_payload() -> None:
+    assert parse_energy_score({}) == EnergyScore()
+
+
+@pytest.mark.parametrize("block", ["scoring", "actions", "details"])
+@pytest.mark.parametrize("value", [None, "bad"], ids=["null", "not_a_dict"])
+def test_parse_energy_score_absent_block_is_none(
+    block: str, value: object, load_fixture: LoadFixture
+) -> None:
+    payload = load_fixture("energy_score_single.json") | {block: value}
+    result = parse_energy_score(payload)
+    field = {"scoring": "criteria", "actions": "actions", "details": "details"}[block]
+    assert getattr(result, field) is None

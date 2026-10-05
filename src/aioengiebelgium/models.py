@@ -1064,3 +1064,67 @@ class HappyHourServiceStatus:
 
     status: str | None = None
     status_date: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnergyScoreCriteria:
+    """Flags from the wire scoring block, None when a criterion does not count for the contract."""
+
+    consumption_availability: bool | None = None
+    energy_question: bool | None = None
+    has_checked_monthly_graph: bool | None = None
+    sobriety_electricity: bool | None = None
+    sobriety_gas: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnergyScoreActions:
+    """Actions the app suggests to raise an energy score."""
+
+    activate_automatic_data: bool | None = None
+    enter_meter_reads: bool | None = None
+    present_energy_question: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnergyScoreQuestionAnswer:
+    """The answer given to the monthly energy question in the app."""
+
+    question_id: int | None = None
+    answer_score_value: int | None = None
+    answer_bool: bool | None = None
+    answer_label: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnergyScoreDataAvailability:
+    """How consumption data reaches ENGIE for one energy type in the scored month."""
+
+    meter_type: str | None = None
+    automatic_data_flow: str | None = None
+    has_meter_reads_in_current_month: bool | None = None
+    has_consumption_data_end_of_month: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnergyScoreDetails:
+    """Contract configuration and per-criterion details of an energy score."""
+
+    contract_configuration: str | None = None
+    viewed_energy_score_details: bool | None = None
+    has_checked_monthly_graph_details: bool | None = None
+    energy_question: EnergyScoreQuestionAnswer | None = None
+    electricity: EnergyScoreDataAvailability | None = None
+    gas: EnergyScoreDataAvailability | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnergyScore:
+    """Response from the energy-score endpoint."""
+
+    business_agreement_number: str | None = None
+    score: str | None = None
+    last_updated: date | None = None
+    criteria: EnergyScoreCriteria | None = None
+    actions: EnergyScoreActions | None = None
+    details: EnergyScoreDetails | None = None

@@ -166,6 +166,7 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_budget_billing_plan_details(business_agreement_number)` | `BudgetBillingPlanDetails` | The budget billing plan of the current billing period: amounts, payment slices, the amounts it can be set to, ENGIE's proposed new amount and the same details per energy contract. A business agreement without an adjustable plan returns only the flags. |
 | `async_get_happy_hour_eligibility(business_agreement_number)` | `HappyHourEligibility` | Whether the business agreement can activate the happy hour service, with ENGIE's reason codes when it cannot. |
 | `async_get_happy_hour_service_status(business_agreement_number)` | `HappyHourServiceStatus` | The happy hour service status (for example `ACTIVE` or `NOT_ACTIVATED`) and when it last changed. |
+| `async_get_energy_score(business_agreement_number, year, month)` | `EnergyScore` | The app's energy score grade (A to E) for a month, the criteria behind it and the actions the app suggests. Some criteria track app use (monthly graph viewed, monthly question answered). A criterion that does not count for the contract is `None`. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
 
 ### Service actions

@@ -69,6 +69,7 @@ _PRICES_URL = f"{BILLING_BASE_URL}/business-agreements/{_BAN}/supplier-energy-pr
 _RELATIONS_URL = f"{ACCOUNTS_BASE_URL}/customer-account-relations"
 _TOKEN_URL = f"{AUTH_BASE_URL}/oauth/token"
 _USAGE_DETAILS_URL = f"{ENERGY_INSIGHTS_V2_BASE_URL}/business-agreements/{_BAN}/usage-details"
+_ENERGY_SCORE_URL = f"{ENERGY_INSIGHTS_V2_BASE_URL}/business-agreements/{_BAN}/energy-score"
 _ENERGY_CONTRACTS_URL = (
     f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/energy-contracts"
 )
@@ -706,6 +707,26 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "energy_score": (
+        _WireCase(
+            id="energy_score_single",
+            fixture_name="energy_score_single.json",
+            call=lambda c: c.async_get_energy_score(_BAN, 2024, 9),
+            request_method="GET",
+            url=_ENERGY_SCORE_URL,
+            expected_params={"year": "2024", "month": "9"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="energy_score_dual",
+            fixture_name="energy_score_dual.json",
+            call=lambda c: c.async_get_energy_score(_BAN, 2024, 8),
+            request_method="GET",
+            url=_ENERGY_SCORE_URL,
+            expected_params={"year": "2024", "month": "8"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
@@ -937,6 +958,27 @@ def test_month_args_reject_out_of_range_month_and_year() -> None:
         MonthArgs(ban=_BAN, year=1999, month=1)
     with pytest.raises(ValueError, match="year must be between 2000 and 2100"):
         MonthArgs(ban=_BAN, year=2101, month=1)
+
+
+@pytest.mark.parametrize(
+    ("ban", "year", "month", "message"),
+    [
+        pytest.param(_BAN, 2024, 0, "month must be between 1 and 12", id="month_zero"),
+        pytest.param(_BAN, 2024, 13, "month must be between 1 and 12", id="month_13"),
+        pytest.param(_BAN, 1999, 9, "year must be between 2000 and 2100", id="year_1999"),
+        pytest.param("12a", 2024, 9, "business agreement number must be digits", id="bad_ban"),
+    ],
+)
+async def test_get_energy_score_rejects_invalid_args_before_request(
+    ban: str, year: int, month: int, message: str
+) -> None:
+    """The energy score getter validates its BAN, year and month without calling ENGIE."""
+    with aioresponses() as m:
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            with pytest.raises(ValueError, match=message):
+                await client.async_get_energy_score(ban, year, month)
+        assert not m.requests
 
 
 @pytest.mark.parametrize(

@@ -88,6 +88,24 @@ Models
 .. autoclass:: aioengiebelgium.EnergyCostPair
    :members:
 
+.. autoclass:: aioengiebelgium.EnergyScore
+   :members:
+
+.. autoclass:: aioengiebelgium.EnergyScoreActions
+   :members:
+
+.. autoclass:: aioengiebelgium.EnergyScoreCriteria
+   :members:
+
+.. autoclass:: aioengiebelgium.EnergyScoreDataAvailability
+   :members:
+
+.. autoclass:: aioengiebelgium.EnergyScoreDetails
+   :members:
+
+.. autoclass:: aioengiebelgium.EnergyScoreQuestionAnswer
+   :members:
+
 .. autoclass:: aioengiebelgium.EpexPayload
    :members:
 

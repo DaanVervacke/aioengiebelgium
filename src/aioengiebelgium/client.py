@@ -17,6 +17,7 @@ from ._endpoints import (
     CANCEL_HAPPY_HOUR_SERVICE,
     CUSTOMER_ACCOUNT_RELATIONS,
     ENERGY_CONTRACTS,
+    ENERGY_SCORE,
     EPEX_PRICES,
     FEATURE_FLAG,
     HAPPY_HOUR_ELIGIBILITY,
@@ -66,6 +67,7 @@ from .models import (
     BudgetBillingPlanDetails,
     CustomerAccountRelations,
     EnergyContractsResponse,
+    EnergyScore,
     EpexPayload,
     FeatureFlag,
     HappyHourEligibility,
@@ -354,6 +356,16 @@ class EngieBeClient:
     async def async_cancel_happy_hour_service(self, business_agreement_number: str) -> None:
         """Cancel the happy hour service. This changes the customer's ENGIE service."""
         await self._call(CANCEL_HAPPY_HOUR_SERVICE, BanArgs(ban=business_agreement_number))
+
+    async def async_get_energy_score(
+        self,
+        business_agreement_number: str,
+        year: int,
+        month: int,
+    ) -> EnergyScore:
+        """Fetch the energy score grade for a month with the criteria behind it."""
+        args = MonthArgs(ban=business_agreement_number, year=year, month=month)
+        return await self._call(ENERGY_SCORE, args)
 
     async def async_get_epex_prices(
         self,

@@ -38,6 +38,7 @@ from .models import (
     BudgetBillingPlanDetails,
     CustomerAccountRelations,
     EnergyContractsResponse,
+    EnergyScore,
     EpexPayload,
     FeatureFlag,
     HappyHourEligibility,
@@ -60,6 +61,7 @@ from .parsers import (
     parse_budget_billing_plan_details,
     parse_customer_account_relations,
     parse_energy_contracts,
+    parse_energy_score,
     parse_epex_prices,
     parse_feature_flag,
     parse_happy_hour_eligibility,
@@ -516,6 +518,14 @@ CANCEL_HAPPY_HOUR_SERVICE: Endpoint[BanArgs, None] = Endpoint(
     parse=lambda _raw, _a: None,
 )
 
+ENERGY_SCORE: Endpoint[MonthArgs, EnergyScore] = Endpoint(
+    name="energy_score",
+    method="GET",
+    url=lambda a: f"{ENERGY_INSIGHTS_V2_BASE_URL}/business-agreements/{a.ban}/energy-score",
+    params=lambda a: {"year": str(a.year), "month": str(a.month)},
+    parse=lambda raw, _a: parse_energy_score(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -549,6 +559,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     HAPPY_HOUR_SERVICE_STATUS,
     ACTIVATE_HAPPY_HOUR_SERVICE,
     CANCEL_HAPPY_HOUR_SERVICE,
+    ENERGY_SCORE,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

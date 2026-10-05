@@ -623,6 +623,80 @@
     skipped_entries=0,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[energy_score_dual]
+  EnergyScore(
+    actions=EnergyScoreActions(
+      activate_automatic_data=False,
+      enter_meter_reads=False,
+      present_energy_question=True,
+    ),
+    business_agreement_number='000000000001',
+    criteria=EnergyScoreCriteria(
+      consumption_availability=True,
+      energy_question=False,
+      has_checked_monthly_graph=None,
+      sobriety_electricity=False,
+      sobriety_gas=True,
+    ),
+    details=EnergyScoreDetails(
+      contract_configuration='DUAL',
+      electricity=EnergyScoreDataAvailability(
+        automatic_data_flow='YES',
+        has_consumption_data_end_of_month=True,
+        has_meter_reads_in_current_month=True,
+        meter_type='DIGITAL',
+      ),
+      energy_question=None,
+      gas=EnergyScoreDataAvailability(
+        automatic_data_flow='YES',
+        has_consumption_data_end_of_month=False,
+        has_meter_reads_in_current_month=True,
+        meter_type='DIGITAL',
+      ),
+      has_checked_monthly_graph_details=None,
+      viewed_energy_score_details=False,
+    ),
+    last_updated=datetime.date(2024, 9, 2),
+    score='C',
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[energy_score_single]
+  EnergyScore(
+    actions=EnergyScoreActions(
+      activate_automatic_data=False,
+      enter_meter_reads=False,
+      present_energy_question=False,
+    ),
+    business_agreement_number='000000000001',
+    criteria=EnergyScoreCriteria(
+      consumption_availability=True,
+      energy_question=True,
+      has_checked_monthly_graph=True,
+      sobriety_electricity=True,
+      sobriety_gas=None,
+    ),
+    details=EnergyScoreDetails(
+      contract_configuration='SINGLE',
+      electricity=EnergyScoreDataAvailability(
+        automatic_data_flow='YES',
+        has_consumption_data_end_of_month=True,
+        has_meter_reads_in_current_month=True,
+        meter_type='DIGITAL',
+      ),
+      energy_question=EnergyScoreQuestionAnswer(
+        answer_bool=True,
+        answer_label='Ja',
+        answer_score_value=1,
+        question_id=11,
+      ),
+      gas=None,
+      has_checked_monthly_graph_details=True,
+      viewed_energy_score_details=True,
+    ),
+    last_updated=datetime.date(2024, 10, 2),
+    score='A',
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[epex_prices]
   EpexPayload(
     market_date=datetime.date(2026, 5, 4),

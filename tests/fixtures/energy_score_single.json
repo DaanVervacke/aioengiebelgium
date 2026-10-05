@@ -1,0 +1,35 @@
+{
+  "businessAgreementNumber": "000000000001",
+  "score": "A",
+  "lastUpdated": "2024-10-02",
+  "scoring": {
+    "consumptionAvailability": true,
+    "energyQuestion": true,
+    "hasCheckedMonthlyGraph": true,
+    "sobrietyElectricity": true
+  },
+  "actions": {
+    "activateAutomaticData": false,
+    "enterMeterReads": false,
+    "presentEnergyQuestion": false
+  },
+  "details": {
+    "contractConfiguration": "SINGLE",
+    "consumptionGranularityAvailabilityDetails": {
+      "electricity": {
+        "meterType": "DIGITAL",
+        "automaticDataFlow": "YES",
+        "hasMeterReadsInCurrentMonth": true,
+        "hasConsumptionDataEndOfMonth": true
+      }
+    },
+    "energyQuestionDetails": {
+      "id": 11,
+      "answerScoreValue": 1,
+      "answerBool": true,
+      "answerLabel": "Ja"
+    },
+    "hasCheckedMonthlyGraphDetails": true,
+    "viewedEnergyScoreDetails": true
+  }
+}

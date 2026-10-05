@@ -31,6 +31,12 @@ from .models import (
     EnergyContract,
     EnergyContractsResponse,
     EnergyCostPair,
+    EnergyScore,
+    EnergyScoreActions,
+    EnergyScoreCriteria,
+    EnergyScoreDataAvailability,
+    EnergyScoreDetails,
+    EnergyScoreQuestionAnswer,
     EpexPayload,
     EpexSlot,
     FeatureFlag,
@@ -116,6 +122,10 @@ def _as_int_or_none(value: Any) -> int | None:
 
 def _as_bool_or_none(value: Any) -> bool | None:
     return value if isinstance(value, bool) else None
+
+
+def _as_object(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def _as_str_or_none(value: Any) -> str | None:
@@ -1352,4 +1362,77 @@ def parse_happy_hour_service_status(data: dict[str, Any]) -> HappyHourServiceSta
     return HappyHourServiceStatus(
         status=_as_str_or_none(data.get("status")),
         status_date=_as_aware_datetime(data.get("statusDate")),
+    )
+
+
+def _parse_energy_data_availability(value: Any) -> EnergyScoreDataAvailability | None:
+    if not isinstance(value, dict):
+        return None
+    return EnergyScoreDataAvailability(
+        meter_type=_as_str_or_none(value.get("meterType")),
+        automatic_data_flow=_as_str_or_none(value.get("automaticDataFlow")),
+        has_meter_reads_in_current_month=_as_bool_or_none(value.get("hasMeterReadsInCurrentMonth")),
+        has_consumption_data_end_of_month=_as_bool_or_none(
+            value.get("hasConsumptionDataEndOfMonth")
+        ),
+    )
+
+
+def _parse_energy_score_question_answer(value: Any) -> EnergyScoreQuestionAnswer | None:
+    if not isinstance(value, dict):
+        return None
+    return EnergyScoreQuestionAnswer(
+        question_id=_as_int_or_none(value.get("id")),
+        answer_score_value=_as_int_or_none(value.get("answerScoreValue")),
+        answer_bool=_as_bool_or_none(value.get("answerBool")),
+        answer_label=_as_str_or_none(value.get("answerLabel")),
+    )
+
+
+def _parse_energy_score_criteria(value: Any) -> EnergyScoreCriteria | None:
+    if not isinstance(value, dict):
+        return None
+    return EnergyScoreCriteria(
+        consumption_availability=_as_bool_or_none(value.get("consumptionAvailability")),
+        energy_question=_as_bool_or_none(value.get("energyQuestion")),
+        has_checked_monthly_graph=_as_bool_or_none(value.get("hasCheckedMonthlyGraph")),
+        sobriety_electricity=_as_bool_or_none(value.get("sobrietyElectricity")),
+        sobriety_gas=_as_bool_or_none(value.get("sobrietyGas")),
+    )
+
+
+def _parse_energy_score_actions(value: Any) -> EnergyScoreActions | None:
+    if not isinstance(value, dict):
+        return None
+    return EnergyScoreActions(
+        activate_automatic_data=_as_bool_or_none(value.get("activateAutomaticData")),
+        enter_meter_reads=_as_bool_or_none(value.get("enterMeterReads")),
+        present_energy_question=_as_bool_or_none(value.get("presentEnergyQuestion")),
+    )
+
+
+def _parse_energy_score_details(details: Any) -> EnergyScoreDetails | None:
+    if not isinstance(details, dict):
+        return None
+    availability = _as_object(details.get("consumptionGranularityAvailabilityDetails"))
+    return EnergyScoreDetails(
+        contract_configuration=_as_str_or_none(details.get("contractConfiguration")),
+        viewed_energy_score_details=_as_bool_or_none(details.get("viewedEnergyScoreDetails")),
+        has_checked_monthly_graph_details=_as_bool_or_none(
+            details.get("hasCheckedMonthlyGraphDetails")
+        ),
+        energy_question=_parse_energy_score_question_answer(details.get("energyQuestionDetails")),
+        electricity=_parse_energy_data_availability(availability.get("electricity")),
+        gas=_parse_energy_data_availability(availability.get("gas")),
+    )
+
+
+def parse_energy_score(data: dict[str, Any]) -> EnergyScore:
+    return EnergyScore(
+        business_agreement_number=_as_str_or_none(data.get("businessAgreementNumber")),
+        score=_as_str_or_none(data.get("score")),
+        last_updated=_as_date(data.get("lastUpdated")),
+        criteria=_parse_energy_score_criteria(data.get("scoring")),
+        actions=_parse_energy_score_actions(data.get("actions")),
+        details=_parse_energy_score_details(data.get("details")),
     )
