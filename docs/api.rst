@@ -34,6 +34,9 @@ Models
 .. autoclass:: aioengiebelgium.BillingOverview
    :members:
 
+.. autoclass:: aioengiebelgium.BillingPeriodUsage
+   :members:
+
 .. autoclass:: aioengiebelgium.BusinessAgreement
    :members:
 

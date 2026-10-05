@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from aioengiebelgium.models import (
+    BillingPeriodUsage,
     EnergyCostPair,
     GasUsage,
     SimulatedCost,
@@ -25,6 +26,7 @@ from aioengiebelgium.parsers import (
     _normalize_vocab,
     _parse_tou_grid_meter,
     parse_account_balance,
+    parse_billing_period_usage,
     parse_customer_account_relations,
     parse_energy_contracts,
     parse_epex_prices,
@@ -1813,6 +1815,18 @@ _NULLED_PAYLOADS = [
         },
         id="monthly_billed_budget",
     ),
+    pytest.param(
+        parse_billing_period_usage,
+        {
+            "startDate": None,
+            "endDate": None,
+            "expectedYearInvoice": None,
+            "usedAmount": None,
+            "usedAmountRatio": None,
+            "usedAmountFailureReason": None,
+        },
+        id="billing_period_usage",
+    ),
 ]
 
 
@@ -2122,6 +2136,22 @@ _MALFORMED_CASES = [
             and r.skipped_entries == 3
         ),
         id="monthly_billed_budget",
+    ),
+    pytest.param(
+        parse_billing_period_usage,
+        {
+            "startDate": "bad",
+            "endDate": 5,
+            "usedAmount": "bad",
+            "usedAmountFailureReason": 7,
+        },
+        lambda r: (
+            r.start_date is None
+            and r.end_date is None
+            and r.used_amount == 0.0
+            and r.used_amount_failure_reason is None
+        ),
+        id="billing_period_usage",
     ),
 ]
 
@@ -2538,3 +2568,19 @@ def test_parse_monthly_billed_budget_empty_payload() -> None:
     assert result.payments == ()
     assert result.expected_cost_amount is None
     assert result.skipped_entries == 0
+
+
+def test_parse_billing_period_usage_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_billing_period_usage(load_fixture("billing_period_usage.json"))
+    assert (result.start_date, result.end_date) == (date(2023, 11, 9), date(2024, 11, 11))
+    assert result.used_amount is not None
+    assert result.expected_year_invoice is not None
+    assert result.used_amount_ratio == pytest.approx(
+        result.used_amount / result.expected_year_invoice, abs=0.005
+    )
+    assert result.used_amount_failure_reason is None
+
+
+def test_parse_billing_period_usage_failure_reason_only(load_fixture: LoadFixture) -> None:
+    result = parse_billing_period_usage(load_fixture("billing_period_usage_missing_data.json"))
+    assert result == BillingPeriodUsage(used_amount_failure_reason="MISSING_DATA")

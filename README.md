@@ -162,6 +162,7 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_service_points(business_agreement_number)` | `ServicePointsResponse` | Service points of a business agreement, with their metering data sources (P1, P4, billing, meter reads, IMV) and how far back measured data reaches. |
 | `async_get_meter_reads(business_agreement_number, *, latest=False, start_date=None, end_date=None)` | `MeterReadsResponse` | Meter register indexes. Pass `latest=True` for the most recent read, a date range for the reads in it, or nothing for the full history. |
 | `async_get_monthly_billed_budget(business_agreement_number)` | `MonthlyBilledBudget` | Costs so far, expected costs and the monthly payment status of the current billed budget period. ENGIE answers HTTP 500 for a contract without a monthly billed budget. |
+| `async_get_billing_period_usage(business_agreement_number)` | `BillingPeriodUsage` | Cost used so far in the current billing period, the expected yearly invoice and their ratio. When ENGIE cannot compute the cost, only `used_amount_failure_reason` is set (for example `MISSING_DATA`). |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
 
 ### Exceptions

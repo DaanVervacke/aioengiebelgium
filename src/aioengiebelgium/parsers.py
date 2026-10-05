@@ -13,6 +13,7 @@ from .models import (
     AccountRelation,
     BillingDetails,
     BillingOverview,
+    BillingPeriodUsage,
     BusinessAgreement,
     ConsumptionAddress,
     ContractInfo,
@@ -1180,4 +1181,15 @@ def parse_monthly_billed_budget(data: dict[str, Any]) -> MonthlyBilledBudget:
         last_invoiced_amount=_as_float_or_none(data.get("lastInvoicedAmount")),
         payments=tuple(payments),
         skipped_entries=skipped,
+    )
+
+
+def parse_billing_period_usage(data: dict[str, Any]) -> BillingPeriodUsage:
+    return BillingPeriodUsage(
+        start_date=_as_date(data.get("startDate")),
+        end_date=_as_date(data.get("endDate")),
+        expected_year_invoice=_as_float_or_none(data.get("expectedYearInvoice")),
+        used_amount=_as_float_or_none(data.get("usedAmount")),
+        used_amount_ratio=_as_float_or_none(data.get("usedAmountRatio")),
+        used_amount_failure_reason=_as_str_or_none(data.get("usedAmountFailureReason")),
     )

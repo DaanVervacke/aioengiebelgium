@@ -34,6 +34,7 @@ from .exceptions import (
 )
 from .models import (
     AccountBalance,
+    BillingPeriodUsage,
     CustomerAccountRelations,
     EnergyContractsResponse,
     EpexPayload,
@@ -52,6 +53,7 @@ from .models import (
 )
 from .parsers import (
     parse_account_balance,
+    parse_billing_period_usage,
     parse_customer_account_relations,
     parse_energy_contracts,
     parse_epex_prices,
@@ -458,6 +460,13 @@ MONTHLY_BILLED_BUDGET: Endpoint[BanArgs, MonthlyBilledBudget] = Endpoint(
     parse=lambda raw, _a: parse_monthly_billed_budget(raw),
 )
 
+BILLING_PERIOD_USAGE: Endpoint[BanArgs, BillingPeriodUsage] = Endpoint(
+    name="billing_period_usage",
+    method="GET",
+    url=lambda a: f"{HAPPY_HOUR_BASE_URL}/business-agreements/{a.ban}/billing-period-usage-details",
+    parse=lambda raw, _a: parse_billing_period_usage(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -485,6 +494,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     SERVICE_POINTS,
     METER_READS,
     MONTHLY_BILLED_BUDGET,
+    BILLING_PERIOD_USAGE,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

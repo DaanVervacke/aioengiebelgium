@@ -604,6 +604,26 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "billing_period_usage": (
+        _WireCase(
+            id="billing_period_usage",
+            fixture_name="billing_period_usage.json",
+            call=lambda c: c.async_get_billing_period_usage(_BAN),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/billing-period-usage-details",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="billing_period_usage_missing_data",
+            fixture_name="billing_period_usage_missing_data.json",
+            call=lambda c: c.async_get_billing_period_usage(_BAN),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/billing-period-usage-details",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",

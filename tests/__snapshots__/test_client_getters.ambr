@@ -42,6 +42,26 @@
     status='CLEAR',
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[billing_period_usage]
+  BillingPeriodUsage(
+    end_date=datetime.date(2024, 11, 11),
+    expected_year_invoice=612.4,
+    start_date=datetime.date(2023, 11, 9),
+    used_amount=418.06213374,
+    used_amount_failure_reason=None,
+    used_amount_ratio=0.68,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[billing_period_usage_missing_data]
+  BillingPeriodUsage(
+    end_date=None,
+    expected_year_invoice=None,
+    start_date=None,
+    used_amount=None,
+    used_amount_failure_reason='MISSING_DATA',
+    used_amount_ratio=None,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[customer_account_relations]
   CustomerAccountRelations(
     accounts=tuple(

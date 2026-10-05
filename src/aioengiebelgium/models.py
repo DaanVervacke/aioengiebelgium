@@ -940,3 +940,15 @@ class MonthlyBilledBudget:
     last_invoiced_amount: float | None = None
     payments: tuple[PaymentSlice, ...] = ()
     skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class BillingPeriodUsage:
+    """Response from the billing-period-usage-details endpoint."""
+
+    start_date: date | None = None
+    end_date: date | None = None
+    expected_year_invoice: float | None = None
+    used_amount: float | None = None
+    used_amount_ratio: float | None = None
+    used_amount_failure_reason: str | None = None
