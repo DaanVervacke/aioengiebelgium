@@ -105,3 +105,10 @@ docs: |-
 
   When the wire omits optimalTimeslotCode the parser derives it from
   costIndicator: cheapest slot for offtake, dearest for injection.
+
+  Each meter also carries a combinedSchedule with
+  supplierActiveConfigurationId, dgoTgoActiveConfigurationId and
+  offtake / injection weekday maps. Its slots are {startTime, endTime,
+  supplierSlotCode, dgoTgoSlotCode, costIndicator}. The parser applies
+  the same slot code normalisation to both codes. Captured responses
+  sent empty injection lists here.

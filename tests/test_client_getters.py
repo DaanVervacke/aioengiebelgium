@@ -489,6 +489,15 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_params={},
             expected_user_agent=USER_AGENT_NATIVE,
         ),
+        _WireCase(
+            id="tou_schedules_combined",
+            fixture_name="tou_schedules_combined.json",
+            call=lambda c: c.async_get_tou_schedules(_BAN),
+            request_method="GET",
+            url=f"{BILLING_BASE_URL}/business-agreements/{_BAN}/tou-schedules",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
     ),
     "account_balance": (
         _WireCase(

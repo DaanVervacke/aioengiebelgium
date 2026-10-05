@@ -579,6 +579,40 @@ class TouSchedule:
 
 
 @dataclass(frozen=True, slots=True)
+class TouCombinedSlot:
+    """A time-of-use slot carrying both the supplier and the grid operator slot code."""
+
+    start_time: str
+    end_time: str
+    supplier_slot_code: str
+    dgo_tgo_slot_code: str
+    cost_indicator: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TouCombinedDirectionSchedule:
+    """Combined TOU slots for one direction, per weekday."""
+
+    monday: tuple[TouCombinedSlot, ...] = ()
+    tuesday: tuple[TouCombinedSlot, ...] = ()
+    wednesday: tuple[TouCombinedSlot, ...] = ()
+    thursday: tuple[TouCombinedSlot, ...] = ()
+    friday: tuple[TouCombinedSlot, ...] = ()
+    saturday: tuple[TouCombinedSlot, ...] = ()
+    sunday: tuple[TouCombinedSlot, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class TouCombinedSchedule:
+    """The supplier and grid operator TOU schedules merged into one, both directions."""
+
+    supplier_active_configuration_id: str | None = None
+    dgo_tgo_active_configuration_id: str | None = None
+    offtake: TouCombinedDirectionSchedule | None = None
+    injection: TouCombinedDirectionSchedule | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class TouGridMeterSchedule:
     """Per-grid-meter TOU schedules."""
 
@@ -586,6 +620,7 @@ class TouGridMeterSchedule:
     exclusive_night_meter: bool | None = None
     supplier: TouSchedule | None = None
     dgo_tgo: TouSchedule | None = None
+    combined: TouCombinedSchedule | None = None
 
 
 def _schedule_has_tou(

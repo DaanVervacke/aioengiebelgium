@@ -17,6 +17,7 @@ from aioengiebelgium.models import (
     SimulatedCostFlow,
     SimulatedEnergy,
     SimulatedEnergyFlow,
+    TouCombinedSlot,
     bare_ean,
     ean_with_delivery_point_suffix,
 )
@@ -1264,6 +1265,69 @@ def test_parse_tou_schedules_exposes_grid_meter_metadata() -> None:
     assert meter.exclusive_night_meter is True
 
 
+def test_parse_tou_schedules_combined_schedule_fixture(load_fixture: LoadFixture) -> None:
+    meter = (
+        parse_tou_schedules(load_fixture("tou_schedules_combined.json"))
+        .items[0]
+        .grid_meter_schedules[0]
+    )
+    combined = meter.combined
+    assert combined is not None
+    assert combined.supplier_active_configuration_id == "TOTAL_HOURS"
+    assert combined.dgo_tgo_active_configuration_id == "TOTAL_HOURS"
+    assert combined.offtake is not None
+    assert combined.offtake.monday == (
+        TouCombinedSlot(
+            start_time="00:00:00",
+            end_time="00:00:00",
+            supplier_slot_code="total_hours",
+            dgo_tgo_slot_code="total_hours",
+            cost_indicator=5,
+        ),
+    )
+    assert combined.injection is not None
+    assert combined.injection.sunday == ()
+
+
+def test_parse_tou_schedules_combined_schedule_canonicalises_both_codes() -> None:
+    data = {
+        "items": [
+            {
+                "eanWithSuffix": "541448820000000001_ID1",
+                "gridMeterTimeOfUseSchedules": [
+                    {
+                        "combinedSchedule": {
+                            "supplierActiveConfigurationId": "S_TOU1",
+                            "dgoTgoActiveConfigurationId": "",
+                            "offtake": {
+                                "friday": [
+                                    {
+                                        "startTime": "07:00",
+                                        "endTime": "22:00",
+                                        "supplierSlotCode": "S_TOU1_OFFTAKE_PEAK",
+                                        "dgoTgoSlotCode": "HIGH_LOAD_HOURS",
+                                        "costIndicator": True,
+                                    },
+                                ],
+                            },
+                        },
+                    }
+                ],
+            }
+        ]
+    }
+    combined = parse_tou_schedules(data).items[0].grid_meter_schedules[0].combined
+    assert combined is not None
+    assert combined.supplier_active_configuration_id == "S_TOU1"
+    assert combined.dgo_tgo_active_configuration_id is None
+    assert combined.injection is None
+    assert combined.offtake is not None
+    (slot,) = combined.offtake.friday
+    assert slot.supplier_slot_code == "peak"
+    assert slot.dgo_tgo_slot_code == "peak"
+    assert slot.cost_indicator is None
+
+
 def test_parse_tou_schedules_parses_supplier_schedule() -> None:
     data = {
         "items": [
@@ -1575,6 +1639,26 @@ _NULLED_PAYLOADS = [
                         },
                         "injection": None,
                     },
+                    "gridMeterTimeOfUseSchedules": [
+                        {
+                            "combinedSchedule": {
+                                "supplierActiveConfigurationId": None,
+                                "dgoTgoActiveConfigurationId": None,
+                                "offtake": {
+                                    "monday": [
+                                        {
+                                            "startTime": None,
+                                            "endTime": None,
+                                            "supplierSlotCode": None,
+                                            "dgoTgoSlotCode": None,
+                                            "costIndicator": None,
+                                        },
+                                    ],
+                                },
+                                "injection": None,
+                            },
+                        },
+                    ],
                 },
             ],
         },
@@ -1825,11 +1909,48 @@ _MALFORMED_CASES = [
                 {"eanWithSuffix": 9},
                 {
                     "eanWithSuffix": "541448820000000001_ID1",
-                    "gridMeterTimeOfUseSchedules": [{"dgoTgoSchedule": "bad"}],
+                    "gridMeterTimeOfUseSchedules": [
+                        {"dgoTgoSchedule": "bad", "combinedSchedule": "bad"},
+                        {
+                            "combinedSchedule": {
+                                "offtake": {
+                                    "monday": [
+                                        3,
+                                        {
+                                            "startTime": "00:00",
+                                            "endTime": "07:00",
+                                            "supplierSlotCode": "OFFPEAK",
+                                        },
+                                        {
+                                            "startTime": "07:00",
+                                            "endTime": "22:00",
+                                            "supplierSlotCode": "PEAK",
+                                            "dgoTgoSlotCode": 4,
+                                        },
+                                        {
+                                            "startTime": "22:00",
+                                            "endTime": "00:00",
+                                            "supplierSlotCode": "OFFPEAK",
+                                            "dgoTgoSlotCode": "OFFPEAK",
+                                        },
+                                    ],
+                                },
+                                "injection": "bad",
+                            },
+                        },
+                    ],
                 },
             ]
         },
-        lambda r: len(r.items) == 1 and r.items[0].grid_meter_schedules[0].dgo_tgo is None,
+        lambda r: (
+            len(r.items) == 1
+            and r.items[0].grid_meter_schedules[0].dgo_tgo is None
+            and r.items[0].grid_meter_schedules[0].combined is None
+            and r.items[0].grid_meter_schedules[1].combined is not None
+            and r.items[0].grid_meter_schedules[1].combined.injection is None
+            and r.items[0].grid_meter_schedules[1].combined.offtake is not None
+            and len(r.items[0].grid_meter_schedules[1].combined.offtake.monday) == 1
+        ),
         id="tou_schedules",
     ),
     pytest.param(

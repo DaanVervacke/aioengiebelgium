@@ -60,6 +60,9 @@ from .models import (
     SolarSurplusDay,
     SolarSurplusForecasts,
     SolarSurplusSlot,
+    TouCombinedDirectionSchedule,
+    TouCombinedSchedule,
+    TouCombinedSlot,
     TouDirectionSchedule,
     TouGridMeterSchedule,
     TouSchedule,
@@ -670,20 +673,70 @@ def _parse_tou_slot(s: dict[str, Any]) -> TouSlot | None:
         or not isinstance(slot_code, str)
     ):
         return None
-    cost_raw = s.get("costIndicator")
-    cost_indicator = (
-        cost_raw if isinstance(cost_raw, int) and not isinstance(cost_raw, bool) else None
-    )
     return TouSlot(
         start_time=start_time,
         end_time=end_time,
         slot_code=_canonicalise_slot_code(slot_code),
-        cost_indicator=cost_indicator,
+        cost_indicator=_as_cost_indicator(s.get("costIndicator")),
     )
+
+
+def _as_cost_indicator(value: Any) -> int | None:
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
 def _parse_tou_slots(data: Any) -> tuple[TouSlot, ...]:
     return tuple(_parse_items(data, _parse_tou_slot, "TOU slot"))
+
+
+def _parse_tou_combined_slot(s: dict[str, Any]) -> TouCombinedSlot | None:
+    start_time = s.get("startTime")
+    end_time = s.get("endTime")
+    supplier_code = s.get("supplierSlotCode")
+    dgo_tgo_code = s.get("dgoTgoSlotCode")
+    if (
+        not isinstance(start_time, str)
+        or not isinstance(end_time, str)
+        or not isinstance(supplier_code, str)
+        or not isinstance(dgo_tgo_code, str)
+    ):
+        return None
+    return TouCombinedSlot(
+        start_time=start_time,
+        end_time=end_time,
+        supplier_slot_code=_canonicalise_slot_code(supplier_code),
+        dgo_tgo_slot_code=_canonicalise_slot_code(dgo_tgo_code),
+        cost_indicator=_as_cost_indicator(s.get("costIndicator")),
+    )
+
+
+def _parse_tou_combined_slots(data: Any) -> tuple[TouCombinedSlot, ...]:
+    return tuple(_parse_items(data, _parse_tou_combined_slot, "TOU combined slot"))
+
+
+def _parse_tou_combined_direction(data: Any) -> TouCombinedDirectionSchedule | None:
+    if not isinstance(data, dict):
+        return None
+    return TouCombinedDirectionSchedule(
+        monday=_parse_tou_combined_slots(data.get("monday")),
+        tuesday=_parse_tou_combined_slots(data.get("tuesday")),
+        wednesday=_parse_tou_combined_slots(data.get("wednesday")),
+        thursday=_parse_tou_combined_slots(data.get("thursday")),
+        friday=_parse_tou_combined_slots(data.get("friday")),
+        saturday=_parse_tou_combined_slots(data.get("saturday")),
+        sunday=_parse_tou_combined_slots(data.get("sunday")),
+    )
+
+
+def _parse_tou_combined_schedule(data: Any) -> TouCombinedSchedule | None:
+    if not isinstance(data, dict):
+        return None
+    return TouCombinedSchedule(
+        supplier_active_configuration_id=_as_str_or_none(data.get("supplierActiveConfigurationId")),
+        dgo_tgo_active_configuration_id=_as_str_or_none(data.get("dgoTgoActiveConfigurationId")),
+        offtake=_parse_tou_combined_direction(data.get("offtake")),
+        injection=_parse_tou_combined_direction(data.get("injection")),
+    )
 
 
 def _derive_optimal_slot_code(
@@ -751,6 +804,7 @@ def _parse_tou_grid_meter(meter: Any) -> TouGridMeterSchedule | None:
         exclusive_night_meter=exclusive_night if isinstance(exclusive_night, bool) else None,
         supplier=_parse_tou_schedule(meter.get("supplierSchedule")),
         dgo_tgo=_parse_tou_schedule(meter.get("dgoTgoSchedule")),
+        combined=_parse_tou_combined_schedule(meter.get("combinedSchedule")),
     )
 
 

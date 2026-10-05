@@ -175,6 +175,15 @@ Models
 .. autoclass:: aioengiebelgium.SolarSurplusSlot
    :members:
 
+.. autoclass:: aioengiebelgium.TouCombinedDirectionSchedule
+   :members:
+
+.. autoclass:: aioengiebelgium.TouCombinedSchedule
+   :members:
+
+.. autoclass:: aioengiebelgium.TouCombinedSlot
+   :members:
+
 .. autoclass:: aioengiebelgium.TouDirectionSchedule
    :members:
 
