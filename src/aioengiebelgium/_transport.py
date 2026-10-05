@@ -116,7 +116,9 @@ async def request_json(
     json_body: dict[str, Any] | None = None,
     params: dict[str, str] | None = None,
     timeout: float = 30.0,  # noqa: ASYNC109
+    expect_body: bool = True,
 ) -> dict[str, Any]:
+    """Make a request and return its JSON object, or an empty dict when no body is expected."""
     async with request(
         session,
         method=method,
@@ -126,6 +128,11 @@ async def request_json(
         params=params,
         timeout=timeout,
     ) as response:
+        if not expect_body:
+            if not HTTPStatus.OK <= response.status < HTTPStatus.MULTIPLE_CHOICES:
+                msg = f"Unexpected status {response.status} for a request without a body"
+                raise EngieBeInvalidResponseError(msg)
+            return {}
         return await json_object(response)
 
 

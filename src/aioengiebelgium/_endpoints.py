@@ -87,6 +87,7 @@ class WireRequest:
     params: dict[str, str] | None
     json_body: dict[str, Any] | None
     extra_headers: dict[str, str] | None
+    expect_body: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,6 +103,7 @@ class Endpoint[ArgsT, ModelT]:
     json_body: Callable[[ArgsT], dict[str, Any]] | None = None
     optional_auth: bool = False
     not_found_error: Callable[[ArgsT], EngieBeCommunicationError] | None = None
+    expect_body: bool = True
 
     def build(self, args: ArgsT) -> WireRequest:
         json_body = None if self.json_body is None else self.json_body(args)
@@ -113,6 +115,7 @@ class Endpoint[ArgsT, ModelT]:
             params=self.params(args) if callable(self.params) else self.params,
             json_body=json_body,
             extra_headers=None if json_body is None else {"Content-Type": "application/json"},
+            expect_body=self.expect_body,
         )
 
     def raise_error(self, err: EngieBeCommunicationError, args: ArgsT) -> NoReturn:
@@ -496,6 +499,23 @@ HAPPY_HOUR_SERVICE_STATUS: Endpoint[BanArgs, HappyHourServiceStatus] = Endpoint(
     parse=lambda raw, _a: parse_happy_hour_service_status(raw),
 )
 
+ACTIVATE_HAPPY_HOUR_SERVICE: Endpoint[BanArgs, HappyHourServiceStatus] = Endpoint(
+    name="activate_happy_hour_service",
+    method="POST",
+    url=lambda a: (
+        f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{a.ban}/happy-hour-service/_activate"
+    ),
+    parse=lambda raw, _a: parse_happy_hour_service_status(raw),
+)
+
+CANCEL_HAPPY_HOUR_SERVICE: Endpoint[BanArgs, None] = Endpoint(
+    name="cancel_happy_hour_service",
+    method="DELETE",
+    url=lambda a: f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{a.ban}/happy-hour-service",
+    expect_body=False,
+    parse=lambda _raw, _a: None,
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -527,6 +547,8 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     BUDGET_BILLING_PLAN,
     HAPPY_HOUR_ELIGIBILITY,
     HAPPY_HOUR_SERVICE_STATUS,
+    ACTIVATE_HAPPY_HOUR_SERVICE,
+    CANCEL_HAPPY_HOUR_SERVICE,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

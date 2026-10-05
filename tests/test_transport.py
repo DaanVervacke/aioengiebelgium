@@ -142,3 +142,49 @@ async def test_unmatched_request_raises() -> None:
             with pytest.raises(EngieBeCommunicationError, match="ClientConnectionError") as excinfo:
                 await _transport.request_json(session, method="GET", url=_URL)
     assert isinstance(excinfo.value.__cause__, aiohttp.ClientConnectionError)
+
+
+@pytest.mark.parametrize(
+    ("status", "body"),
+    [(204, ""), (200, ""), (200, "not-json{")],
+    ids=["no_content", "empty_ok", "ignored_body"],
+)
+async def test_request_without_expected_body_returns_empty_dict(status: int, body: str) -> None:
+    """A 2xx without an expected body returns an empty dict and never reads the body."""
+    with aioresponses() as m:
+        m.delete(_URL, status=status, body=body)
+        async with aiohttp.ClientSession() as session:
+            result = await _transport.request_json(
+                session, method="DELETE", url=_URL, expect_body=False
+            )
+    assert result == {}
+
+
+async def test_empty_body_without_flag_raises_invalid_response_error() -> None:
+    """An empty body still fails when the caller expects JSON."""
+    with aioresponses() as m:
+        m.delete(_URL, status=204, body="")
+        async with aiohttp.ClientSession() as session:
+            with pytest.raises(EngieBeInvalidResponseError):
+                await _transport.request_json(session, method="DELETE", url=_URL)
+
+
+@pytest.mark.parametrize(
+    ("status", "error"),
+    [
+        (302, EngieBeInvalidResponseError),
+        (401, EngieBeAuthenticationError),
+        (500, EngieBeCommunicationError),
+    ],
+    ids=["redirect", "unauthorized", "server_error"],
+)
+async def test_request_without_expected_body_still_raises_on_error_status(
+    status: int,
+    error: type[Exception],
+) -> None:
+    """Only a 2xx counts as success when no body is expected."""
+    with aioresponses() as m:
+        m.delete(_URL, status=status)
+        async with aiohttp.ClientSession() as session:
+            with pytest.raises(error):
+                await _transport.request_json(session, method="DELETE", url=_URL, expect_body=False)

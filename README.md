@@ -168,6 +168,15 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_happy_hour_service_status(business_agreement_number)` | `HappyHourServiceStatus` | The happy hour service status (for example `ACTIVE` or `NOT_ACTIVATED`) and when it last changed. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
 
+### Service actions
+
+These calls change the customer's ENGIE service. They were built from the ENGIE Smart App's API contract and have not been run against a live account.
+
+| Method | Returns | Description |
+| --- | --- | --- |
+| `async_activate_happy_hour_service(business_agreement_number)` | `HappyHourServiceStatus` | Activates the happy hour service and returns its new status. Check `async_get_happy_hour_eligibility` first. An `EngieBeInvalidResponseError` after activation can still mean the activation worked, so confirm with `async_get_happy_hour_service_status`. |
+| `async_cancel_happy_hour_service(business_agreement_number)` | `None` | Cancels the happy hour service. ENGIE returns no body. |
+
 ### Exceptions
 
 All exceptions derive from `EngieBeError`, which carries an optional HTTP

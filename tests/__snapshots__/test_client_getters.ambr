@@ -42,6 +42,12 @@
     status='CLEAR',
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[activate_happy_hour_service]
+  HappyHourServiceStatus(
+    status='ACTIVE',
+    status_date=datetime.datetime(2024, 5, 1, 9, 15, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[billing_period_usage]
   BillingPeriodUsage(
     end_date=datetime.date(2024, 11, 11),
@@ -285,6 +291,9 @@
       upper_limit=870.0,
     ),
   )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[cancel_happy_hour_service]
+  None
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[customer_account_relations]
   CustomerAccountRelations(

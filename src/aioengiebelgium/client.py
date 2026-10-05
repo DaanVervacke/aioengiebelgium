@@ -11,8 +11,10 @@ from . import _transport
 from ._auth import AuthFlow, start_auth_flow
 from ._endpoints import (
     ACCOUNT_BALANCE,
+    ACTIVATE_HAPPY_HOUR_SERVICE,
     BILLING_PERIOD_USAGE,
     BUDGET_BILLING_PLAN,
+    CANCEL_HAPPY_HOUR_SERVICE,
     CUSTOMER_ACCOUNT_RELATIONS,
     ENERGY_CONTRACTS,
     EPEX_PRICES,
@@ -342,6 +344,17 @@ class EngieBeClient:
         """Fetch the status of the happy hour service."""
         return await self._call(HAPPY_HOUR_SERVICE_STATUS, BanArgs(ban=business_agreement_number))
 
+    async def async_activate_happy_hour_service(
+        self,
+        business_agreement_number: str,
+    ) -> HappyHourServiceStatus:
+        """Activate the happy hour service. This changes the customer's ENGIE service."""
+        return await self._call(ACTIVATE_HAPPY_HOUR_SERVICE, BanArgs(ban=business_agreement_number))
+
+    async def async_cancel_happy_hour_service(self, business_agreement_number: str) -> None:
+        """Cancel the happy hour service. This changes the customer's ENGIE service."""
+        await self._call(CANCEL_HAPPY_HOUR_SERVICE, BanArgs(ban=business_agreement_number))
+
     async def async_get_epex_prices(
         self,
         from_dt: datetime,
@@ -404,6 +417,7 @@ class EngieBeClient:
                     params=wire.params,
                     json_body=wire.json_body,
                     timeout=self._request_timeout,
+                    expect_body=wire.expect_body,
                 )
             except EngieBeAuthenticationError as err:
                 if attempt or not with_auth:

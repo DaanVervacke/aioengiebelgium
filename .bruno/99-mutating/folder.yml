@@ -1,0 +1,10 @@
+info:
+  name: 99 Mutating
+  type: folder
+  seq: 99
+request:
+  auth: inherit
+docs: |-
+  These requests change the customer's ENGIE service. Each one is
+  skipped unless the environment sets ENGIE_ALLOW_MUTATING to 1. They
+  carry no live tag, so a run filtered on live leaves them out as well.

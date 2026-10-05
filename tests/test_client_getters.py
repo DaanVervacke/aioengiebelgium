@@ -110,7 +110,7 @@ class _WireCase:
     """
 
     id: str
-    fixture_name: str
+    fixture_name: str | None
     call: _ClientCall
     request_method: str
     url: str
@@ -684,6 +684,28 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "activate_happy_hour_service": (
+        _WireCase(
+            id="activate_happy_hour_service",
+            fixture_name="happy_hour_service_active.json",
+            call=lambda c: c.async_activate_happy_hour_service(_BAN),
+            request_method="POST",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-service/_activate",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "cancel_happy_hour_service": (
+        _WireCase(
+            id="cancel_happy_hour_service",
+            fixture_name=None,
+            call=lambda c: c.async_cancel_happy_hour_service(_BAN),
+            request_method="DELETE",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-service",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
@@ -703,6 +725,18 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
         ),
     ),
 }
+
+
+def _register_wire_response(m: aioresponses, case: _WireCase, load_fixture: LoadFixture) -> None:
+    """Mock the case's endpoint with its fixture, or with 204 No Content when it has none."""
+    if case.fixture_name is None:
+        m.add(_any_query(case.url), method=case.request_method, status=HTTPStatus.NO_CONTENT)
+        return
+    m.add(
+        _any_query(case.url),
+        method=case.request_method,
+        payload=load_fixture(case.fixture_name),
+    )
 
 
 def test_every_catalog_endpoint_has_wire_cases() -> None:
@@ -726,11 +760,7 @@ async def test_getter_parses_payload_and_sends_expected_request(
 ) -> None:
     """Every getter parses its fixture into the snapshotted model and pins its wire request."""
     with aioresponses() as m:
-        m.add(
-            _any_query(case.url),
-            method=case.request_method,
-            payload=load_fixture(case.fixture_name),
-        )
+        _register_wire_response(m, case, load_fixture)
         async with aiohttp.ClientSession() as session:
             client = EngieBeClient(session, access_token=_TOKEN)
             result = await case.call(client)
@@ -755,11 +785,7 @@ async def test_tokenless_call_matches_auth_mode(
     """Auth-required rows fail fast with no request; the optional-auth row omits the header."""
     case = _WIRE_CASES[endpoint.name][0]
     with aioresponses() as m:
-        m.add(
-            _any_query(case.url),
-            method=case.request_method,
-            payload=load_fixture(case.fixture_name),
-        )
+        _register_wire_response(m, case, load_fixture)
         async with aiohttp.ClientSession() as session:
             client = EngieBeClient(session)
             if endpoint.optional_auth:
@@ -805,6 +831,56 @@ async def test_feature_flag_401_retry_preserves_body_and_headers(
         assert retry.kwargs["headers"]["Content-Type"] == "application/json"
         assert retry.kwargs["headers"]["authorization"] == "Bearer new-access"
     assert result is not None
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        pytest.param(case, id=case.id)
+        for name in ("activate_happy_hour_service", "cancel_happy_hour_service")
+        for case in _WIRE_CASES[name]
+    ],
+)
+async def test_happy_hour_service_write_refreshes_on_401_and_sends_no_body(
+    case: _WireCase,
+    load_fixture: LoadFixture,
+) -> None:
+    """Each write call retries once with the rotated token and never sends a JSON body."""
+    with aioresponses() as m:
+        m.add(case.url, method=case.request_method, status=401)
+        m.post(
+            _TOKEN_URL,
+            payload={
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "token_type": "Bearer",
+            },
+        )
+        _register_wire_response(m, case, load_fixture)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(
+                session,
+                access_token="expired-token",
+                refresh_token="valid-refresh",
+            )
+            await case.call(client)
+        first, retry = m.requests[case.request_method, URL(case.url)]
+    assert first.kwargs["json"] is None
+    assert retry.kwargs["json"] is None
+    assert "Content-Type" not in retry.kwargs["headers"]
+    assert retry.kwargs["headers"]["authorization"] == "Bearer new-access"
+
+
+async def test_cancel_happy_hour_service_raises_on_error_status() -> None:
+    """A 409 on cancellation surfaces as a communication error with its status."""
+    url = f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}/happy-hour-service"
+    with aioresponses() as m:
+        m.delete(url, status=409)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            with pytest.raises(EngieBeCommunicationError) as excinfo:
+                await client.async_cancel_happy_hour_service(_BAN)
+    assert excinfo.value.status == HTTPStatus.CONFLICT
 
 
 async def test_get_prices_ban_with_spaces(load_fixture: LoadFixture) -> None:

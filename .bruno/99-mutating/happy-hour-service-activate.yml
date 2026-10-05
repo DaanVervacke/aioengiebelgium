@@ -1,0 +1,53 @@
+info:
+  name: Happy Hour service activate (mutating)
+  type: http
+  seq: 1
+  tags:
+  - data
+  - mutating
+http:
+  method: POST
+  url: '{{businessAgreementsBaseUrl}}/business-agreements/{{ENGIE_BAN}}/happy-hour-service/_activate'
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  auth: inherit
+runtime:
+  scripts:
+  - type: before-request
+    code: |-
+      if (bru.getEnvVar('ENGIE_ALLOW_MUTATING') !== '1') {
+        if (req.getExecutionMode() === 'runner') { bru.runner.skipRequest(); }
+        else { throw new Error('Set ENGIE_ALLOW_MUTATING to 1 to send this request.'); }
+      }
+  - type: tests
+    code: |-
+      test("responds 2xx", function () {
+        expect(res.getStatus()).to.be.within(200, 299);
+      });
+
+      test("returns a status", function () {
+        expect(typeof res.getBody().status).to.equal('string');
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  MUTATING. Activates the happy hour service of one BAN. Running this
+  request changes the customer's ENGIE service.
+
+  Mirrors EngieBeClient::async_activate_happy_hour_service.
+
+  The pre-request script skips it unless ENGIE_ALLOW_MUTATING is 1, and
+  it carries no live tag. Run it only on an account where activation is
+  intended. Check happy hour eligibility first.
+
+  No request body. The response has the same shape as the happy hour
+  service status. Taken from the ENGIE Smart App 5.0 API contract. This request
+  has not been run against a live account.
+
+  Parsed by parsers.py into HappyHourServiceStatus in models.py.
