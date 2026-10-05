@@ -196,6 +196,19 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             },
             expected_user_agent=USER_AGENT_BROWSER,
         ),
+        _WireCase(
+            id="energy_contracts_green_dual_fuel",
+            fixture_name="energy_contracts_green_dual_fuel.json",
+            call=lambda c: c.async_get_energy_contracts(_BAN),
+            request_method="GET",
+            url=_ENERGY_CONTRACTS_URL,
+            expected_params={
+                "filter": "ONLY_ACTIVE_ENERGY_CONTRACTS",
+                "includeActions": "true",
+                "includeSapData": "true",
+            },
+            expected_user_agent=USER_AGENT_BROWSER,
+        ),
     ),
     "service_point": (
         _WireCase(
@@ -302,6 +315,15 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             call=lambda c: c.async_get_happy_hour_month_report(_BAN, 2026, 8),
             request_method="GET",
             url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/month-report/2026-08",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="happy_hour_month_report_dual_fuel",
+            fixture_name="happy_hour_month_report_dual_fuel.json",
+            call=lambda c: c.async_get_happy_hour_month_report(_BAN, 2024, 9),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/month-report/2024-09",
             expected_params={},
             expected_user_agent=USER_AGENT_NATIVE,
         ),

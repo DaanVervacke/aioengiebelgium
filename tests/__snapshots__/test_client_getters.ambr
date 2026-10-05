@@ -228,6 +228,8 @@
         division='ELECTRICITY',
         product_configuration=ProductConfiguration(
           energy_product='DYNAMIC',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000001_ID1',
@@ -238,6 +240,8 @@
         division='GAS',
         product_configuration=ProductConfiguration(
           energy_product='EASY',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000002_ID2',
@@ -255,6 +259,8 @@
         division='ELECTRICITY',
         product_configuration=ProductConfiguration(
           energy_product='DYNAMIC',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000001_ID1',
@@ -279,6 +285,8 @@
         division='ELECTRICITY',
         product_configuration=ProductConfiguration(
           energy_product='EASY',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000001_ID1',
@@ -289,9 +297,42 @@
         division='GAS',
         product_configuration=ProductConfiguration(
           energy_product='EASY',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000002_ID2',
+        status='ACTIVE',
+      ),
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_green_dual_fuel]
+  EnergyContractsResponse(
+    items=tuple(
+      EnergyContract(
+        business_agreement_number='',
+        division='GAS',
+        product_configuration=ProductConfiguration(
+          energy_product='EASY',
+          green_level='CLASSICAL',
+          green_origin=None,
+          type='INDEXED',
+        ),
+        service_point_number='541448820000000001_ID1',
+        status='ACTIVE',
+      ),
+      EnergyContract(
+        business_agreement_number='',
+        division='ELECTRICITY',
+        product_configuration=ProductConfiguration(
+          energy_product='EASY',
+          green_level='GREENFREE',
+          green_origin='EUROPEAN',
+          type='INDEXED',
+        ),
+        service_point_number='541448820000000002_ID1',
         status='ACTIVE',
       ),
     ),
@@ -306,6 +347,8 @@
         division='ELECTRICITY',
         product_configuration=ProductConfiguration(
           energy_product='DYNAMIC',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000001_ID1',
@@ -316,6 +359,8 @@
         division='GAS',
         product_configuration=ProductConfiguration(
           energy_product='EASY',
+          green_level=None,
+          green_origin=None,
           type='INDEXED',
         ),
         service_point_number='541448820000000002_ID2',
@@ -514,6 +559,7 @@
       is_calculation_ongoing=False,
       reward_euros=4.56,
     ),
+    gas=None,
     history=tuple(
     ),
     partial_historical_data=None,
@@ -524,9 +570,272 @@
     year_month=None,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_dual_fuel]
+  HappyHourMonthReport(
+    current=None,
+    gas=EnergyCostPair(
+      cost=25.015,
+      kwh=202.286,
+    ),
+    history=tuple(
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=10.73,
+          kwh=193.842,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=66.394,
+          kwh=157.874,
+        ),
+        gas=EnergyCostPair(
+          cost=65.224,
+          kwh=1192.578,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2023, 9, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=7.111,
+          kwh=24.638,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=72.632,
+          kwh=328.005,
+        ),
+        gas=EnergyCostPair(
+          cost=131.151,
+          kwh=152.789,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2023, 10, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=11.636,
+          kwh=80.804,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=56.828,
+          kwh=366.24,
+        ),
+        gas=EnergyCostPair(
+          cost=31.557,
+          kwh=389.882,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2023, 11, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=14.468,
+          kwh=158.449,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=57.76,
+          kwh=169.035,
+        ),
+        gas=EnergyCostPair(
+          cost=134.205,
+          kwh=400.468,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2023, 12, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=2.826,
+          kwh=205.414,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=102.092,
+          kwh=264.404,
+        ),
+        gas=EnergyCostPair(
+          cost=24.38,
+          kwh=1065.785,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 1, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=8.709,
+          kwh=194.508,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=61.641,
+          kwh=121.468,
+        ),
+        gas=EnergyCostPair(
+          cost=119.035,
+          kwh=372.814,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 2, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=9.748,
+          kwh=114.807,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=48.978,
+          kwh=357.582,
+        ),
+        gas=EnergyCostPair(
+          cost=24.713,
+          kwh=1451.561,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 3, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=10.901,
+          kwh=154.23,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=107.482,
+          kwh=264.027,
+        ),
+        gas=EnergyCostPair(
+          cost=74.939,
+          kwh=1257.933,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 4, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=5.477,
+          kwh=134.404,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=77.23,
+          kwh=195.362,
+        ),
+        gas=EnergyCostPair(
+          cost=55.916,
+          kwh=1378.341,
+        ),
+        happy_hour=HappyHourMonthData(
+          comparison=None,
+          consumption_kwh=21.408,
+          eligible_hours=16,
+          is_calculation_ongoing=False,
+          reward_euros=0.685,
+        ),
+        year_month=datetime.date(2024, 5, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=3.977,
+          kwh=111.442,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=53.992,
+          kwh=146.344,
+        ),
+        gas=EnergyCostPair(
+          cost=101.311,
+          kwh=1332.47,
+        ),
+        happy_hour=HappyHourMonthData(
+          comparison=HappyHourComparison(
+            consumption_kwh_pct_change=-0.456,
+            eligible_hours_pct_change=5.788,
+            reward_euros_pct_change=-24.697,
+          ),
+          consumption_kwh=19.747,
+          eligible_hours=18,
+          is_calculation_ongoing=False,
+          reward_euros=2.762,
+        ),
+        year_month=datetime.date(2024, 6, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=11.431,
+          kwh=45.353,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=98.907,
+          kwh=295.754,
+        ),
+        gas=EnergyCostPair(
+          cost=23.972,
+          kwh=1153.397,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 7, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=4.993,
+          kwh=58.691,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=77.629,
+          kwh=133.187,
+        ),
+        gas=EnergyCostPair(
+          cost=93.91,
+          kwh=1024.184,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 8, 1),
+      ),
+      MonthReportHistoryEntry(
+        electricity_injection=EnergyCostPair(
+          cost=0.682,
+          kwh=86.766,
+        ),
+        electricity_offtake=EnergyCostPair(
+          cost=75.457,
+          kwh=314.675,
+        ),
+        gas=EnergyCostPair(
+          cost=33.453,
+          kwh=253.325,
+        ),
+        happy_hour=None,
+        year_month=datetime.date(2024, 9, 1),
+      ),
+    ),
+    partial_historical_data=False,
+    partial_year_month_data=False,
+    simulated_cost=SimulatedCost(
+      electricity_injection=SimulatedCostFlow(
+        amount=7.451,
+      ),
+      electricity_offtake=SimulatedCostFlow(
+        amount=63.836,
+      ),
+      gas=SimulatedCostFlow(
+        amount=32.521,
+      ),
+      total=88.906,
+    ),
+    simulated_energy=SimulatedEnergy(
+      electricity_injection=SimulatedEnergyFlow(
+        kwh=138.958,
+      ),
+      electricity_offtake=SimulatedEnergyFlow(
+        kwh=256.981,
+      ),
+      gas=SimulatedEnergyFlow(
+        kwh=314.934,
+      ),
+    ),
+    skipped_entries=0,
+    year_month='2024-09',
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_energy]
   HappyHourMonthReport(
     current=None,
+    gas=None,
     history=tuple(
       MonthReportHistoryEntry(
         electricity_injection=EnergyCostPair(
@@ -537,6 +846,7 @@
           cost=31.29,
           kwh=15.756,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2025, 8, 1),
       ),
@@ -549,6 +859,7 @@
           cost=28.16,
           kwh=6.784,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2025, 9, 1),
       ),
@@ -561,6 +872,7 @@
           cost=45.48,
           kwh=71.491,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2025, 10, 1),
       ),
@@ -573,6 +885,7 @@
           cost=91.95,
           kwh=282.497,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2025, 11, 1),
       ),
@@ -585,6 +898,7 @@
           cost=113.38,
           kwh=392.166,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2025, 12, 1),
       ),
@@ -597,6 +911,7 @@
           cost=121.96,
           kwh=387.357,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 1, 1),
       ),
@@ -609,6 +924,7 @@
           cost=71.51,
           kwh=204.54,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 2, 1),
       ),
@@ -621,6 +937,7 @@
           cost=33.68,
           kwh=20.316,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 3, 1),
       ),
@@ -633,6 +950,7 @@
           cost=28.33,
           kwh=83.077,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 4, 1),
       ),
@@ -645,6 +963,7 @@
           cost=26.4,
           kwh=29.854,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 5, 1),
       ),
@@ -657,6 +976,7 @@
           cost=31.03,
           kwh=10.638,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 6, 1),
       ),
@@ -669,12 +989,14 @@
           cost=31.19,
           kwh=8.066,
         ),
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 7, 1),
       ),
       MonthReportHistoryEntry(
         electricity_injection=None,
         electricity_offtake=None,
+        gas=None,
         happy_hour=None,
         year_month=datetime.date(2026, 8, 1),
       ),
@@ -688,6 +1010,7 @@
       electricity_offtake=SimulatedCostFlow(
         amount=10.0,
       ),
+      gas=None,
       total=52.83,
     ),
     simulated_energy=SimulatedEnergy(
@@ -697,6 +1020,7 @@
       electricity_offtake=SimulatedEnergyFlow(
         kwh=131.389,
       ),
+      gas=None,
     ),
     skipped_entries=0,
     year_month='2026-08',

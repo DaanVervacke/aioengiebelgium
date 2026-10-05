@@ -300,6 +300,8 @@ def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
         ProductConfiguration(
             energy_product=pc_raw.get("energyProduct"),
             type=pc_raw.get("type"),
+            green_level=_as_str_or_none(pc_raw.get("greenLevel")),
+            green_origin=_as_str_or_none(pc_raw.get("greenOrigin")),
         )
         if isinstance(pc_raw, dict)
         else None
@@ -536,6 +538,7 @@ def _parse_month_report_history_entry(entry: dict[str, Any]) -> MonthReportHisto
         happy_hour=_parse_happy_hour_data(hh) if isinstance(hh, dict) else None,
         electricity_offtake=_parse_energy_cost_pair(entry.get("electricityOfftake")),
         electricity_injection=_parse_energy_cost_pair(entry.get("electricityInjection")),
+        gas=_parse_energy_cost_pair(entry.get("gas")),
     )
 
 
@@ -551,6 +554,7 @@ def _parse_simulated_energy(raw: Any) -> SimulatedEnergy | None:
     return SimulatedEnergy(
         electricity_offtake=_parse_simulated_energy_flow(raw.get("electricityOfftake")),
         electricity_injection=_parse_simulated_energy_flow(raw.get("electricityInjection")),
+        gas=_parse_simulated_energy_flow(raw.get("gas")),
     )
 
 
@@ -567,6 +571,23 @@ def _parse_simulated_cost(raw: Any) -> SimulatedCost | None:
         electricity_offtake=_parse_simulated_cost_flow(raw.get("electricityOfftake")),
         electricity_injection=_parse_simulated_cost_flow(raw.get("electricityInjection")),
         total=_as_float_or_none(raw.get("total")),
+        gas=_parse_simulated_cost_flow(raw.get("gas")),
+    )
+
+
+def _month_block_gas(block: Any) -> dict[str, Any] | None:
+    gas = block.get("gas") if isinstance(block, dict) else None
+    return gas if isinstance(gas, dict) else None
+
+
+def _parse_month_gas(energy: Any, cost: Any) -> EnergyCostPair | None:
+    energy_gas = _month_block_gas(energy)
+    cost_gas = _month_block_gas(cost)
+    if energy_gas is None and cost_gas is None:
+        return None
+    return EnergyCostPair(
+        kwh=_as_float_or_none(energy_gas.get("kWh")) if energy_gas is not None else None,
+        cost=_as_float_or_none(cost_gas.get("amount")) if cost_gas is not None else None,
     )
 
 
@@ -574,6 +595,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
     current = None
     simulated_energy = None
     simulated_cost = None
+    gas = None
     month_raw = data.get("month")
     if isinstance(month_raw, dict):
         hh = month_raw.get("happyHour")
@@ -581,6 +603,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
             current = _parse_happy_hour_data(hh)
         simulated_energy = _parse_simulated_energy(month_raw.get("simulatedEnergy"))
         simulated_cost = _parse_simulated_cost(month_raw.get("simulatedCost"))
+        gas = _parse_month_gas(month_raw.get("energy"), month_raw.get("cost"))
 
     history, skipped = _parse_items_counted(
         data.get("history"), _parse_month_report_history_entry, "month report history"
@@ -601,6 +624,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
         simulated_energy=simulated_energy,
         simulated_cost=simulated_cost,
         skipped_entries=skipped,
+        gas=gas,
     )
 
 

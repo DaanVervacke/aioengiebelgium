@@ -156,6 +156,8 @@ class ProductConfiguration:
 
     energy_product: str | None = None
     type: str | None = None
+    green_level: str | None = None
+    green_origin: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -365,7 +367,7 @@ class HappyHourMonthData:
 
 @dataclass(frozen=True, slots=True)
 class EnergyCostPair:
-    """A kWh/cost pair for one flow direction in a month-report history entry."""
+    """A kWh/cost pair for one energy flow in a month report."""
 
     kwh: float | None = None
     cost: float | None = None
@@ -379,6 +381,7 @@ class MonthReportHistoryEntry:
     happy_hour: HappyHourMonthData | None = None
     electricity_offtake: EnergyCostPair | None = None
     electricity_injection: EnergyCostPair | None = None
+    gas: EnergyCostPair | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -394,6 +397,7 @@ class SimulatedEnergy:
 
     electricity_offtake: SimulatedEnergyFlow | None = None
     electricity_injection: SimulatedEnergyFlow | None = None
+    gas: SimulatedEnergyFlow | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -410,6 +414,7 @@ class SimulatedCost:
     electricity_offtake: SimulatedCostFlow | None = None
     electricity_injection: SimulatedCostFlow | None = None
     total: float | None = None
+    gas: SimulatedCostFlow | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -424,6 +429,8 @@ class HappyHourMonthReport:
     simulated_energy: SimulatedEnergy | None = None
     simulated_cost: SimulatedCost | None = None
     skipped_entries: int = 0
+    gas: EnergyCostPair | None = None
+    """Gas energy and cost for the reported month."""
 
 
 @dataclass(frozen=True, slots=True)

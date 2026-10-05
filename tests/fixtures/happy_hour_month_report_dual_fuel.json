@@ -1,0 +1,297 @@
+{
+  "history": [
+    {
+      "yearMonth": "2023-09",
+      "electricityInjection": {
+        "kWh": 193.842,
+        "cost": 10.73
+      },
+      "electricityOfftake": {
+        "kWh": 157.874,
+        "cost": 66.394
+      },
+      "gas": {
+        "kWh": 1192.578,
+        "cost": 65.224
+      }
+    },
+    {
+      "yearMonth": "2023-10",
+      "electricityInjection": {
+        "kWh": 24.638,
+        "cost": 7.111
+      },
+      "electricityOfftake": {
+        "kWh": 328.005,
+        "cost": 72.632
+      },
+      "gas": {
+        "kWh": 152.789,
+        "cost": 131.151
+      }
+    },
+    {
+      "yearMonth": "2023-11",
+      "electricityInjection": {
+        "kWh": 80.804,
+        "cost": 11.636
+      },
+      "electricityOfftake": {
+        "kWh": 366.24,
+        "cost": 56.828
+      },
+      "gas": {
+        "kWh": 389.882,
+        "cost": 31.557
+      }
+    },
+    {
+      "yearMonth": "2023-12",
+      "electricityInjection": {
+        "kWh": 158.449,
+        "cost": 14.468
+      },
+      "electricityOfftake": {
+        "kWh": 169.035,
+        "cost": 57.76
+      },
+      "gas": {
+        "kWh": 400.468,
+        "cost": 134.205
+      }
+    },
+    {
+      "yearMonth": "2024-01",
+      "electricityInjection": {
+        "kWh": 205.414,
+        "cost": 2.826
+      },
+      "electricityOfftake": {
+        "kWh": 264.404,
+        "cost": 102.092
+      },
+      "gas": {
+        "kWh": 1065.785,
+        "cost": 24.38
+      }
+    },
+    {
+      "yearMonth": "2024-02",
+      "electricityInjection": {
+        "kWh": 194.508,
+        "cost": 8.709
+      },
+      "electricityOfftake": {
+        "kWh": 121.468,
+        "cost": 61.641
+      },
+      "gas": {
+        "kWh": 372.814,
+        "cost": 119.035
+      }
+    },
+    {
+      "yearMonth": "2024-03",
+      "electricityInjection": {
+        "kWh": 114.807,
+        "cost": 9.748
+      },
+      "electricityOfftake": {
+        "kWh": 357.582,
+        "cost": 48.978
+      },
+      "gas": {
+        "kWh": 1451.561,
+        "cost": 24.713
+      }
+    },
+    {
+      "yearMonth": "2024-04",
+      "electricityInjection": {
+        "kWh": 154.23,
+        "cost": 10.901
+      },
+      "electricityOfftake": {
+        "kWh": 264.027,
+        "cost": 107.482
+      },
+      "gas": {
+        "kWh": 1257.933,
+        "cost": 74.939
+      }
+    },
+    {
+      "yearMonth": "2024-05",
+      "electricityInjection": {
+        "kWh": 134.404,
+        "cost": 5.477
+      },
+      "electricityOfftake": {
+        "kWh": 195.362,
+        "cost": 77.23
+      },
+      "gas": {
+        "kWh": 1378.341,
+        "cost": 55.916
+      },
+      "happyHour": {
+        "consumptionKWh": 21.408,
+        "isCalculationOngoing": false,
+        "numberOfEligibleHappyHours": 16,
+        "rewardEuros": 0.685
+      }
+    },
+    {
+      "yearMonth": "2024-06",
+      "electricityInjection": {
+        "kWh": 111.442,
+        "cost": 3.977
+      },
+      "electricityOfftake": {
+        "kWh": 146.344,
+        "cost": 53.992
+      },
+      "gas": {
+        "kWh": 1332.47,
+        "cost": 101.311
+      },
+      "happyHour": {
+        "comparisonToPreviousMonth": {
+          "consumptionKWhPercentageChange": -0.456,
+          "numberOfEligibleHappyHoursPercentageChange": 5.788,
+          "rewardEurosPercentageChange": -24.697
+        },
+        "consumptionKWh": 19.747,
+        "isCalculationOngoing": false,
+        "numberOfEligibleHappyHours": 18,
+        "rewardEuros": 2.762
+      }
+    },
+    {
+      "yearMonth": "2024-07",
+      "electricityInjection": {
+        "kWh": 45.353,
+        "cost": 11.431
+      },
+      "electricityOfftake": {
+        "kWh": 295.754,
+        "cost": 98.907
+      },
+      "gas": {
+        "kWh": 1153.397,
+        "cost": 23.972
+      }
+    },
+    {
+      "yearMonth": "2024-08",
+      "electricityInjection": {
+        "kWh": 58.691,
+        "cost": 4.993
+      },
+      "electricityOfftake": {
+        "kWh": 133.187,
+        "cost": 77.629
+      },
+      "gas": {
+        "kWh": 1024.184,
+        "cost": 93.91
+      }
+    },
+    {
+      "yearMonth": "2024-09",
+      "electricityInjection": {
+        "kWh": 86.766,
+        "cost": 0.682
+      },
+      "electricityOfftake": {
+        "kWh": 314.675,
+        "cost": 75.457
+      },
+      "gas": {
+        "kWh": 253.325,
+        "cost": 33.453
+      }
+    }
+  ],
+  "month": {
+    "cost": {
+      "electricityInjection": {
+        "amountSum": 11.364,
+        "supplierParts": [
+          {
+            "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+            "amount": 11.364,
+            "percentageOfSum": 1.0,
+            "hasVolumeSimulationPercentage": false
+          }
+        ]
+      },
+      "electricityOfftake": {
+        "amountSum": 59.492,
+        "supplierParts": [
+          {
+            "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+            "amount": 59.492,
+            "percentageOfSum": 1.0,
+            "hasVolumeSimulationPercentage": false
+          }
+        ]
+      },
+      "gas": {
+        "amount": 25.015
+      },
+      "total": 73.143
+    },
+    "energy": {
+      "electricityInjection": {
+        "kWhSum": 155.217,
+        "supplierParts": [
+          {
+            "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+            "kWh": 155.217,
+            "percentageOfSum": 1.0
+          }
+        ]
+      },
+      "electricityOfftake": {
+        "kWhSum": 228.792,
+        "supplierParts": [
+          {
+            "timeOfUseTimeSlotCode": "TOTAL_HOURS",
+            "kWh": 228.792,
+            "percentageOfSum": 1.0
+          }
+        ]
+      },
+      "gas": {
+        "kWh": 202.286
+      }
+    },
+    "simulatedCost": {
+      "electricityInjection": {
+        "amount": 7.451
+      },
+      "electricityOfftake": {
+        "amount": 63.836
+      },
+      "gas": {
+        "amount": 32.521
+      },
+      "total": 88.906
+    },
+    "simulatedEnergy": {
+      "electricityInjection": {
+        "kWh": 138.958
+      },
+      "electricityOfftake": {
+        "kWh": 256.981
+      },
+      "gas": {
+        "kWh": 314.934
+      }
+    }
+  },
+  "partialHistoricalData": false,
+  "partialYearMonthData": false,
+  "yearMonth": "2024-09"
+}

@@ -73,3 +73,8 @@ docs: |-
   consumption, eligible hours, reward and comparison metrics. Parsed by
   parsers.py. The event windows come from the separate happy-hour-event
   endpoint, not this report.
+
+  For a business agreement with gas, the parser also reads
+  month.energy.gas.kWh, month.cost.gas.amount,
+  month.simulatedEnergy.gas.kWh, month.simulatedCost.gas.amount and
+  history[].gas.{kWh,cost}.

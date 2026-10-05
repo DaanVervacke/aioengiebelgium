@@ -417,7 +417,46 @@ def test_parse_happy_hour_month_report_neither_block_present() -> None:
     assert result.current is None
     assert result.simulated_energy is None
     assert result.simulated_cost is None
+    assert result.gas is None
     assert result.history == ()
+
+
+def test_parse_happy_hour_month_report_dual_fuel_gas(load_fixture: LoadFixture) -> None:
+    result = parse_happy_hour_month_report(load_fixture("happy_hour_month_report_dual_fuel.json"))
+
+    assert result.gas == EnergyCostPair(kwh=202.286, cost=25.015)
+    assert result.simulated_energy is not None
+    assert result.simulated_energy.gas == SimulatedEnergyFlow(kwh=314.934)
+    assert result.simulated_cost is not None
+    assert result.simulated_cost.gas == SimulatedCostFlow(amount=32.521)
+    assert len(result.history) == 13
+    first = result.history[0]
+    assert first.year_month == date(2023, 9, 1)
+    assert first.gas == EnergyCostPair(kwh=1192.578, cost=65.224)
+    assert result.skipped_entries == 0
+
+
+def test_parse_happy_hour_month_report_gas_from_one_block_only() -> None:
+    energy_only = parse_happy_hour_month_report({"month": {"energy": {"gas": {"kWh": 4.5}}}})
+    cost_only = parse_happy_hour_month_report({"month": {"cost": {"gas": {"amount": 1.25}}}})
+
+    assert energy_only.gas == EnergyCostPair(kwh=4.5, cost=None)
+    assert cost_only.gas == EnergyCostPair(kwh=None, cost=1.25)
+
+
+def test_parse_energy_contracts_green_level_and_origin(load_fixture: LoadFixture) -> None:
+    result = parse_energy_contracts(load_fixture("energy_contracts_green_dual_fuel.json"))
+    by_division = {c.division: c.product_configuration for c in result.items}
+
+    gas = by_division["GAS"]
+    electricity = by_division["ELECTRICITY"]
+    assert gas is not None
+    assert gas.green_level == "CLASSICAL"
+    assert gas.green_origin is None
+    assert electricity is not None
+    assert electricity.green_level == "GREENFREE"
+    assert electricity.green_origin == "EUROPEAN"
+    assert result.skipped_entries == 0
 
 
 def test_parse_solar_surplus_forecasts_empty() -> None:
@@ -1517,7 +1556,12 @@ _NULLED_PAYLOADS = [
                     "servicePointNumber": None,
                     "division": None,
                     "status": None,
-                    "productConfiguration": {"energyProduct": None, "type": None},
+                    "productConfiguration": {
+                        "energyProduct": None,
+                        "type": None,
+                        "greenLevel": None,
+                        "greenOrigin": None,
+                    },
                 },
             ],
         },
@@ -1597,8 +1641,15 @@ _NULLED_PAYLOADS = [
                         "rewardEurosPercentageChange": None,
                     },
                 },
+                "energy": {"gas": {"kWh": None}},
+                "cost": {"gas": None},
+                "simulatedEnergy": {"gas": None},
+                "simulatedCost": {"gas": {"amount": None}},
             },
-            "history": [{"yearMonth": None, "happyHour": {"consumptionKWh": None}}],
+            "history": [
+                {"yearMonth": None, "happyHour": {"consumptionKWh": None}},
+                {"yearMonth": "2024-09", "gas": {"kWh": None, "cost": None}},
+            ],
         },
         id="happy_hour_month_report",
     ),
@@ -1807,8 +1858,22 @@ _MALFORMED_CASES = [
     ),
     pytest.param(
         parse_energy_contracts,
-        {"items": [None, {"businessAgreementNumber": "B1", "productConfiguration": "bad"}]},
-        lambda r: len(r.items) == 1 and r.items[0].product_configuration is None,
+        {
+            "items": [
+                None,
+                {"businessAgreementNumber": "B1", "productConfiguration": "bad"},
+                {
+                    "businessAgreementNumber": "B1",
+                    "productConfiguration": {"greenLevel": 3, "greenOrigin": ""},
+                },
+            ]
+        },
+        lambda r: (
+            len(r.items) == 2
+            and r.items[0].product_configuration is None
+            and r.items[1].product_configuration.green_level is None
+            and r.items[1].product_configuration.green_origin is None
+        ),
         id="energy_contracts",
     ),
     pytest.param(
@@ -1867,15 +1932,17 @@ _MALFORMED_CASES = [
     pytest.param(
         parse_happy_hour_month_report,
         {
-            "month": {"noHappyHour": True},
+            "month": {"noHappyHour": True, "energy": {"gas": "bad"}, "cost": ["bad"]},
             "history": [
                 3,
                 {"happyHour": "no"},
                 {"yearMonth": "not-a-month", "happyHour": {"savedAmount": 1.0}},
-                {"yearMonth": "2026-05", "happyHour": {"savedAmount": 1.0}},
+                {"yearMonth": "2026-05", "happyHour": {"savedAmount": 1.0}, "gas": "bad"},
             ],
         },
-        lambda r: r.current is None and len(r.history) == 1,
+        lambda r: (
+            r.current is None and len(r.history) == 1 and r.gas is None and r.history[0].gas is None
+        ),
         id="happy_hour_month_report",
     ),
     pytest.param(

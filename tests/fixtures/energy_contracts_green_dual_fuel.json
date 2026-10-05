@@ -1,0 +1,76 @@
+{
+  "customerAccountNumber": "1500000001",
+  "businessAgreementNumber": "000000000001",
+  "actions": [
+    "PRODUCT_CHANGE"
+  ],
+  "items": [
+    {
+      "contractType": "CONTRACT",
+      "contractId": "1000000001",
+      "contractItemId": "1",
+      "status": "ACTIVE",
+      "division": "GAS",
+      "action": "PRODUCT_CHANGE",
+      "billingContractNumber": "2000000001",
+      "businessScenario": "TACIT_EXTENSION",
+      "commercializationStartDate": "2023-03-01",
+      "customerAgreementDate": "2023-03-01",
+      "desiredContractStartDate": "2023-03-01",
+      "endDate": "+999999999-12-31",
+      "legalContractStartDate": "2023-03-01",
+      "productConfiguration": {
+        "careLevel": "BASIC_CARE",
+        "contractItemTimeOfUseConfigurationList": [],
+        "duration": "ONE_YEAR",
+        "energyProduct": "EASY",
+        "greenLevel": "CLASSICAL",
+        "meteringConfiguration": {
+          "meteringReadsForInformation": "NOT_APPLICABLE",
+          "registerTypeConfiguration": "TOTAL_HOURS",
+          "smartMeterRegime": "ONE",
+          "supplierBillingFrequency": "MONTHLY"
+        },
+        "serviceComponent": "OFFTAKE",
+        "type": "INDEXED"
+      },
+      "salesClosure": "BATCH_PROCESS",
+      "servicePointNumber": "541448820000000001_ID1",
+      "startDate": "2023-03-01"
+    },
+    {
+      "contractType": "CONTRACT",
+      "contractId": "1000000002",
+      "contractItemId": "1",
+      "status": "ACTIVE",
+      "division": "ELECTRICITY",
+      "action": "PRODUCT_CHANGE",
+      "billingContractNumber": "2000000002",
+      "businessScenario": "TACIT_EXTENSION",
+      "commercializationStartDate": "2023-03-01",
+      "customerAgreementDate": "2023-03-01",
+      "desiredContractStartDate": "2023-03-01",
+      "endDate": "+999999999-12-31",
+      "legalContractStartDate": "2023-03-01",
+      "productConfiguration": {
+        "careLevel": "BASIC_CARE",
+        "contractItemTimeOfUseConfigurationList": [],
+        "duration": "ONE_YEAR",
+        "energyProduct": "EASY",
+        "greenLevel": "GREENFREE",
+        "greenOrigin": "EUROPEAN",
+        "meteringConfiguration": {
+          "meteringReadsForInformation": "NOT_APPLICABLE",
+          "registerTypeConfiguration": "TOTAL_HOURS",
+          "smartMeterRegime": "ONE",
+          "supplierBillingFrequency": "MONTHLY"
+        },
+        "serviceComponent": "CONSTRAINT_COMMERCIALIZATION_OF_INJECTION",
+        "type": "INDEXED"
+      },
+      "salesClosure": "BATCH_PROCESS",
+      "servicePointNumber": "541448820000000002_ID1",
+      "startDate": "2023-03-01"
+    }
+  ]
+}

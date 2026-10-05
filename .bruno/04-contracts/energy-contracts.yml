@@ -123,4 +123,6 @@ docs: |-
   earliest legalContractStartDate.
 
   Parsed by parsers.py: items[].division, .servicePointNumber,
-  .status, .productConfiguration.energyProduct.
+  .status, .productConfiguration.energyProduct, .type, .greenLevel
+  and .greenOrigin. greenOrigin can be absent, for example on a gas
+  contract.
