@@ -15,6 +15,10 @@ http:
   - name: month
     value: '{{peaksMonth}}'
     type: query
+  - name: day
+    value: '1'
+    type: query
+    disabled: true
   headers:
   - name: User-Agent
     value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
@@ -96,3 +100,12 @@ docs: |-
   object, the last two both shaped {peakKWh, peakKW, start, end}.
   Parsed by parsers.py. ENGIE sends the array as dailyPeaks, not
   peaks: match the wire name, not a model field name.
+
+  Some responses also carry previousPeakOfTheMonth in the same shape.
+  It is the earlier, lower peak of the same month that the current
+  peakOfTheMonth replaced, not the peak of the previous month.
+
+  The optional day query param (disabled here) limits dailyPeaks to
+  that day of the month. peakOfTheMonth and previousPeakOfTheMonth
+  still cover the whole month. To try it, enable the param and add
+  &day=N to the URL.

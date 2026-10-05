@@ -26,6 +26,7 @@ from aioengiebelgium._endpoints import (
     FlagArgs,
     MeterReadsArgs,
     MonthArgs,
+    PeaksArgs,
     SolarArgs,
 )
 from aioengiebelgium.client import EngieBeClient
@@ -238,6 +239,30 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
                 f"{_BAN}/energy-insights/peaks"
             ),
             expected_params={"year": "2026", "month": "4"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="monthly_peaks_with_previous_peak",
+            fixture_name="peaks_with_previous_peak.json",
+            call=lambda c: c.async_get_monthly_peaks(_BAN, 2024, 10),
+            request_method="GET",
+            url=(
+                f"{PEAKS_BASE_URL}/private/customers/me/contract-accounts/"
+                f"{_BAN}/energy-insights/peaks"
+            ),
+            expected_params={"year": "2024", "month": "10"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="monthly_peaks_single_day",
+            fixture_name="peaks_single_day.json",
+            call=lambda c: c.async_get_monthly_peaks(_BAN, 2024, 10, day=4),
+            request_method="GET",
+            url=(
+                f"{PEAKS_BASE_URL}/private/customers/me/contract-accounts/"
+                f"{_BAN}/energy-insights/peaks"
+            ),
+            expected_params={"year": "2024", "month": "10", "day": "4"},
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
@@ -713,6 +738,39 @@ def test_month_args_reject_out_of_range_month_and_year() -> None:
         MonthArgs(ban=_BAN, year=1999, month=1)
     with pytest.raises(ValueError, match="year must be between 2000 and 2100"):
         MonthArgs(ban=_BAN, year=2101, month=1)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        pytest.param({"day": 0}, "day must be between 1 and 31", id="day_zero"),
+        pytest.param({"day": 32}, "day must be between 1 and 31", id="day_32"),
+        pytest.param({"month": 13}, "month must be between 1 and 12", id="month_13"),
+        pytest.param({"year": 1999}, "year must be between 2000 and 2100", id="year_1999"),
+        pytest.param({"ban": "12a"}, "business agreement number must be digits", id="bad_ban"),
+    ],
+)
+def test_peaks_args_reject_invalid_values(kwargs: dict[str, Any], message: str) -> None:
+    """Peaks args validate the BAN, year, month and optional day at construction."""
+    values: dict[str, Any] = {"ban": _BAN, "year": 2026, "month": 10, **kwargs}
+    with pytest.raises(ValueError, match=message):
+        PeaksArgs(**values)
+
+
+def test_peaks_args_check_day_against_month_length() -> None:
+    """The day must exist in the requested month, so February follows leap years."""
+    with pytest.raises(ValueError, match="day must be between 1 and 28: 31"):
+        PeaksArgs(ban=_BAN, year=2025, month=2, day=31)
+    with pytest.raises(ValueError, match="day must be between 1 and 28: 29"):
+        PeaksArgs(ban=_BAN, year=2025, month=2, day=29)
+    assert PeaksArgs(ban=_BAN, year=2024, month=2, day=29).day == 29
+
+
+def test_peaks_args_accept_day_bounds_and_strip_ban() -> None:
+    """Days 1 and 31 are accepted, and the BAN loses its spaces."""
+    assert PeaksArgs(ban="000 000 000 001", year=2026, month=10, day=1).ban == _BAN
+    assert PeaksArgs(ban=_BAN, year=2026, month=10, day=31).day == 31
+    assert PeaksArgs(ban=_BAN, year=2026, month=10).day is None
 
 
 def test_constructor_arguments_after_session_are_keyword_only() -> None:

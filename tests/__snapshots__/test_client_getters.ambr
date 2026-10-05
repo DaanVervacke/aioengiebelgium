@@ -1263,8 +1263,81 @@
       peak_kwh=0.875,
       start=datetime.datetime(2026, 4, 15, 18, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
     ),
+    previous_peak_of_the_month=None,
     skipped_entries=0,
     year=2026,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[monthly_peaks_single_day]
+  MonthlyPeaks(
+    daily_peaks=tuple(
+      Peak(
+        end=datetime.datetime(2024, 10, 4, 17, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        peak_kw=2.748,
+        peak_kwh=0.687,
+        start=datetime.datetime(2024, 10, 4, 17, 15, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      ),
+    ),
+    month=10,
+    peak_of_the_month=Peak(
+      end=datetime.datetime(2024, 10, 3, 16, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      peak_kw=4.884,
+      peak_kwh=1.221,
+      start=datetime.datetime(2024, 10, 3, 15, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+    ),
+    previous_peak_of_the_month=Peak(
+      end=datetime.datetime(2024, 10, 2, 8, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      peak_kw=4.236,
+      peak_kwh=1.059,
+      start=datetime.datetime(2024, 10, 2, 8, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+    ),
+    skipped_entries=0,
+    year=2024,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[monthly_peaks_with_previous_peak]
+  MonthlyPeaks(
+    daily_peaks=tuple(
+      Peak(
+        end=datetime.datetime(2024, 10, 1, 15, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        peak_kw=3.112,
+        peak_kwh=0.778,
+        start=datetime.datetime(2024, 10, 1, 15, 15, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      ),
+      Peak(
+        end=datetime.datetime(2024, 10, 2, 8, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        peak_kw=4.236,
+        peak_kwh=1.059,
+        start=datetime.datetime(2024, 10, 2, 8, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      ),
+      Peak(
+        end=datetime.datetime(2024, 10, 3, 16, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        peak_kw=4.884,
+        peak_kwh=1.221,
+        start=datetime.datetime(2024, 10, 3, 15, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      ),
+      Peak(
+        end=datetime.datetime(2024, 10, 4, 17, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        peak_kw=2.748,
+        peak_kwh=0.687,
+        start=datetime.datetime(2024, 10, 4, 17, 15, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      ),
+    ),
+    month=10,
+    peak_of_the_month=Peak(
+      end=datetime.datetime(2024, 10, 3, 16, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      peak_kw=4.884,
+      peak_kwh=1.221,
+      start=datetime.datetime(2024, 10, 3, 15, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+    ),
+    previous_peak_of_the_month=Peak(
+      end=datetime.datetime(2024, 10, 2, 8, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      peak_kw=4.236,
+      peak_kwh=1.059,
+      start=datetime.datetime(2024, 10, 2, 8, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+    ),
+    skipped_entries=0,
+    year=2024,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[prices]

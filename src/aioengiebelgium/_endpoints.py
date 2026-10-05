@@ -1,5 +1,6 @@
 """Endpoint catalog: every wire fact for each API endpoint lives in one descriptor."""
 
+import calendar
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -120,11 +121,21 @@ _MIN_MONTH = 1
 _MAX_MONTH = 12
 _MIN_YEAR = 2000
 _MAX_YEAR = 2100
+_MIN_DAY = 1
 
 
 def _validate_ban(ban: str) -> None:
     if not _BAN_RE.fullmatch(ban):
         msg = f"business agreement number must be digits: {ban!r}"
+        raise ValueError(msg)
+
+
+def _validate_year_month(year: int, month: int) -> None:
+    if not _MIN_MONTH <= month <= _MAX_MONTH:
+        msg = f"month must be between {_MIN_MONTH} and {_MAX_MONTH}: {month}"
+        raise ValueError(msg)
+    if not _MIN_YEAR <= year <= _MAX_YEAR:
+        msg = f"year must be between {_MIN_YEAR} and {_MAX_YEAR}: {year}"
         raise ValueError(msg)
 
 
@@ -161,12 +172,33 @@ class MonthArgs:
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
         _validate_ban(self.ban)
-        if not _MIN_MONTH <= self.month <= _MAX_MONTH:
-            msg = f"month must be between {_MIN_MONTH} and {_MAX_MONTH}: {self.month}"
+        _validate_year_month(self.year, self.month)
+
+
+@dataclass(frozen=True, slots=True)
+class PeaksArgs:
+    ban: str
+    year: int
+    month: int
+    day: int | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
+        _validate_year_month(self.year, self.month)
+        if self.day is None:
+            return
+        last_day = calendar.monthrange(self.year, self.month)[1]
+        if not _MIN_DAY <= self.day <= last_day:
+            msg = f"day must be between {_MIN_DAY} and {last_day}: {self.day}"
             raise ValueError(msg)
-        if not _MIN_YEAR <= self.year <= _MAX_YEAR:
-            msg = f"year must be between {_MIN_YEAR} and {_MAX_YEAR}: {self.year}"
-            raise ValueError(msg)
+
+
+def _peaks_params(args: PeaksArgs) -> dict[str, str]:
+    params = {"year": str(args.year), "month": str(args.month)}
+    if args.day is not None:
+        params["day"] = str(args.day)
+    return params
 
 
 @dataclass(frozen=True, slots=True)
@@ -329,13 +361,13 @@ CUSTOMER_ACCOUNT_RELATIONS: Endpoint[NoArgs, CustomerAccountRelations] = Endpoin
     parse=lambda raw, _a: parse_customer_account_relations(raw),
 )
 
-MONTHLY_PEAKS: Endpoint[MonthArgs, MonthlyPeaks] = Endpoint(
+MONTHLY_PEAKS: Endpoint[PeaksArgs, MonthlyPeaks] = Endpoint(
     name="monthly_peaks",
     method="GET",
     url=lambda a: (
         f"{PEAKS_BASE_URL}/private/customers/me/contract-accounts/{a.ban}/energy-insights/peaks"
     ),
-    params=lambda a: {"year": str(a.year), "month": str(a.month)},
+    params=_peaks_params,
     parse=lambda raw, _a: parse_monthly_peaks(raw),
 )
 

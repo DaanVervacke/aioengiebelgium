@@ -136,6 +136,27 @@ def test_parse_energy_contracts_empty_dict() -> None:
 def test_parse_monthly_peaks_missing_peak_of_the_month() -> None:
     result = parse_monthly_peaks({"year": 2026, "month": 4, "dailyPeaks": []})
     assert result.peak_of_the_month is None
+    assert result.previous_peak_of_the_month is None
+
+
+def test_parse_monthly_peaks_previous_peak_of_the_month(load_fixture: LoadFixture) -> None:
+    result = parse_monthly_peaks(load_fixture("peaks_with_previous_peak.json"))
+
+    assert result.previous_peak_of_the_month is not None
+    assert result.previous_peak_of_the_month.peak_kw == 4.236
+    assert result.previous_peak_of_the_month.start.isoformat() == "2024-10-02T08:30:00+02:00"
+    assert result.peak_of_the_month is not None
+    assert result.peak_of_the_month.peak_kw == 4.884
+    assert len(result.daily_peaks) == 4
+
+
+def test_parse_monthly_peaks_single_day_keeps_month_peaks(load_fixture: LoadFixture) -> None:
+    result = parse_monthly_peaks(load_fixture("peaks_single_day.json"))
+
+    assert [p.start.day for p in result.daily_peaks] == [4]
+    assert result.peak_of_the_month is not None
+    assert result.peak_of_the_month.start.day == 3
+    assert result.previous_peak_of_the_month is not None
 
 
 def test_parse_monthly_peaks_drops_naive_datetimes() -> None:
@@ -1444,6 +1465,7 @@ _NULLED_PAYLOADS = [
             "year": None,
             "month": None,
             "peakOfTheMonth": {"peakKW": None, "peakKWh": None, "start": None, "end": None},
+            "previousPeakOfTheMonth": None,
             "dailyPeaks": [
                 {
                     "peakKW": None,
@@ -1711,6 +1733,7 @@ _MALFORMED_CASES = [
             "year": 2026,
             "month": 4,
             "peakOfTheMonth": "not-a-dict",
+            "previousPeakOfTheMonth": {"start": "bad", "end": None},
             "dailyPeaks": [
                 "x",
                 {
@@ -1721,7 +1744,11 @@ _MALFORMED_CASES = [
                 },
             ],
         },
-        lambda r: len(r.daily_peaks) == 1 and r.peak_of_the_month is None,
+        lambda r: (
+            len(r.daily_peaks) == 1
+            and r.peak_of_the_month is None
+            and r.previous_peak_of_the_month is None
+        ),
         id="monthly_peaks",
     ),
     pytest.param(

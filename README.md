@@ -151,7 +151,7 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_energy_contracts(business_agreement_number, *, include_inactive=False)` | `EnergyContractsResponse` | Energy contracts for a business agreement. |
 | `async_get_service_point(ean)` | `ServicePoint` | Service point details. Accepts a bare EAN or one with its delivery-point suffix (e.g. `_ID1`). |
 | `async_get_customer_account_relations()` | `CustomerAccountRelations` | Customer account relations for the authenticated user. |
-| `async_get_monthly_peaks(business_agreement_number, year, month)` | `MonthlyPeaks` | Capacity tariff peaks for a given month. |
+| `async_get_monthly_peaks(business_agreement_number, year, month, *, day=None)` | `MonthlyPeaks` | Capacity tariff peaks for a given month, with the peak of the month and the earlier, lower peak of the same month that it replaced. Pass `day` to get only that day's daily peak. |
 | `async_get_happy_hour_event(business_agreement_number)` | `HappyHourEvent` | Today's and tomorrow's happy hour windows. |
 | `async_get_happy_hour_month_report(business_agreement_number, year, month)` | `HappyHourMonthReport` | The happy hour month report. |
 | `async_get_usage_details(business_agreement_number, start_date, end_date, granularity=UsageGranularity.HOURLY, *, include_simulation=False)` | `UsageDetailsResponse` | Energy usage and costs for a date range, per hour, day, month or year. Gas energy (kWh) and cost come back next to electricity when the business agreement has a gas contract. |

@@ -227,6 +227,8 @@ class MonthlyPeaks:
     peak_of_the_month: Peak | None = None
     daily_peaks: tuple[Peak, ...] = ()
     skipped_entries: int = 0
+    previous_peak_of_the_month: Peak | None = None
+    """The earlier, lower peak of the same month that the current peak of the month replaced."""
 
 
 @dataclass(frozen=True, slots=True)

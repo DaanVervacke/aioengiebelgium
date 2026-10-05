@@ -330,16 +330,19 @@ def _parse_peak(data: dict[str, Any]) -> Peak | None:
     )
 
 
+def _parse_optional_peak(data: Any) -> Peak | None:
+    return _parse_peak(data) if isinstance(data, dict) else None
+
+
 def parse_monthly_peaks(data: dict[str, Any]) -> MonthlyPeaks:
-    monthly_raw = data.get("peakOfTheMonth")
-    monthly = _parse_peak(monthly_raw) if isinstance(monthly_raw, dict) else None
     daily, skipped = _parse_items_counted(data.get("dailyPeaks"), _parse_peak, "daily peak")
     return MonthlyPeaks(
         year=_as_int(data.get("year")),
         month=_as_int(data.get("month")),
-        peak_of_the_month=monthly,
+        peak_of_the_month=_parse_optional_peak(data.get("peakOfTheMonth")),
         daily_peaks=tuple(daily),
         skipped_entries=skipped,
+        previous_peak_of_the_month=_parse_optional_peak(data.get("previousPeakOfTheMonth")),
     )
 
 

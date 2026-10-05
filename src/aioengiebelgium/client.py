@@ -34,6 +34,7 @@ from ._endpoints import (
     MeterReadsArgs,
     MonthArgs,
     NoArgs,
+    PeaksArgs,
     SolarArgs,
     UsageArgs,
     WireRequest,
@@ -197,9 +198,11 @@ class EngieBeClient:
         business_agreement_number: str,
         year: int,
         month: int,
+        *,
+        day: int | None = None,
     ) -> MonthlyPeaks:
-        """Fetch capacity tariff peaks for a given month."""
-        args = MonthArgs(ban=business_agreement_number, year=year, month=month)
+        """Fetch capacity tariff peaks for a month, with daily peaks limited to ``day`` if given."""
+        args = PeaksArgs(ban=business_agreement_number, year=year, month=month, day=day)
         return await self._call(MONTHLY_PEAKS, args)
 
     async def async_get_happy_hour_event(
