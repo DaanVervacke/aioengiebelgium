@@ -24,7 +24,7 @@ http:
           "contractAccountId": "{{ENGIE_BAN}}",
           "platform": "android",
           "platformVersion": "16",
-          "appVersion": "4.19.0.703"
+          "appVersion": "5.0.0.1168"
         }
       }
   auth: inherit
