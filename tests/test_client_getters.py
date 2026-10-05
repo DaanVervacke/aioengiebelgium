@@ -24,6 +24,7 @@ from aioengiebelgium._endpoints import (
     Endpoint,
     EpexArgs,
     FlagArgs,
+    MeterReadsArgs,
     MonthArgs,
     SolarArgs,
 )
@@ -464,6 +465,57 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "service_points": (
+        _WireCase(
+            id="service_points_dual_fuel",
+            fixture_name="service_points_dual_fuel.json",
+            call=lambda c: c.async_get_service_points(_BAN),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/service-points",
+            expected_params={"loadMeteringSourcesStatus": "true"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="service_points_single_electricity",
+            fixture_name="service_points_single_electricity.json",
+            call=lambda c: c.async_get_service_points(_BAN),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/service-points",
+            expected_params={"loadMeteringSourcesStatus": "true"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "meter_reads": (
+        _WireCase(
+            id="meter_reads_latest",
+            fixture_name="meter_reads_latest.json",
+            call=lambda c: c.async_get_meter_reads(_BAN, latest=True),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/meter-reads",
+            expected_params={"latest": "true"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="meter_reads_date_range",
+            fixture_name="meter_reads_history.json",
+            call=lambda c: c.async_get_meter_reads(
+                _BAN, start_date=date(2025, 9, 1), end_date=date(2026, 10, 5)
+            ),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/meter-reads",
+            expected_params={"startDate": "2025-09-01", "endDate": "2026-10-05"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="meter_reads_full_history",
+            fixture_name="meter_reads_history.json",
+            call=lambda c: c.async_get_meter_reads(_BAN),
+            request_method="GET",
+            url=f"{HAPPY_HOUR_BASE_URL}/business-agreements/{_BAN}/meter-reads",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
@@ -661,6 +713,44 @@ async def test_get_service_point_accepts_bare_ean(load_fixture: LoadFixture) -> 
         (((_method, request_url), calls),) = m.requests.items()
     assert request_url.path.endswith(f"/service-points/{_EAN}")
     assert result is not None
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        pytest.param(
+            {"start_date": date(2026, 1, 1), "end_date": None},
+            "must be given together",
+            id="start_only",
+        ),
+        pytest.param(
+            {"start_date": None, "end_date": date(2026, 1, 1)},
+            "must be given together",
+            id="end_only",
+        ),
+        pytest.param(
+            {"latest": True, "start_date": date(2026, 1, 1), "end_date": date(2026, 2, 1)},
+            "cannot be combined",
+            id="latest_with_range",
+        ),
+        pytest.param(
+            {"start_date": date(2026, 2, 1), "end_date": date(2026, 1, 1)},
+            "is after end_date",
+            id="reversed_range",
+        ),
+    ],
+)
+def test_meter_reads_args_reject_invalid_combinations(kwargs: dict[str, Any], message: str) -> None:
+    arguments: dict[str, Any] = {"latest": False, "start_date": None, "end_date": None} | kwargs
+    with pytest.raises(ValueError, match=message):
+        MeterReadsArgs(ban=_BAN, **arguments)
+
+
+def test_meter_reads_args_strip_and_validate_ban() -> None:
+    args = MeterReadsArgs(ban="0000 0000 0001", latest=True, start_date=None, end_date=None)
+    assert args.ban == "000000000001"
+    with pytest.raises(ValueError, match="must be digits"):
+        MeterReadsArgs(ban="abc", latest=True, start_date=None, end_date=None)
 
 
 def test_epex_args_reject_naive_datetimes() -> None:

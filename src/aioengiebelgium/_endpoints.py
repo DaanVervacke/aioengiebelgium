@@ -38,9 +38,11 @@ from .models import (
     FeatureFlag,
     HappyHourEvent,
     HappyHourMonthReport,
+    MeterReadsResponse,
     MonthlyPeaks,
     PricesResponse,
     ServicePoint,
+    ServicePointsResponse,
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
@@ -53,9 +55,11 @@ from .parsers import (
     parse_feature_flag,
     parse_happy_hour_event,
     parse_happy_hour_month_report,
+    parse_meter_reads,
     parse_monthly_peaks,
     parse_prices,
     parse_service_point,
+    parse_service_points,
     parse_solar_surplus_forecasts,
     parse_tou_schedules,
     parse_usage_details,
@@ -205,6 +209,39 @@ class FlagArgs:
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
         _validate_ban(self.ban)
+
+
+@dataclass(frozen=True, slots=True)
+class MeterReadsArgs:
+    ban: str
+    latest: bool
+    start_date: date | None
+    end_date: date | None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
+        if (self.start_date is None) != (self.end_date is None):
+            msg = "start_date and end_date must be given together"
+            raise ValueError(msg)
+        if self.latest and self.start_date is not None:
+            msg = "latest cannot be combined with a date range"
+            raise ValueError(msg)
+        if (
+            self.start_date is not None
+            and self.end_date is not None
+            and self.start_date > self.end_date
+        ):
+            msg = f"start_date {self.start_date} is after end_date {self.end_date}"
+            raise ValueError(msg)
+
+
+def _meter_reads_params(args: MeterReadsArgs) -> dict[str, str]:
+    if args.latest:
+        return {"latest": "true"}
+    if args.start_date is not None and args.end_date is not None:
+        return {"startDate": args.start_date.isoformat(), "endDate": args.end_date.isoformat()}
+    return {}
 
 
 @dataclass(frozen=True, slots=True)
@@ -363,6 +400,22 @@ ACCOUNT_BALANCE: Endpoint[BanArgs, AccountBalance] = Endpoint(
     parse=lambda raw, _a: parse_account_balance(raw),
 )
 
+SERVICE_POINTS: Endpoint[BanArgs, ServicePointsResponse] = Endpoint(
+    name="service_points",
+    method="GET",
+    url=lambda a: f"{HAPPY_HOUR_BASE_URL}/business-agreements/{a.ban}/service-points",
+    params={"loadMeteringSourcesStatus": "true"},
+    parse=lambda raw, _a: parse_service_points(raw),
+)
+
+METER_READS: Endpoint[MeterReadsArgs, MeterReadsResponse] = Endpoint(
+    name="meter_reads",
+    method="GET",
+    url=lambda a: f"{HAPPY_HOUR_BASE_URL}/business-agreements/{a.ban}/meter-reads",
+    params=_meter_reads_params,
+    parse=lambda raw, _a: parse_meter_reads(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -387,6 +440,8 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     FEATURE_FLAG,
     TOU_SCHEDULES,
     ACCOUNT_BALANCE,
+    SERVICE_POINTS,
+    METER_READS,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

@@ -29,9 +29,11 @@ from aioengiebelgium.parsers import (
     parse_feature_flag,
     parse_happy_hour_event,
     parse_happy_hour_month_report,
+    parse_meter_reads,
     parse_monthly_peaks,
     parse_prices,
     parse_service_point,
+    parse_service_points,
     parse_solar_surplus_forecasts,
     parse_tou_schedules,
     parse_usage_details,
@@ -1551,6 +1553,52 @@ _NULLED_PAYLOADS = [
         {"division": None, "ean": None, "eanBlocked": None, "premisesId": None},
         id="service_point",
     ),
+    pytest.param(
+        parse_service_points,
+        {
+            "items": [
+                {
+                    "ean": "541448820000000001",
+                    "eanWithSuffix": None,
+                    "division": None,
+                    "hasSolar": None,
+                    "dataAvailability": {"measured": {"quarterHourly": None, "daily": None}},
+                    "dataSources": {
+                        "p1": {"active": None, "applicable": None, "dongleStatus": None},
+                        "p4": None,
+                        "billing": {"type": None, "upgradableTo": None},
+                    },
+                },
+                {"ean": None},
+            ],
+        },
+        id="service_points",
+    ),
+    pytest.param(
+        parse_meter_reads,
+        {
+            "items": [
+                {
+                    "ean": "541448820000000001",
+                    "meterReadDate": "2026-10-01",
+                    "origin": None,
+                    "division": None,
+                    "registers": [
+                        {
+                            "meterNumber": None,
+                            "indexRead": 1.0,
+                            "unit": None,
+                            "active": None,
+                            "minimumIndexReadRange": None,
+                        },
+                        {"indexRead": None},
+                    ],
+                },
+                {"ean": "541448820000000001", "meterReadDate": None},
+            ],
+        },
+        id="meter_reads",
+    ),
 ]
 
 
@@ -1740,6 +1788,47 @@ _MALFORMED_CASES = [
             and r.items[1].gas is None
         ),
         id="usage_details",
+    ),
+    pytest.param(
+        parse_service_points,
+        {
+            "items": [
+                5,
+                {"ean": 7},
+                {
+                    "ean": "541448820000000001",
+                    "dataAvailability": {"measured": "bad"},
+                    "dataSources": "bad",
+                },
+            ]
+        },
+        lambda r: (
+            len(r.items) == 1
+            and r.items[0].data_availability is None
+            and r.items[0].data_sources is None
+        ),
+        id="service_points",
+    ),
+    pytest.param(
+        parse_meter_reads,
+        {
+            "items": [
+                6,
+                {"ean": "541448820000000001", "meterReadDate": "not-a-date"},
+                {"ean": "541448820000000001", "meterReadDate": "2026-10-01", "registers": "bad"},
+                {
+                    "ean": "541448820000000001",
+                    "meterReadDate": "2026-10-01",
+                    "registers": [8, {"indexRead": "12"}, {"indexRead": True}, {"indexRead": 3}],
+                },
+            ]
+        },
+        lambda r: (
+            len(r.items) == 1
+            and len(r.items[0].registers) == 1
+            and r.items[0].registers[0].index_read == 3.0
+        ),
+        id="meter_reads",
     ),
 ]
 
@@ -2030,6 +2119,8 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
         ),
         pytest.param(parse_tou_schedules, "tou_schedules_bihoraire.json", id="tou_schedules"),
         pytest.param(parse_epex_prices, "epex_24h.json", id="epex_prices"),
+        pytest.param(parse_service_points, "service_points_dual_fuel.json", id="service_points"),
+        pytest.param(parse_meter_reads, "meter_reads_history.json", id="meter_reads"),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -2039,3 +2130,94 @@ def test_clean_payloads_have_zero_skipped_entries(
 ) -> None:
     """Real captured payloads parse without dropping any entry."""
     assert parser(load_fixture(fixture_name)).skipped_entries == 0
+
+
+def test_parse_service_points_counts_skipped_entries() -> None:
+    result = parse_service_points({"items": [{"ean": "541448820000000001"}, {"division": "GAS"}]})
+    assert len(result.items) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_service_points_maps_source_specific_status_fields() -> None:
+    result = parse_service_points(
+        {
+            "items": [
+                {
+                    "ean": "541448820000000001",
+                    "dataSources": {
+                        "p1": {"dongleStatus": "NOT_CONFIGURED"},
+                        "p4": {"mandateStatus": "ACTIVE"},
+                        "meterReads": {"status": "NOT_AVAILABLE"},
+                        "billing": {"type": "SMR3", "upgradableTo": "SMR1"},
+                        "imv": {"mandateStatus": "ACTIVE"},
+                    },
+                }
+            ]
+        }
+    )
+    sources = result.items[0].data_sources
+    assert sources is not None
+    assert sources.p1 is not None
+    assert sources.p1.status == "NOT_CONFIGURED"
+    assert sources.p4 is not None
+    assert sources.p4.status == "ACTIVE"
+    assert sources.meter_reads is not None
+    assert sources.meter_reads.status == "NOT_AVAILABLE"
+    assert sources.billing is not None
+    assert (sources.billing.status, sources.billing.type, sources.billing.upgradable_to) == (
+        None,
+        "SMR3",
+        "SMR1",
+    )
+    assert sources.imv is not None
+    assert sources.imv.status is None
+
+
+def test_parse_service_points_dual_fuel_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_service_points(load_fixture("service_points_dual_fuel.json"))
+    assert {item.division for item in result.items} == {"ELECTRICITY", "GAS"}
+    for item in result.items:
+        assert item.data_availability is not None
+        assert item.data_availability.daily is not None
+        assert item.data_availability.daily.start is not None
+        assert item.data_availability.daily.start.tzinfo is not None
+
+
+def test_parse_meter_reads_counts_skipped_entries() -> None:
+    result = parse_meter_reads(
+        {"items": [{"ean": "541448820000000001", "meterReadDate": "2026-10-01"}, {"ean": "x"}]}
+    )
+    assert len(result.items) == 1
+    assert result.skipped_entries == 1
+
+
+def test_parse_meter_reads_drops_read_whose_registers_are_all_malformed() -> None:
+    result = parse_meter_reads(
+        {
+            "items": [
+                {
+                    "ean": "541448820000000001",
+                    "meterReadDate": "2026-10-01",
+                    "registers": [{"indexRead": None}, 4],
+                },
+                {"ean": "541448820000000001", "meterReadDate": "2026-10-02", "registers": []},
+            ]
+        }
+    )
+    assert [read.read_date for read in result.items] == [date(2026, 10, 2)]
+    assert result.skipped_entries == 1
+
+
+def test_parse_meter_reads_history_fixture_keeps_both_origins(load_fixture: LoadFixture) -> None:
+    result = parse_meter_reads(load_fixture("meter_reads_history.json"))
+    assert {read.origin for read in result.items} == {"OFFICIAL", "INFORMATIVE"}
+    assert {read.division for read in result.items} == {"ELECTRICITY", "GAS"}
+
+
+def test_parse_meter_reads_latest_fixture_keeps_index_ranges(load_fixture: LoadFixture) -> None:
+    result = parse_meter_reads(load_fixture("meter_reads_latest.json"))
+    registers = [register for read in result.items for register in read.registers]
+    assert registers
+    assert all(register.minimum_index_read_range is not None for register in registers)
+    assert all(register.maximum_index_read_range is not None for register in registers)
+    assert {register.unit for register in registers} <= {"KWH", "M_3"}

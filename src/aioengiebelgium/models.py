@@ -767,3 +767,102 @@ class ServicePoint:
     charging_station: bool = False
     premises_id: str | None = None
     market_details: ServicePointMarketDetails | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MeasuredDataWindow:
+    """Whether measured data at one granularity exists, and the period it covers."""
+
+    available: bool = False
+    start: datetime | None = None
+    end: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DataAvailability:
+    """Measured data availability of a service point per granularity."""
+
+    quarter_hourly: MeasuredDataWindow | None = None
+    daily: MeasuredDataWindow | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MeteringDataSource:
+    """One metering data source of a service point with its dongle, mandate or source status."""
+
+    active: bool = False
+    applicable: bool = False
+    service_start_date: datetime | None = None
+    service_end_date: datetime | None = None
+    status: str | None = None
+    type: str | None = None
+    upgradable_to: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MeteringDataSources:
+    """The metering data sources of a service point, keyed by source."""
+
+    p1: MeteringDataSource | None = None
+    p4: MeteringDataSource | None = None
+    billing: MeteringDataSource | None = None
+    meter_reads: MeteringDataSource | None = None
+    imv: MeteringDataSource | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MeteringServicePoint:
+    """A service point of a business agreement with its data sources."""
+
+    ean: str
+    ean_with_suffix: str | None = None
+    division: str | None = None
+    metering_method_type: str | None = None
+    has_solar: bool = False
+    region: str | None = None
+    dgo: str | None = None
+    data_availability: DataAvailability | None = None
+    data_sources: MeteringDataSources | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ServicePointsResponse:
+    """Response from the business-agreement service-points endpoint."""
+
+    items: tuple[MeteringServicePoint, ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class MeterRegisterRead:
+    """The index of one meter register on a read date."""
+
+    meter_number: str | None
+    register_number: str | None
+    index_read: float
+    unit: str | None = None
+    register_type: str | None = None
+    direction: str | None = None
+    active: bool = False
+    minimum_index_read_range: float | None = None
+    maximum_index_read_range: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MeterRead:
+    """All register indexes of one service point on one read date."""
+
+    ean: str
+    read_date: date
+    ean_with_suffix: str | None = None
+    division: str | None = None
+    origin: str | None = None
+    registers: tuple[MeterRegisterRead, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class MeterReadsResponse:
+    """Response from the meter-reads endpoint."""
+
+    items: tuple[MeterRead, ...] = ()
+    skipped_entries: int = 0

@@ -1,0 +1,60 @@
+{
+  "items": [
+    {
+      "ean": "541448820000000003",
+      "eanWithSuffix": "541448820000000003_ID1",
+      "division": "ELECTRICITY",
+      "meteringMethodType": "SMART_READING",
+      "hasSolar": true,
+      "region": "FLANDERS",
+      "dataAvailability": {
+        "measured": {
+          "quarterHourly": {
+            "available": true,
+            "end": "2024-10-03T23:45:00+02:00",
+            "start": "2022-12-05T00:00:00+01:00"
+          },
+          "daily": {
+            "available": true,
+            "end": "2024-10-03T00:00:00+02:00",
+            "start": "2022-12-05T00:00:00+01:00"
+          }
+        }
+      },
+      "dataSources": {
+        "p1": {
+          "active": false,
+          "applicable": true,
+          "dongleStatus": "NOT_CONFIGURED"
+        },
+        "p4": {
+          "active": true,
+          "applicable": true,
+          "mandateStatus": "ACTIVE",
+          "serviceEndDate": "2025-12-06T00:00:00+01:00",
+          "serviceStartDate": "2022-12-05T00:00:00+01:00"
+        },
+        "billing": {
+          "active": true,
+          "applicable": true,
+          "serviceStartDate": "2023-11-10T00:00:00+01:00",
+          "type": "SMR3",
+          "upgradableTo": "SMR1"
+        },
+        "meterReads": {
+          "active": true,
+          "applicable": false,
+          "serviceStartDate": "2022-12-05T00:00:00+01:00",
+          "status": "NOT_AVAILABLE"
+        },
+        "imv": {
+          "active": true,
+          "applicable": false,
+          "serviceStartDate": "2023-01-01T00:00:00+01:00",
+          "status": "ACTIVE"
+        }
+      },
+      "dgo": "FLUVIUS"
+    }
+  ]
+}

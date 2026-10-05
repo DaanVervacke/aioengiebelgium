@@ -5,6 +5,7 @@ info:
 request:
   auth: inherit
 docs: |-
-  Peaks, Happy Hours, time-of-use schedules, solar surplus and historical
-  usage. Date windows are computed by each request's pre-request script,
-  so nothing needs editing before a run.
+  Peaks, Happy Hours, time-of-use schedules, solar surplus, historical
+  usage, service point data sources and meter reads. Date windows are
+  computed by each request's pre-request script, so nothing needs editing
+  before a run.

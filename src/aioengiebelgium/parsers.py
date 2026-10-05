@@ -18,6 +18,7 @@ from .models import (
     ContractInfo,
     CustomerAccount,
     CustomerAccountRelations,
+    DataAvailability,
     EanPrices,
     ElectricityUsage,
     EnergyContract,
@@ -33,7 +34,14 @@ from .models import (
     HappyHourMonthData,
     HappyHourMonthReport,
     HappyHourWindow,
+    MeasuredDataWindow,
     MeteringConfiguration,
+    MeteringDataSource,
+    MeteringDataSources,
+    MeteringServicePoint,
+    MeterRead,
+    MeterReadsResponse,
+    MeterRegisterRead,
     MonthlyPeaks,
     MonthReportHistoryEntry,
     Peak,
@@ -44,6 +52,7 @@ from .models import (
     ServicePoint,
     ServicePointInstallation,
     ServicePointMarketDetails,
+    ServicePointsResponse,
     SimulatedCost,
     SimulatedCostFlow,
     SimulatedEnergy,
@@ -940,3 +949,114 @@ def parse_service_point(data: dict[str, Any], requested_ean: str) -> ServicePoin
         premises_id=_as_str_or_none(data.get("premisesId")),
         market_details=_parse_service_point_market_details(data.get("marketDetails")),
     )
+
+
+def _parse_measured_window(sub: Any) -> MeasuredDataWindow | None:
+    if not isinstance(sub, dict):
+        return None
+    return MeasuredDataWindow(
+        available=bool(sub.get("available")),
+        start=_as_aware_datetime(sub.get("start")),
+        end=_as_aware_datetime(sub.get("end")),
+    )
+
+
+def _parse_data_availability(sub: Any) -> DataAvailability | None:
+    measured = sub.get("measured") if isinstance(sub, dict) else None
+    if not isinstance(measured, dict):
+        return None
+    return DataAvailability(
+        quarter_hourly=_parse_measured_window(measured.get("quarterHourly")),
+        daily=_parse_measured_window(measured.get("daily")),
+    )
+
+
+def _parse_metering_data_source(sub: Any, status_key: str) -> MeteringDataSource | None:
+    if not isinstance(sub, dict):
+        return None
+    return MeteringDataSource(
+        active=bool(sub.get("active")),
+        applicable=bool(sub.get("applicable")),
+        service_start_date=_as_aware_datetime(sub.get("serviceStartDate")),
+        service_end_date=_as_aware_datetime(sub.get("serviceEndDate")),
+        status=_as_str_or_none(sub.get(status_key)),
+        type=_as_str_or_none(sub.get("type")),
+        upgradable_to=_as_str_or_none(sub.get("upgradableTo")),
+    )
+
+
+def _parse_metering_data_sources(sub: Any) -> MeteringDataSources | None:
+    if not isinstance(sub, dict):
+        return None
+    return MeteringDataSources(
+        p1=_parse_metering_data_source(sub.get("p1"), "dongleStatus"),
+        p4=_parse_metering_data_source(sub.get("p4"), "mandateStatus"),
+        billing=_parse_metering_data_source(sub.get("billing"), "status"),
+        meter_reads=_parse_metering_data_source(sub.get("meterReads"), "status"),
+        imv=_parse_metering_data_source(sub.get("imv"), "status"),
+    )
+
+
+def _parse_metering_service_point(item: dict[str, Any]) -> MeteringServicePoint | None:
+    ean = _as_str_or_none(item.get("ean"))
+    if ean is None:
+        return None
+    return MeteringServicePoint(
+        ean=ean,
+        ean_with_suffix=_as_str_or_none(item.get("eanWithSuffix")),
+        division=_as_str_or_none(item.get("division")),
+        metering_method_type=_as_str_or_none(item.get("meteringMethodType")),
+        has_solar=bool(item.get("hasSolar")),
+        region=_as_str_or_none(item.get("region")),
+        dgo=_as_str_or_none(item.get("dgo")),
+        data_availability=_parse_data_availability(item.get("dataAvailability")),
+        data_sources=_parse_metering_data_sources(item.get("dataSources")),
+    )
+
+
+def parse_service_points(data: dict[str, Any]) -> ServicePointsResponse:
+    items, skipped = _parse_items_counted(
+        data.get("items"), _parse_metering_service_point, "service point"
+    )
+    return ServicePointsResponse(items=tuple(items), skipped_entries=skipped)
+
+
+def _parse_meter_register_read(raw: dict[str, Any]) -> MeterRegisterRead | None:
+    index_read = raw.get("indexRead")
+    if isinstance(index_read, bool) or not isinstance(index_read, int | float):
+        return None
+    return MeterRegisterRead(
+        meter_number=_as_str_or_none(raw.get("meterNumber")),
+        register_number=_as_str_or_none(raw.get("registerNumber")),
+        index_read=float(index_read),
+        unit=_as_str_or_none(raw.get("unit")),
+        register_type=_as_str_or_none(raw.get("registerType")),
+        direction=_as_str_or_none(raw.get("direction")),
+        active=bool(raw.get("active")),
+        minimum_index_read_range=_as_float_or_none(raw.get("minimumIndexReadRange")),
+        maximum_index_read_range=_as_float_or_none(raw.get("maximumIndexReadRange")),
+    )
+
+
+def _parse_meter_read(item: dict[str, Any]) -> MeterRead | None:
+    ean = _as_str_or_none(item.get("ean"))
+    read_date = _as_date(item.get("meterReadDate"))
+    if ean is None or read_date is None:
+        return None
+    raw_registers = item.get("registers")
+    registers = _parse_items(raw_registers, _parse_meter_register_read, "meter register")
+    if raw_registers and not registers:
+        return None
+    return MeterRead(
+        ean=ean,
+        read_date=read_date,
+        ean_with_suffix=_as_str_or_none(item.get("eanWithSuffix")),
+        division=_as_str_or_none(item.get("division")),
+        origin=_as_str_or_none(item.get("origin")),
+        registers=tuple(registers),
+    )
+
+
+def parse_meter_reads(data: dict[str, Any]) -> MeterReadsResponse:
+    items, skipped = _parse_items_counted(data.get("items"), _parse_meter_read, "meter read")
+    return MeterReadsResponse(items=tuple(items), skipped_entries=skipped)

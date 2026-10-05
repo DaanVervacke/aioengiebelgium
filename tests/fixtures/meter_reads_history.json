@@ -1,0 +1,193 @@
+{
+  "items": [
+    {
+      "ean": "541448820000000001",
+      "eanWithSuffix": "541448820000000001_ID1",
+      "origin": "OFFICIAL",
+      "division": "GAS",
+      "registers": [
+        {
+          "meterNumber": "7SAG0000000002",
+          "indexRead": 1148.5,
+          "unit": "M_3",
+          "registerType": "TOTAL_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/VC",
+          "active": true
+        }
+      ],
+      "meterReadDate": "2023-12-01"
+    },
+    {
+      "ean": "541448820000000001",
+      "eanWithSuffix": "541448820000000001_ID1",
+      "origin": "OFFICIAL",
+      "division": "GAS",
+      "registers": [
+        {
+          "meterNumber": "7SAG0000000002",
+          "indexRead": 1037.125,
+          "unit": "M_3",
+          "registerType": "TOTAL_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/VC",
+          "active": true
+        }
+      ],
+      "meterReadDate": "2023-09-01"
+    },
+    {
+      "ean": "541448820000000002",
+      "eanWithSuffix": "541448820000000002_ID1",
+      "origin": "INFORMATIVE",
+      "division": "ELECTRICITY",
+      "registers": [
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 2074.25,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/1.8.1",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 3074.25,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "2/1.8.2",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 4074.25,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "3/2.8.1",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 5074.25,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "4/2.8.2",
+          "active": true
+        }
+      ],
+      "meterReadDate": "2023-09-01"
+    },
+    {
+      "ean": "541448820000000002",
+      "eanWithSuffix": "541448820000000002_ID1",
+      "origin": "OFFICIAL",
+      "division": "ELECTRICITY",
+      "registers": [
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 2222.75,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/1.8.1",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 3222.75,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "2/1.8.2",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 4222.75,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "3/2.8.1",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 5222.75,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "4/2.8.2",
+          "active": true
+        }
+      ],
+      "meterReadDate": "2024-04-30"
+    },
+    {
+      "ean": "541448820000000002",
+      "eanWithSuffix": "541448820000000002_ID1",
+      "origin": "OFFICIAL",
+      "division": "ELECTRICITY",
+      "registers": [
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 2185.625,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/1.8.1",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 3185.625,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "2/1.8.2",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 4185.625,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "3/2.8.1",
+          "active": true
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 5185.625,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "4/2.8.2",
+          "active": true
+        }
+      ],
+      "meterReadDate": "2023-12-01"
+    },
+    {
+      "ean": "541448820000000001",
+      "eanWithSuffix": "541448820000000001_ID1",
+      "origin": "INFORMATIVE",
+      "division": "GAS",
+      "registers": [
+        {
+          "meterNumber": "7SAG0000000002",
+          "indexRead": 1111.375,
+          "unit": "M_3",
+          "registerType": "TOTAL_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/VC",
+          "active": true
+        }
+      ],
+      "meterReadDate": "2023-09-01"
+    }
+  ]
+}

@@ -17,9 +17,11 @@ from ._endpoints import (
     FEATURE_FLAG,
     HAPPY_HOUR_EVENT,
     HAPPY_HOUR_MONTH_REPORT,
+    METER_READS,
     MONTHLY_PEAKS,
     PRICES,
     SERVICE_POINT,
+    SERVICE_POINTS,
     SOLAR_SURPLUS_FORECASTS,
     TOU_SCHEDULES,
     USAGE_DETAILS,
@@ -29,6 +31,7 @@ from ._endpoints import (
     Endpoint,
     EpexArgs,
     FlagArgs,
+    MeterReadsArgs,
     MonthArgs,
     NoArgs,
     SolarArgs,
@@ -57,9 +60,11 @@ from .models import (
     FeatureFlag,
     HappyHourEvent,
     HappyHourMonthReport,
+    MeterReadsResponse,
     MonthlyPeaks,
     PricesResponse,
     ServicePoint,
+    ServicePointsResponse,
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
@@ -264,6 +269,30 @@ class EngieBeClient:
     ) -> AccountBalance:
         """Fetch the billing account balance."""
         return await self._call(ACCOUNT_BALANCE, BanArgs(ban=business_agreement_number))
+
+    async def async_get_service_points(
+        self,
+        business_agreement_number: str,
+    ) -> ServicePointsResponse:
+        """Fetch the service points of a business agreement with their metering data sources."""
+        return await self._call(SERVICE_POINTS, BanArgs(ban=business_agreement_number))
+
+    async def async_get_meter_reads(
+        self,
+        business_agreement_number: str,
+        *,
+        latest: bool = False,
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> MeterReadsResponse:
+        """Fetch meter reads: the latest only, a date range, or the full history by default."""
+        args = MeterReadsArgs(
+            ban=business_agreement_number,
+            latest=latest,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return await self._call(METER_READS, args)
 
     async def async_get_epex_prices(
         self,

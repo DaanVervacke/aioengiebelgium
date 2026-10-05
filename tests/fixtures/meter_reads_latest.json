@@ -1,0 +1,77 @@
+{
+  "items": [
+    {
+      "ean": "541448820000000002",
+      "eanWithSuffix": "541448820000000002_ID1",
+      "origin": "OFFICIAL",
+      "division": "ELECTRICITY",
+      "registers": [
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 1037.125,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/1.8.1",
+          "active": true,
+          "maximumIndexReadRange": 1237.125,
+          "minimumIndexReadRange": 997.125
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 2037.125,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "2/1.8.2",
+          "active": true,
+          "maximumIndexReadRange": 2237.125,
+          "minimumIndexReadRange": 1997.125
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 3037.125,
+          "unit": "KWH",
+          "registerType": "HIGH_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "3/2.8.1",
+          "active": true,
+          "maximumIndexReadRange": 3237.125,
+          "minimumIndexReadRange": 2997.125
+        },
+        {
+          "meterNumber": "1SAG0000000001",
+          "indexRead": 4037.125,
+          "unit": "KWH",
+          "registerType": "LOW_LOAD_HOURS",
+          "direction": "INJECTION",
+          "registerNumber": "4/2.8.2",
+          "active": true,
+          "maximumIndexReadRange": 4237.125,
+          "minimumIndexReadRange": 3997.125
+        }
+      ],
+      "meterReadDate": "2024-10-01"
+    },
+    {
+      "ean": "541448820000000001",
+      "eanWithSuffix": "541448820000000001_ID1",
+      "origin": "OFFICIAL",
+      "division": "GAS",
+      "registers": [
+        {
+          "meterNumber": "7SAG0000000002",
+          "indexRead": 5074.25,
+          "unit": "M_3",
+          "registerType": "TOTAL_HOURS",
+          "direction": "OFFTAKE",
+          "registerNumber": "1/VC",
+          "active": true,
+          "maximumIndexReadRange": 5274.25,
+          "minimumIndexReadRange": 5034.25
+        }
+      ],
+      "meterReadDate": "2024-10-01"
+    }
+  ]
+}

@@ -49,6 +49,9 @@ Models
 .. autoclass:: aioengiebelgium.CustomerAccountRelations
    :members:
 
+.. autoclass:: aioengiebelgium.DataAvailability
+   :members:
+
 .. autoclass:: aioengiebelgium.EanPrices
    :members:
 
@@ -94,7 +97,28 @@ Models
 .. autoclass:: aioengiebelgium.HappyHourWindow
    :members:
 
+.. autoclass:: aioengiebelgium.MeasuredDataWindow
+   :members:
+
 .. autoclass:: aioengiebelgium.MeteringConfiguration
+   :members:
+
+.. autoclass:: aioengiebelgium.MeteringDataSource
+   :members:
+
+.. autoclass:: aioengiebelgium.MeteringDataSources
+   :members:
+
+.. autoclass:: aioengiebelgium.MeteringServicePoint
+   :members:
+
+.. autoclass:: aioengiebelgium.MeterRead
+   :members:
+
+.. autoclass:: aioengiebelgium.MeterReadsResponse
+   :members:
+
+.. autoclass:: aioengiebelgium.MeterRegisterRead
    :members:
 
 .. autoclass:: aioengiebelgium.MonthReportHistoryEntry
@@ -125,6 +149,9 @@ Models
    :members:
 
 .. autoclass:: aioengiebelgium.ServicePointMarketDetails
+   :members:
+
+.. autoclass:: aioengiebelgium.ServicePointsResponse
    :members:
 
 .. autoclass:: aioengiebelgium.SimulatedCost
