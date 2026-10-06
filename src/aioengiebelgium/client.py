@@ -25,6 +25,8 @@ from ._endpoints import (
     HAPPY_HOUR_EVENT,
     HAPPY_HOUR_MONTH_REPORT,
     HAPPY_HOUR_SERVICE_STATUS,
+    LATEST_CHARGING_SESSION,
+    LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
     METER_READS,
     MONTHLY_BILLED_BUDGET,
     MONTHLY_PEAKS,
@@ -70,6 +72,8 @@ from .models import (
     AccountBalance,
     BillingPeriodUsage,
     BudgetBillingPlanDetails,
+    ChargingSessionChargeSettings,
+    ChargingSessionDetails,
     CustomerAccountRelations,
     ElectricVehiclesResponse,
     EnergyContractsResponse,
@@ -395,6 +399,18 @@ class EngieBeClient:
     async def async_get_vehicle_charge_settings(self, vehicle_id: int) -> VehicleChargeSettings:
         """Fetch the Smart Charge settings of a vehicle: departure times and battery levels."""
         return await self._call(VEHICLE_CHARGE_SETTINGS, VehicleArgs(vehicle_id=vehicle_id))
+
+    async def async_get_latest_charging_session(self, vehicle_id: int) -> ChargingSessionDetails:
+        """Fetch the latest charging session of a vehicle with its energy per interval."""
+        return await self._call(LATEST_CHARGING_SESSION, VehicleArgs(vehicle_id=vehicle_id))
+
+    async def async_get_latest_charging_session_charge_settings(
+        self,
+        vehicle_id: int,
+    ) -> ChargingSessionChargeSettings:
+        """Fetch the target battery level and departure time of the latest charging session."""
+        args = VehicleArgs(vehicle_id=vehicle_id)
+        return await self._call(LATEST_CHARGING_SESSION_CHARGE_SETTINGS, args)
 
     async def async_get_epex_prices(
         self,

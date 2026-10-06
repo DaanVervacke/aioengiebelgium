@@ -1433,6 +1433,38 @@
     status_date=None,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[latest_charging_session]
+  ChargingSessionDetails(
+    consumptions=tuple(
+    ),
+    session=ChargingSession(
+      battery_level_end=None,
+      battery_level_start=0,
+      business_agreement_number='000000000001',
+      cost=0.0,
+      end=None,
+      id=200004,
+      pause_end=None,
+      reward=None,
+      session_type='smart_charging',
+      smart_charge_outcome=None,
+      source='enode',
+      start=None,
+      status='unknown',
+      total_consumption_kwh=0.0,
+      updated_at=datetime.datetime(2025, 8, 6, 7, 4, 28, 121713, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+      vehicle_name='ID.3',
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[latest_charging_session_charge_settings]
+  ChargingSessionChargeSettings(
+    departure_time_override=datetime.datetime(2025, 8, 7, 5, 0, tzinfo=datetime.timezone.utc),
+    direct=False,
+    target_battery_level=80,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[meter_reads_date_range]
   MeterReadsResponse(
     items=tuple(

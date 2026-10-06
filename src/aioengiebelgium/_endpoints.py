@@ -38,6 +38,8 @@ from .models import (
     AccountBalance,
     BillingPeriodUsage,
     BudgetBillingPlanDetails,
+    ChargingSessionChargeSettings,
+    ChargingSessionDetails,
     CustomerAccountRelations,
     ElectricVehiclesResponse,
     EnergyContractsResponse,
@@ -64,6 +66,8 @@ from .parsers import (
     parse_account_balance,
     parse_billing_period_usage,
     parse_budget_billing_plan_details,
+    parse_charging_session_charge_settings,
+    parse_charging_session_details,
     parse_customer_account_relations,
     parse_electric_vehicles,
     parse_energy_contracts,
@@ -582,6 +586,24 @@ VEHICLE_CHARGE_SETTINGS: Endpoint[VehicleArgs, VehicleChargeSettings] = Endpoint
     parse=lambda raw, _a: parse_vehicle_charge_settings(raw),
 )
 
+LATEST_CHARGING_SESSION: Endpoint[VehicleArgs, ChargingSessionDetails] = Endpoint(
+    name="latest_charging_session",
+    method="GET",
+    url=lambda a: f"{EV_V2_BASE_URL}/vehicles/{a.vehicle_id}/charging-sessions/latest",
+    parse=lambda raw, _a: parse_charging_session_details(raw),
+)
+
+LATEST_CHARGING_SESSION_CHARGE_SETTINGS: Endpoint[VehicleArgs, ChargingSessionChargeSettings] = (
+    Endpoint(
+        name="latest_charging_session_charge_settings",
+        method="GET",
+        url=lambda a: (
+            f"{EV_V2_BASE_URL}/vehicles/{a.vehicle_id}/charging-sessions/latest/charge-settings"
+        ),
+        parse=lambda raw, _a: parse_charging_session_charge_settings(raw),
+    )
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -619,6 +641,8 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     SMART_CHARGE_SERVICES,
     ELECTRIC_VEHICLES,
     VEHICLE_CHARGE_SETTINGS,
+    LATEST_CHARGING_SESSION,
+    LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

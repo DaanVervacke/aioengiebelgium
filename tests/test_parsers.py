@@ -10,10 +10,21 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from aioengiebelgium.const import ChargeSettingMode, VehicleChargeStatus, VehiclePolicyState
+from aioengiebelgium.const import (
+    ChargeSettingMode,
+    ChargingSessionSource,
+    ChargingSessionStatus,
+    ChargingSessionType,
+    VehicleChargeStatus,
+    VehiclePolicyState,
+)
 from aioengiebelgium.models import (
     BillingPeriodUsage,
     ChargeSettingValue,
+    ChargingSession,
+    ChargingSessionChargeSettings,
+    ChargingSessionConsumption,
+    ChargingSessionDetails,
     DepartureTimes,
     ElectricVehicle,
     ElectricVehiclesResponse,
@@ -33,6 +44,7 @@ from aioengiebelgium.models import (
     SimulatedCostFlow,
     SimulatedEnergy,
     SimulatedEnergyFlow,
+    SmartChargeOutcome,
     TouCombinedSlot,
     VehicleCapabilities,
     VehicleChargeSettings,
@@ -46,6 +58,8 @@ from aioengiebelgium.parsers import (
     parse_account_balance,
     parse_billing_period_usage,
     parse_budget_billing_plan_details,
+    parse_charging_session_charge_settings,
+    parse_charging_session_details,
     parse_customer_account_relations,
     parse_electric_vehicles,
     parse_energy_contracts,
@@ -1980,6 +1994,29 @@ _NULLED_PAYLOADS = [
         },
         id="vehicle_charge_settings",
     ),
+    pytest.param(
+        parse_charging_session_details,
+        {
+            "session": {
+                "id": 200001,
+                "vehicleName": None,
+                "sessionType": None,
+                "status": None,
+                "start": None,
+                "batteryLevelStart": None,
+                "cost": None,
+                "reward": None,
+                "smartChargeOutcome": {"state": None, "offTarget": None},
+            },
+            "consumptions": [{"kwh": None, "start": None}],
+        },
+        id="charging_session_details",
+    ),
+    pytest.param(
+        parse_charging_session_charge_settings,
+        {"targetBatteryLevel": None, "departureTimeOverride": None, "direct": None},
+        id="charging_session_charge_settings",
+    ),
 ]
 
 
@@ -2429,6 +2466,49 @@ _MALFORMED_CASES = [
         ),
         id="vehicle_charge_settings",
     ),
+    pytest.param(
+        parse_charging_session_details,
+        {
+            "session": {
+                "id": 200001,
+                "start": "2025-06-14T11:43:32",
+                "smartChargeOutcome": {"state": "OFF_TARGET", "offTarget": [21]},
+            },
+            "consumptions": [
+                {"kwh": "2.86", "start": "2025-06-14T11:00:00+02:00"},
+                {"kwh": True, "start": "2025-06-14T11:00:00+02:00"},
+                {"kwh": 2.5, "start": "2025-06-14T12:00:00"},
+                {"kwh": 1, "start": "2025-06-14T13:00:00+02:00"},
+            ],
+        },
+        lambda r: (
+            r.session
+            == ChargingSession(
+                id=200001, smart_charge_outcome=SmartChargeOutcome(state="off_target")
+            )
+            and r.consumptions
+            == (
+                ChargingSessionConsumption(
+                    start=datetime(2025, 6, 14, 13, tzinfo=timezone(timedelta(hours=2))),
+                    kwh=1.0,
+                ),
+            )
+            and r.skipped_entries == 3
+        ),
+        id="charging_session_details",
+    ),
+    pytest.param(
+        parse_charging_session_details,
+        {"session": {"id": "200001"}, "consumptions": "none"},
+        lambda r: r == ChargingSessionDetails(),
+        id="charging_session_details_bad_session_id",
+    ),
+    pytest.param(
+        parse_charging_session_charge_settings,
+        {"targetBatteryLevel": "high", "departureTimeOverride": "2025-08-07T05:00:00", "direct": 0},
+        lambda r: r == ChargingSessionChargeSettings(target_battery_level=0),
+        id="charging_session_charge_settings",
+    ),
 ]
 
 
@@ -2741,6 +2821,11 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
             id="ev_service_info",
         ),
         pytest.param(parse_electric_vehicles, "electric_vehicles.json", id="electric_vehicles"),
+        pytest.param(
+            parse_charging_session_details,
+            "latest_charging_session.json",
+            id="latest_charging_session",
+        ),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -3124,3 +3209,42 @@ def test_parse_vehicle_charge_settings_fixture(load_fixture: LoadFixture) -> Non
 
 def test_parse_vehicle_charge_settings_empty_payload() -> None:
     assert parse_vehicle_charge_settings({}) == VehicleChargeSettings()
+
+
+def test_parse_latest_charging_session_unknown_status_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_charging_session_details(load_fixture("latest_charging_session.json"))
+    assert result == ChargingSessionDetails(
+        session=ChargingSession(
+            id=200004,
+            vehicle_name="ID.3",
+            session_type="smart_charging",
+            status="unknown",
+            source="enode",
+            battery_level_start=0,
+            total_consumption_kwh=0.0,
+            cost=0.0,
+            business_agreement_number="000000000001",
+            updated_at=datetime(2025, 8, 6, 7, 4, 28, 121713, tzinfo=timezone(timedelta(hours=2))),
+        ),
+    )
+    assert result.session is not None
+    assert result.session.status == ChargingSessionStatus.UNKNOWN
+    assert result.session.session_type == ChargingSessionType.SMART_CHARGING
+    assert result.session.source == ChargingSessionSource.ENODE
+
+
+def test_parse_charging_session_details_without_session_object() -> None:
+    assert parse_charging_session_details({"session": None}) == ChargingSessionDetails()
+
+
+def test_parse_latest_charging_session_charge_settings_fixture(
+    load_fixture: LoadFixture,
+) -> None:
+    result = parse_charging_session_charge_settings(
+        load_fixture("latest_charging_session_charge_settings.json")
+    )
+    assert result == ChargingSessionChargeSettings(
+        target_battery_level=80,
+        departure_time_override=datetime(2025, 8, 7, 5, 0, tzinfo=UTC),
+        direct=False,
+    )

@@ -61,6 +61,18 @@ Models
 .. autoclass:: aioengiebelgium.ChargeSettingValue
    :members:
 
+.. autoclass:: aioengiebelgium.ChargingSession
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionChargeSettings
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionConsumption
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionDetails
+   :members:
+
 .. autoclass:: aioengiebelgium.ConsumptionAddress
    :members:
 
@@ -235,6 +247,9 @@ Models
 .. autoclass:: aioengiebelgium.SimulatedEnergyFlow
    :members:
 
+.. autoclass:: aioengiebelgium.SmartChargeOutcome
+   :members:
+
 .. autoclass:: aioengiebelgium.SolarSurplusDay
    :members:
 
@@ -304,6 +319,15 @@ Enums
 .. autoclass:: aioengiebelgium.ChargeSettingMode
    :members:
 
+.. autoclass:: aioengiebelgium.ChargingSessionSource
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionStatus
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionType
+   :members:
+
 .. autoclass:: aioengiebelgium.EpexGranularity
    :members:
 
@@ -311,6 +335,9 @@ Enums
    :members:
 
 .. autoclass:: aioengiebelgium.MfaMethod
+   :members:
+
+.. autoclass:: aioengiebelgium.SmartChargeOutcomeState
    :members:
 
 .. autoclass:: aioengiebelgium.SolarInferenceKey

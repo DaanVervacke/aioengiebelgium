@@ -22,6 +22,10 @@ from .models import (
     BudgetBillingPlanProposalFactor,
     BusinessAgreement,
     ChargeSettingValue,
+    ChargingSession,
+    ChargingSessionChargeSettings,
+    ChargingSessionConsumption,
+    ChargingSessionDetails,
     ConsumptionAddress,
     ContractInfo,
     CustomerAccount,
@@ -80,6 +84,7 @@ from .models import (
     SimulatedCostFlow,
     SimulatedEnergy,
     SimulatedEnergyFlow,
+    SmartChargeOutcome,
     SolarSurplusDay,
     SolarSurplusForecasts,
     SolarSurplusSlot,
@@ -1583,4 +1588,69 @@ def parse_vehicle_charge_settings(data: dict[str, Any]) -> VehicleChargeSettings
         battery_reserve=_parse_charge_setting_value(data.get("batteryReserve")),
         target_battery_level=_parse_charge_setting_value(data.get("targetBatteryLevel")),
         max_target_battery_level=_as_int_or_none(data.get("maxAllowedTargetSoC")),
+    )
+
+
+def _parse_smart_charge_outcome(value: Any) -> SmartChargeOutcome | None:
+    if not isinstance(value, dict):
+        return None
+    off_target = _as_object(value.get("offTarget"))
+    return SmartChargeOutcome(
+        state=_normalize_vocab(value.get("state")),
+        battery_level_at_ready_by=_as_int_or_none(off_target.get("batteryLevelAtReadyBy")),
+        minimum_charge_target_reached_at=_as_aware_datetime(
+            off_target.get("minimumChargeTargetReachedAt")
+        ),
+    )
+
+
+def _parse_charging_session(raw: dict[str, Any]) -> ChargingSession | None:
+    session_id = _as_id(raw.get("id"))
+    if session_id is None:
+        return None
+    return ChargingSession(
+        id=session_id,
+        vehicle_name=_as_str_or_none(raw.get("vehicleName")),
+        session_type=_normalize_vocab(raw.get("sessionType")),
+        status=_normalize_vocab(raw.get("status")),
+        source=_normalize_vocab(raw.get("source")),
+        start=_as_aware_datetime(raw.get("start")),
+        end=_as_aware_datetime(raw.get("end")),
+        pause_end=_as_aware_datetime(raw.get("pauseEnd")),
+        battery_level_start=_as_int_or_none(raw.get("batteryLevelStart")),
+        battery_level_end=_as_int_or_none(raw.get("batteryLevelEnd")),
+        total_consumption_kwh=_as_float_or_none(raw.get("totalConsumptionKwh")),
+        cost=_as_float_or_none(raw.get("cost")),
+        reward=_as_float_or_none(raw.get("reward")),
+        business_agreement_number=_as_str_or_none(raw.get("businessAgreementNumber")),
+        smart_charge_outcome=_parse_smart_charge_outcome(raw.get("smartChargeOutcome")),
+        updated_at=_as_aware_datetime(raw.get("updatedAt")),
+    )
+
+
+def _parse_charging_session_consumption(raw: dict[str, Any]) -> ChargingSessionConsumption | None:
+    start = _as_aware_datetime(raw.get("start"))
+    kwh = raw.get("kwh")
+    if start is None or isinstance(kwh, bool) or not isinstance(kwh, int | float):
+        return None
+    return ChargingSessionConsumption(start=start, kwh=float(kwh))
+
+
+def parse_charging_session_details(data: dict[str, Any]) -> ChargingSessionDetails:
+    raw_session = data.get("session")
+    consumptions, skipped = _parse_items_counted(
+        data.get("consumptions"), _parse_charging_session_consumption, "charging consumption"
+    )
+    return ChargingSessionDetails(
+        session=_parse_charging_session(raw_session) if isinstance(raw_session, dict) else None,
+        consumptions=tuple(consumptions),
+        skipped_entries=skipped,
+    )
+
+
+def parse_charging_session_charge_settings(data: dict[str, Any]) -> ChargingSessionChargeSettings:
+    return ChargingSessionChargeSettings(
+        target_battery_level=_as_int_or_none(data.get("targetBatteryLevel")),
+        departure_time_override=_as_aware_datetime(data.get("departureTimeOverride")),
+        direct=_as_bool_or_none(data.get("direct")),
     )

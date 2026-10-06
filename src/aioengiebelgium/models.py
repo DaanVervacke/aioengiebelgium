@@ -1169,8 +1169,9 @@ class VehicleChargeState:
     """The last charge state ENGIE received from a vehicle.
 
     ``status``, ``policy_state`` and ``session_type`` are lowercase open
-    vocabularies. Known values of the first two are in ``VehicleChargeStatus``
-    and ``VehiclePolicyState``. ``charge_power`` is in kW and ``range`` in km.
+    vocabularies. Known values are in ``VehicleChargeStatus``,
+    ``VehiclePolicyState`` and ``ChargingSessionType``. ``charge_power`` is in
+    kW and ``range`` in km.
     """
 
     status: str | None = None
@@ -1255,3 +1256,80 @@ class VehicleChargeSettings:
     battery_reserve: ChargeSettingValue | None = None
     target_battery_level: ChargeSettingValue | None = None
     max_target_battery_level: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SmartChargeOutcome:
+    """Whether a Smart Charge session reached its target by the departure time.
+
+    ``state`` is a lowercase open vocabulary. Known values are in
+    ``SmartChargeOutcomeState``. The other fields stay None when the session
+    was on target.
+    """
+
+    state: str | None = None
+    battery_level_at_ready_by: int | None = None
+    minimum_charge_target_reached_at: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSession:
+    """One charging session of a vehicle.
+
+    ``session_type``, ``status`` and ``source`` are lowercase open
+    vocabularies. Known values are in ``ChargingSessionType``,
+    ``ChargingSessionStatus`` and ``ChargingSessionSource``. A session with
+    status ``unknown`` can lack ``start``, ``end`` and ``battery_level_end``.
+    ``pause_end`` is the end of a pause in the session. Battery levels are
+    percentages.
+    ``business_agreement_number`` and ``smart_charge_outcome`` are set only on
+    Smart Charge sessions.
+    """
+
+    id: int
+    vehicle_name: str | None = None
+    session_type: str | None = None
+    status: str | None = None
+    source: str | None = None
+    start: datetime | None = None
+    end: datetime | None = None
+    pause_end: datetime | None = None
+    battery_level_start: int | None = None
+    battery_level_end: int | None = None
+    total_consumption_kwh: float | None = None
+    cost: float | None = None
+    reward: float | None = None
+    business_agreement_number: str | None = None
+    smart_charge_outcome: SmartChargeOutcome | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionConsumption:
+    """Energy charged in one interval of a session."""
+
+    start: datetime
+    kwh: float
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionDetails:
+    """A charging session with the energy it charged per interval."""
+
+    session: ChargingSession | None = None
+    consumptions: tuple[ChargingSessionConsumption, ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionChargeSettings:
+    """The charge settings of the latest charging session of a vehicle.
+
+    ``target_battery_level`` is a percentage. ``departure_time_override`` is
+    the departure time set for this session only. ``direct`` is True when the
+    session charges at once instead of following Smart Charge.
+    """
+
+    target_battery_level: int | None = None
+    departure_time_override: datetime | None = None
+    direct: bool | None = None

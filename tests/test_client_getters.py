@@ -784,6 +784,28 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "latest_charging_session": (
+        _WireCase(
+            id="latest_charging_session",
+            fixture_name="latest_charging_session.json",
+            call=lambda c: c.async_get_latest_charging_session(_VEHICLE_ID),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charging-sessions/latest",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "latest_charging_session_charge_settings": (
+        _WireCase(
+            id="latest_charging_session_charge_settings",
+            fixture_name="latest_charging_session_charge_settings.json",
+            call=lambda c: c.async_get_latest_charging_session_charge_settings(_VEHICLE_ID),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charging-sessions/latest/charge-settings",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",

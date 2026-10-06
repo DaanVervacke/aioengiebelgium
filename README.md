@@ -170,6 +170,8 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_smart_charge_services(customer_account_number)` | `EvServiceInfo` | Whether the customer account is onboarded for Smart Charge and the status of its `SMART_CHARGE` service. The customer account number comes from `CustomerAccount.customer_account_number`. |
 | `async_get_electric_vehicles(customer_account_number)` | `ElectricVehiclesResponse` | The vehicles of a customer account, with what ENGIE can read or control on each and the last charge state (battery level, range, plug status, charge power). Inactive vehicles are included with `active=False`. |
 | `async_get_vehicle_charge_settings(vehicle_id)` | `VehicleChargeSettings` | The Smart Charge settings of a vehicle: departure time per weekday, target battery level, battery reserve and whether smart and solar charging are on. `vehicle_id` is `ElectricVehicle.id`. |
+| `async_get_latest_charging_session(vehicle_id)` | `ChargingSessionDetails` | The latest charging session of a vehicle with the energy charged per interval. A session with status `unknown` has no start, end or end battery level yet. |
+| `async_get_latest_charging_session_charge_settings(vehicle_id)` | `ChargingSessionChargeSettings` | The target battery level, the departure time override and the direct-charging flag of the latest charging session. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
 
 ### Service actions

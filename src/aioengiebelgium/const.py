@@ -85,6 +85,33 @@ class VehiclePolicyState(StrEnum):
     SCHEDULE = "schedule"
 
 
+class ChargingSessionType(StrEnum):
+    """Known charging session types, stored lowercase. Unknown types pass through lowercased."""
+
+    SMART_CHARGING = "smart_charging"
+    PUBLIC = "public"
+
+
+class ChargingSessionStatus(StrEnum):
+    """Known session statuses, stored lowercase. Unknown statuses pass through lowercased."""
+
+    ENDED = "ended"
+    UNKNOWN = "unknown"
+
+
+class ChargingSessionSource(StrEnum):
+    """Known charging session sources, stored lowercase. Unknown sources pass through lowercased."""
+
+    ENODE = "enode"
+
+
+class SmartChargeOutcomeState(StrEnum):
+    """Known Smart Charge outcomes, stored lowercase. Unknown outcomes pass through lowercased."""
+
+    ON_TARGET = "on_target"
+    OFF_TARGET = "off_target"
+
+
 class ChargeSettingMode(StrEnum):
     """Known charge setting modes, stored lowercase. Unknown modes pass through lowercased."""
 

@@ -1,0 +1,15 @@
+{
+  "session": {
+    "id": 200004,
+    "vehicleName": "ID.3",
+    "sessionType": "SMART_CHARGING",
+    "status": "UNKNOWN",
+    "updatedAt": "2025-08-06T07:04:28.121713+02:00",
+    "batteryLevelStart": 0,
+    "businessAgreementNumber": "000000000001",
+    "cost": 0,
+    "source": "ENODE",
+    "totalConsumptionKwh": 0
+  },
+  "consumptions": []
+}
