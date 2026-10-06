@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Before 1.0, breaking changes ship as minor bumps.
 
+## [0.6.0] - 2026-10-06
+
+### Features
+
+- Add smart charge service getter
+- Add electric vehicles getter
+- Add vehicle charge settings getter
+- Add latest charging session getters
+- Add charging session history getters
+
+### Maintenance
+
+- Remove comments and stray punctuation from the repo
+
 ## [0.5.0] - 2026-10-05
 
 ### Features
@@ -185,7 +199,8 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Initial release.
 
-[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.5...v0.5.0
 [0.4.5]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.4.3...v0.4.4
