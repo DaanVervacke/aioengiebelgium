@@ -20,6 +20,9 @@ from aioengiebelgium._endpoints import (
     CATALOG,
     BanArgs,
     CanArgs,
+    CanDateRangeArgs,
+    ChargingSessionArgs,
+    ChargingSessionsArgs,
     ContractsArgs,
     EanArgs,
     Endpoint,
@@ -67,6 +70,7 @@ _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
 _BAN = "000000000001"
 _CAN = "1500000001"
 _VEHICLE_ID = 10001
+_SESSION_ID = 200001
 _EAN = "541448860000000001_ID1"
 _DELIVERY_POINT_ID = "DP001"
 _TOKEN = "test-token"
@@ -806,6 +810,101 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "charging_sessions": (
+        _WireCase(
+            id="charging_sessions_last_page",
+            fixture_name="charging_sessions_last_page.json",
+            call=lambda c: c.async_get_charging_sessions(
+                _CAN, date(2026, 7, 8), date(2026, 10, 6), page_number=1
+            ),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/customer-accounts/{_CAN}/charging-sessions",
+            expected_params={
+                "startDate": "2026-07-08",
+                "endDate": "2026-10-06",
+                "pageSize": "20",
+                "pageNumber": "1",
+            },
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="charging_sessions_empty",
+            fixture_name="charging_sessions_empty.json",
+            call=lambda c: c.async_get_charging_sessions(
+                _CAN, date(2026, 7, 8), date(2026, 10, 6), page_size=50
+            ),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/customer-accounts/{_CAN}/charging-sessions",
+            expected_params={
+                "startDate": "2026-07-08",
+                "endDate": "2026-10-06",
+                "pageSize": "50",
+                "pageNumber": "0",
+            },
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "charging_session": (
+        _WireCase(
+            id="charging_session_smart_off_target",
+            fixture_name="charging_session_smart_off_target.json",
+            call=lambda c: c.async_get_charging_session(_SESSION_ID),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/charging-sessions/{_SESSION_ID}",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="charging_session_smart_on_target",
+            fixture_name="charging_session_smart_on_target.json",
+            call=lambda c: c.async_get_charging_session(_SESSION_ID),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/charging-sessions/{_SESSION_ID}",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="charging_session_public",
+            fixture_name="charging_session_public.json",
+            call=lambda c: c.async_get_charging_session(_SESSION_ID),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/charging-sessions/{_SESSION_ID}",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "charging_sessions_summary": (
+        _WireCase(
+            id="charging_sessions_summary",
+            fixture_name="charging_sessions_summary.json",
+            call=lambda c: c.async_get_charging_sessions_summary(
+                _CAN, date(2026, 1, 1), date(2026, 10, 6)
+            ),
+            request_method="GET",
+            url=f"{EV_BASE_URL}/customer-accounts/{_CAN}/charging-sessions-summary",
+            expected_params={
+                "granularity": "MONTHLY",
+                "startDate": "2026-01-01",
+                "endDate": "2026-10-06",
+            },
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="charging_sessions_summary_empty",
+            fixture_name="charging_sessions_summary_empty.json",
+            call=lambda c: c.async_get_charging_sessions_summary(
+                _CAN, date(2026, 1, 1), date(2026, 10, 6)
+            ),
+            request_method="GET",
+            url=f"{EV_BASE_URL}/customer-accounts/{_CAN}/charging-sessions-summary",
+            expected_params={
+                "granularity": "MONTHLY",
+                "startDate": "2026-01-01",
+                "endDate": "2026-10-06",
+            },
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
@@ -1025,6 +1124,45 @@ def test_can_args_strip_spaces_and_reject_non_digits() -> None:
 def test_vehicle_args_reject_non_positive_ids(vehicle_id: Any) -> None:
     with pytest.raises(ValueError, match="vehicle id must be a positive integer"):
         VehicleArgs(vehicle_id=vehicle_id)
+
+
+def test_charging_session_args_reject_non_positive_id() -> None:
+    with pytest.raises(ValueError, match="charging session id must be a positive integer"):
+        ChargingSessionArgs(session_id=0)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        pytest.param(
+            {"start_date": date(2026, 10, 7), "end_date": date(2026, 10, 6)},
+            "start_date 2026-10-07 is after end_date 2026-10-06",
+            id="reversed_range",
+        ),
+        pytest.param({"page_number": -1}, "page_number must not be negative", id="negative_page"),
+        pytest.param({"page_size": 0}, "page_size must be at least 1", id="empty_page"),
+        pytest.param({"can": "15x"}, "customer account number must be digits", id="bad_can"),
+    ],
+)
+def test_charging_sessions_args_reject_invalid_values(kwargs: dict[str, Any], message: str) -> None:
+    base: dict[str, Any] = {
+        "can": _CAN,
+        "start_date": date(2026, 7, 8),
+        "end_date": date(2026, 10, 6),
+        "page_number": 0,
+        "page_size": 20,
+    }
+    with pytest.raises(ValueError, match=message):
+        ChargingSessionsArgs(**(base | kwargs))
+
+
+def test_can_date_range_args_strip_can_and_reject_reversed_range() -> None:
+    args = CanDateRangeArgs(
+        can="1500 000 001", start_date=date(2026, 1, 1), end_date=date(2026, 1, 1)
+    )
+    assert args.can == _CAN
+    with pytest.raises(ValueError, match="is after end_date"):
+        CanDateRangeArgs(can=_CAN, start_date=date(2026, 1, 2), end_date=date(2026, 1, 1))
 
 
 def test_ean_args_reject_malformed_ean() -> None:

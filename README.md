@@ -172,6 +172,9 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_vehicle_charge_settings(vehicle_id)` | `VehicleChargeSettings` | The Smart Charge settings of a vehicle: departure time per weekday, target battery level, battery reserve and whether smart and solar charging are on. `vehicle_id` is `ElectricVehicle.id`. |
 | `async_get_latest_charging_session(vehicle_id)` | `ChargingSessionDetails` | The latest charging session of a vehicle with the energy charged per interval. A session with status `unknown` has no start, end or end battery level yet. |
 | `async_get_latest_charging_session_charge_settings(vehicle_id)` | `ChargingSessionChargeSettings` | The target battery level, the departure time override and the direct-charging flag of the latest charging session. |
+| `async_get_charging_sessions(customer_account_number, start_date, end_date, *, page_number=0, page_size=20)` | `ChargingSessionsPage` | One page of the charging sessions in a date range, newest first, with the total number of sessions and pages. `page_number` is 0-based. |
+| `async_get_charging_session(session_id)` | `ChargingSessionDetails` | One charging session with the energy charged per interval. Smart Charge sessions also carry whether they reached their target. |
+| `async_get_charging_sessions_summary(customer_account_number, start_date, end_date)` | `ChargingSessionsSummary` | Charging totals per calendar month: session count, energy of `smart_charging` sessions and of `public` sessions, cost and reward. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
 
 ### Service actions

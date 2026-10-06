@@ -73,6 +73,15 @@ Models
 .. autoclass:: aioengiebelgium.ChargingSessionDetails
    :members:
 
+.. autoclass:: aioengiebelgium.ChargingSessionsPage
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionsSummary
+   :members:
+
+.. autoclass:: aioengiebelgium.ChargingSessionsSummaryEntry
+   :members:
+
 .. autoclass:: aioengiebelgium.ConsumptionAddress
    :members:
 

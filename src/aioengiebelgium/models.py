@@ -1333,3 +1333,46 @@ class ChargingSessionChargeSettings:
     target_battery_level: int | None = None
     departure_time_override: datetime | None = None
     direct: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionsPage:
+    """One page of the charging sessions of a customer account, newest first.
+
+    ``page_number`` is 0-based.
+    """
+
+    items: tuple[ChargingSession, ...] = ()
+    page_number: int | None = None
+    page_size: int | None = None
+    total_items: int | None = None
+    total_pages: int | None = None
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionsSummaryEntry:
+    """Charging totals of a customer account for one calendar month.
+
+    ``managed_consumption_kwh`` is the energy of sessions of type
+    ``smart_charging`` and ``public_consumption_kwh`` the energy of sessions
+    of type ``public``. ``reward`` is absent for months without a Smart Charge
+    reward.
+    """
+
+    start: datetime
+    session_count: int | None = None
+    total_consumption_kwh: float | None = None
+    managed_consumption_kwh: float | None = None
+    public_consumption_kwh: float | None = None
+    cost: float | None = None
+    reward: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionsSummary:
+    """Response from the charging-sessions-summary endpoint, newest month first."""
+
+    oldest_session_reached: bool | None = None
+    items: tuple[ChargingSessionsSummaryEntry, ...] = ()
+    skipped_entries: int = 0

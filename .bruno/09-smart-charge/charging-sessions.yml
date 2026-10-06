@@ -1,0 +1,102 @@
+info:
+  name: Charging sessions
+  type: http
+  seq: 6
+  tags:
+  - data
+  - live
+http:
+  method: GET
+  url: '{{evV2BaseUrl}}/customer-accounts/{{ENGIE_CAN}}/charging-sessions?startDate={{evStartDate}}&endDate={{evEndDate}}&pageSize=20&pageNumber=0'
+  params:
+  - name: startDate
+    value: '{{evStartDate}}'
+    type: query
+  - name: endDate
+    value: '{{evEndDate}}'
+    type: query
+  - name: pageSize
+    value: '20'
+    type: query
+  - name: pageNumber
+    value: '0'
+    type: query
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  auth: inherit
+runtime:
+  scripts:
+  - type: before-request
+    code: |-
+      const end = new Date();
+      const start = new Date(end.getTime() - 90 * 24 * 60 * 60 * 1000);
+      bru.setVar('evStartDate', start.toISOString().slice(0, 10));
+      bru.setVar('evEndDate', end.toISOString().slice(0, 10));
+  - type: after-response
+    code: |-
+      if (bru.getVar('evSessionId') || bru.getEnvVar('evSessionId')) {
+        console.log('evSessionId already set, leaving it alone.');
+      } else {
+        const items = (res.getBody() || {}).items || [];
+        if (items.length === 0 || !items[0].id) {
+          console.log('No charging session found. Set evSessionId by hand.');
+        } else {
+          bru.setVar('evSessionId', String(items[0].id));
+          console.log('Seeded evSessionId from session 1 of ' + items.length + '.');
+        }
+      }
+  - type: tests
+    code: |-
+      test("responds 200", function () {
+        expect(res.getStatus()).to.equal(200);
+      });
+
+      test("path variables all resolved", function () {
+        const raw = req.getUrl();
+        const path = raw.replace(/^https?:\/\//, '');
+        let problem = 'none';
+        if (path.indexOf('//') !== -1) { problem = 'empty path segment'; }
+        else if (raw.indexOf('{{') !== -1 || raw.indexOf('%7B%7B') !== -1) {
+          problem = 'unresolved variable';
+        }
+        expect(problem).to.equal('none');
+      });
+
+      test("responds with JSON", function () {
+        expect(String(res.getHeader('content-type') || '')).to.contain('json');
+      });
+
+
+      test("returns page metadata", function () {
+        const page = res.getBody().page || {};
+        expect(typeof page.totalItems).to.equal('number');
+        expect(typeof page.number).to.equal('number');
+      });
+
+      test("sessions carry a numeric id", function () {
+        const rows = res.getBody().items || [];
+        const malformed = rows.filter(function (s) { return typeof s.id !== 'number'; });
+        expect(malformed.length).to.equal(0);
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  One page of the charging sessions of one CAN in the last 90 days.
+
+  Mirrors EngieBeClient::async_get_charging_sessions.
+
+  The v1 path answers 404. pageNumber is 0-based and the app sends
+  pageSize 20. Dates are yyyy-mm-dd. Sessions come newest first. Its
+  after-response script seeds evSessionId from the first session for
+  Charging session.
+
+  businessAgreementNumber, reward and smartChargeOutcome appear only on
+  SMART_CHARGING sessions.
+
+  Parsed by parsers.py into ChargingSessionsPage in models.py.

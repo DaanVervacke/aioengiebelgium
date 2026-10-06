@@ -1,0 +1,30 @@
+{
+  "oldestSessionReached": true,
+  "items": [
+    {
+      "start": "2025-08-01T00:00:00+02:00",
+      "sessionCount": 2,
+      "totalConsumptionKwh": 23.26,
+      "managedConsumptionKwh": 0.0,
+      "publicConsumptionKwh": 23.26,
+      "cost": 0
+    },
+    {
+      "start": "2025-07-01T00:00:00+02:00",
+      "sessionCount": 11,
+      "totalConsumptionKwh": 181.64,
+      "managedConsumptionKwh": 0.0,
+      "publicConsumptionKwh": 181.64,
+      "cost": 0
+    },
+    {
+      "start": "2025-06-01T00:00:00+02:00",
+      "sessionCount": 9,
+      "totalConsumptionKwh": 123.24,
+      "managedConsumptionKwh": 19.3,
+      "publicConsumptionKwh": 103.94,
+      "cost": 6.090599164530949,
+      "reward": 0.29
+    }
+  ]
+}

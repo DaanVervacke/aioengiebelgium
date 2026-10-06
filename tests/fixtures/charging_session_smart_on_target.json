@@ -1,0 +1,60 @@
+{
+  "session": {
+    "id": 200002,
+    "vehicleName": "ID.3",
+    "sessionType": "SMART_CHARGING",
+    "status": "ENDED",
+    "updatedAt": "2025-06-15T09:13:10.128436+02:00",
+    "batteryLevelEnd": 90,
+    "batteryLevelStart": 90,
+    "businessAgreementNumber": "000000000001",
+    "cost": 0.0,
+    "end": "2025-06-15T09:04:05+02:00",
+    "reward": 0.0,
+    "smartChargeOutcome": {
+      "offTarget": {},
+      "state": "ON_TARGET"
+    },
+    "source": "ENODE",
+    "start": "2025-06-15T01:11:09.657+02:00",
+    "totalConsumptionKwh": 0.0
+  },
+  "consumptions": [
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T01:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T02:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T03:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T04:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T05:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T06:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T07:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T08:00:00+02:00"
+    },
+    {
+      "kwh": 0.0,
+      "start": "2025-06-15T09:00:00+02:00"
+    }
+  ]
+}

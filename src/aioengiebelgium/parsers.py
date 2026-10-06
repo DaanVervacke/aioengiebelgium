@@ -26,6 +26,9 @@ from .models import (
     ChargingSessionChargeSettings,
     ChargingSessionConsumption,
     ChargingSessionDetails,
+    ChargingSessionsPage,
+    ChargingSessionsSummary,
+    ChargingSessionsSummaryEntry,
     ConsumptionAddress,
     ContractInfo,
     CustomerAccount,
@@ -1653,4 +1656,47 @@ def parse_charging_session_charge_settings(data: dict[str, Any]) -> ChargingSess
         target_battery_level=_as_int_or_none(data.get("targetBatteryLevel")),
         departure_time_override=_as_aware_datetime(data.get("departureTimeOverride")),
         direct=_as_bool_or_none(data.get("direct")),
+    )
+
+
+def parse_charging_sessions_page(data: dict[str, Any]) -> ChargingSessionsPage:
+    items, skipped = _parse_items_counted(
+        data.get("items"), _parse_charging_session, "charging session"
+    )
+    page = _as_object(data.get("page"))
+    return ChargingSessionsPage(
+        items=tuple(items),
+        page_number=_as_int_or_none(page.get("number")),
+        page_size=_as_int_or_none(page.get("size")),
+        total_items=_as_int_or_none(page.get("totalItems")),
+        total_pages=_as_int_or_none(page.get("totalPages")),
+        skipped_entries=skipped,
+    )
+
+
+def _parse_charging_sessions_summary_entry(
+    raw: dict[str, Any],
+) -> ChargingSessionsSummaryEntry | None:
+    start = _as_aware_datetime(raw.get("start"))
+    if start is None:
+        return None
+    return ChargingSessionsSummaryEntry(
+        start=start,
+        session_count=_as_int_or_none(raw.get("sessionCount")),
+        total_consumption_kwh=_as_float_or_none(raw.get("totalConsumptionKwh")),
+        managed_consumption_kwh=_as_float_or_none(raw.get("managedConsumptionKwh")),
+        public_consumption_kwh=_as_float_or_none(raw.get("publicConsumptionKwh")),
+        cost=_as_float_or_none(raw.get("cost")),
+        reward=_as_float_or_none(raw.get("reward")),
+    )
+
+
+def parse_charging_sessions_summary(data: dict[str, Any]) -> ChargingSessionsSummary:
+    items, skipped = _parse_items_counted(
+        data.get("items"), _parse_charging_sessions_summary_entry, "charging sessions summary"
+    )
+    return ChargingSessionsSummary(
+        oldest_session_reached=_as_bool_or_none(data.get("oldestSessionReached")),
+        items=tuple(items),
+        skipped_entries=skipped,
     )

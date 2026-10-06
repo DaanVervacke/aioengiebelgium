@@ -1,0 +1,26 @@
+{
+  "session": {
+    "id": 200003,
+    "vehicleName": "ID.3",
+    "sessionType": "PUBLIC",
+    "status": "ENDED",
+    "updatedAt": "2025-06-14T13:23:22.790068+02:00",
+    "batteryLevelEnd": 96,
+    "batteryLevelStart": 33,
+    "cost": 0,
+    "end": "2025-06-14T13:23:16+02:00",
+    "source": "ENODE",
+    "start": "2025-06-14T12:24:42+02:00",
+    "totalConsumptionKwh": 31.26
+  },
+  "consumptions": [
+    {
+      "kwh": 28.21,
+      "start": "2025-06-14T12:00:00+02:00"
+    },
+    {
+      "kwh": 3.05,
+      "start": "2025-06-14T13:00:00+02:00"
+    }
+  ]
+}

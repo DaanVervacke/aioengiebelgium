@@ -1,0 +1,81 @@
+info:
+  name: Charging sessions summary
+  type: http
+  seq: 8
+  tags:
+  - data
+  - live
+http:
+  method: GET
+  url: '{{evBaseUrl}}/customer-accounts/{{ENGIE_CAN}}/charging-sessions-summary?granularity=MONTHLY&startDate={{evStartDate}}&endDate={{evEndDate}}'
+  params:
+  - name: granularity
+    value: MONTHLY
+    type: query
+  - name: startDate
+    value: '{{evStartDate}}'
+    type: query
+  - name: endDate
+    value: '{{evEndDate}}'
+    type: query
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  auth: inherit
+runtime:
+  scripts:
+  - type: before-request
+    code: |-
+      const end = new Date();
+      const start = new Date(end.getTime() - 90 * 24 * 60 * 60 * 1000);
+      bru.setVar('evStartDate', start.toISOString().slice(0, 10));
+      bru.setVar('evEndDate', end.toISOString().slice(0, 10));
+  - type: tests
+    code: |-
+      test("responds 200", function () {
+        expect(res.getStatus()).to.equal(200);
+      });
+
+      test("path variables all resolved", function () {
+        const raw = req.getUrl();
+        const path = raw.replace(/^https?:\/\//, '');
+        let problem = 'none';
+        if (path.indexOf('//') !== -1) { problem = 'empty path segment'; }
+        else if (raw.indexOf('{{') !== -1 || raw.indexOf('%7B%7B') !== -1) {
+          problem = 'unresolved variable';
+        }
+        expect(problem).to.equal('none');
+      });
+
+      test("responds with JSON", function () {
+        expect(String(res.getHeader('content-type') || '')).to.contain('json');
+      });
+
+
+      test("returns an oldest session flag", function () {
+        expect(typeof res.getBody().oldestSessionReached).to.equal('boolean');
+      });
+
+      test("entries carry a start and a session count", function () {
+        const rows = res.getBody().items || [];
+        const malformed = rows.filter(function (e) { return typeof e.start !== 'string' || typeof e.sessionCount !== 'number'; });
+        expect(malformed.length).to.equal(0);
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  Charging totals of one CAN per calendar month over the last 90 days.
+
+  Mirrors EngieBeClient::async_get_charging_sessions_summary.
+
+  Only v1 exists for this endpoint. The app sends granularity, but
+  ENGIE returned the same monthly entries for DAILY, WEEKLY, MONTHLY and
+  YEARLY, so the client always sends MONTHLY. Entries come newest month
+  first. reward is absent for months without a Smart Charge reward.
+
+  Parsed by parsers.py into ChargingSessionsSummary in models.py.

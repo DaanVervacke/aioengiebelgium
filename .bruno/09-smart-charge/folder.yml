@@ -9,4 +9,6 @@ docs: |-
   ENGIE_CAN, the customerAccountNumber from 03-accounts/Customer account
   relations. Set it by hand, because a login can reach several customer
   accounts and only some of them have Smart Charge. Electric vehicles
-  seeds evVehicleId for the requests that address one vehicle.
+  seeds evVehicleId for the requests that address one vehicle, and
+  Charging sessions seeds evSessionId. Date windows are computed by the
+  pre-request scripts.

@@ -1,0 +1,65 @@
+info:
+  name: Charging session
+  type: http
+  seq: 7
+  tags:
+  - data
+  - live
+http:
+  method: GET
+  url: '{{evV2BaseUrl}}/charging-sessions/{{evSessionId}}'
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  auth: inherit
+runtime:
+  scripts:
+  - type: tests
+    code: |-
+      test("responds 200", function () {
+        expect(res.getStatus()).to.equal(200);
+      });
+
+      test("path variables all resolved", function () {
+        const raw = req.getUrl();
+        const path = raw.replace(/^https?:\/\//, '');
+        let problem = 'none';
+        if (path.indexOf('//') !== -1) { problem = 'empty path segment'; }
+        else if (raw.indexOf('{{') !== -1 || raw.indexOf('%7B%7B') !== -1) {
+          problem = 'unresolved variable';
+        }
+        expect(problem).to.equal('none');
+      });
+
+      test("responds with JSON", function () {
+        expect(String(res.getHeader('content-type') || '')).to.contain('json');
+      });
+
+
+      test("returns a session with a numeric id", function () {
+        expect(typeof (res.getBody().session || {}).id).to.equal('number');
+      });
+
+      test("consumptions carry kwh and start", function () {
+        const rows = res.getBody().consumptions || [];
+        const malformed = rows.filter(function (c) { return typeof c.kwh !== 'number' || typeof c.start !== 'string'; });
+        expect(malformed.length).to.equal(0);
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  One charging session with its energy per interval.
+
+  Mirrors EngieBeClient::async_get_charging_session.
+
+  Needs evSessionId, which Charging sessions seeds. The v1 path answers
+  404. consumptions were hourly in captures. smartChargeOutcome.state
+  seen: ON_TARGET and OFF_TARGET. offTarget is an empty object when the
+  session was on target.
+
+  Parsed by parsers.py into ChargingSessionDetails in models.py.

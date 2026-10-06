@@ -40,6 +40,8 @@ from .models import (
     BudgetBillingPlanDetails,
     ChargingSessionChargeSettings,
     ChargingSessionDetails,
+    ChargingSessionsPage,
+    ChargingSessionsSummary,
     CustomerAccountRelations,
     ElectricVehiclesResponse,
     EnergyContractsResponse,
@@ -68,6 +70,8 @@ from .parsers import (
     parse_budget_billing_plan_details,
     parse_charging_session_charge_settings,
     parse_charging_session_details,
+    parse_charging_sessions_page,
+    parse_charging_sessions_summary,
     parse_customer_account_relations,
     parse_electric_vehicles,
     parse_energy_contracts,
@@ -164,6 +168,12 @@ def _validate_positive_id(label: str, value: int) -> None:
         raise ValueError(msg)
 
 
+def _validate_date_range(start_date: date, end_date: date) -> None:
+    if start_date > end_date:
+        msg = f"start_date {start_date} is after end_date {end_date}"
+        raise ValueError(msg)
+
+
 def _validate_year_month(year: int, month: int) -> None:
     if not _MIN_MONTH <= month <= _MAX_MONTH:
         msg = f"month must be between {_MIN_MONTH} and {_MAX_MONTH}: {month}"
@@ -204,6 +214,44 @@ class VehicleArgs:
 
     def __post_init__(self) -> None:
         _validate_positive_id("vehicle id", self.vehicle_id)
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionArgs:
+    session_id: int
+
+    def __post_init__(self) -> None:
+        _validate_positive_id("charging session id", self.session_id)
+
+
+@dataclass(frozen=True, slots=True)
+class ChargingSessionsArgs:
+    can: str
+    start_date: date
+    end_date: date
+    page_number: int
+    page_size: int
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "can", CanArgs(can=self.can).can)
+        _validate_date_range(self.start_date, self.end_date)
+        if self.page_number < 0:
+            msg = f"page_number must not be negative: {self.page_number}"
+            raise ValueError(msg)
+        if self.page_size < 1:
+            msg = f"page_size must be at least 1: {self.page_size}"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class CanDateRangeArgs:
+    can: str
+    start_date: date
+    end_date: date
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "can", CanArgs(can=self.can).can)
+        _validate_date_range(self.start_date, self.end_date)
 
 
 @dataclass(frozen=True, slots=True)
@@ -604,6 +652,38 @@ LATEST_CHARGING_SESSION_CHARGE_SETTINGS: Endpoint[VehicleArgs, ChargingSessionCh
     )
 )
 
+CHARGING_SESSIONS: Endpoint[ChargingSessionsArgs, ChargingSessionsPage] = Endpoint(
+    name="charging_sessions",
+    method="GET",
+    url=lambda a: f"{EV_V2_BASE_URL}/customer-accounts/{a.can}/charging-sessions",
+    params=lambda a: {
+        "startDate": a.start_date.isoformat(),
+        "endDate": a.end_date.isoformat(),
+        "pageSize": str(a.page_size),
+        "pageNumber": str(a.page_number),
+    },
+    parse=lambda raw, _a: parse_charging_sessions_page(raw),
+)
+
+CHARGING_SESSION: Endpoint[ChargingSessionArgs, ChargingSessionDetails] = Endpoint(
+    name="charging_session",
+    method="GET",
+    url=lambda a: f"{EV_V2_BASE_URL}/charging-sessions/{a.session_id}",
+    parse=lambda raw, _a: parse_charging_session_details(raw),
+)
+
+CHARGING_SESSIONS_SUMMARY: Endpoint[CanDateRangeArgs, ChargingSessionsSummary] = Endpoint(
+    name="charging_sessions_summary",
+    method="GET",
+    url=lambda a: f"{EV_BASE_URL}/customer-accounts/{a.can}/charging-sessions-summary",
+    params=lambda a: {
+        "granularity": "MONTHLY",
+        "startDate": a.start_date.isoformat(),
+        "endDate": a.end_date.isoformat(),
+    },
+    parse=lambda raw, _a: parse_charging_sessions_summary(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -643,6 +723,9 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     VEHICLE_CHARGE_SETTINGS,
     LATEST_CHARGING_SESSION,
     LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
+    CHARGING_SESSIONS,
+    CHARGING_SESSION,
+    CHARGING_SESSIONS_SUMMARY,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

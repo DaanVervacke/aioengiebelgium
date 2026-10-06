@@ -15,6 +15,7 @@ from aioengiebelgium.const import (
     ChargingSessionSource,
     ChargingSessionStatus,
     ChargingSessionType,
+    SmartChargeOutcomeState,
     VehicleChargeStatus,
     VehiclePolicyState,
 )
@@ -25,6 +26,9 @@ from aioengiebelgium.models import (
     ChargingSessionChargeSettings,
     ChargingSessionConsumption,
     ChargingSessionDetails,
+    ChargingSessionsPage,
+    ChargingSessionsSummary,
+    ChargingSessionsSummaryEntry,
     DepartureTimes,
     ElectricVehicle,
     ElectricVehiclesResponse,
@@ -60,6 +64,8 @@ from aioengiebelgium.parsers import (
     parse_budget_billing_plan_details,
     parse_charging_session_charge_settings,
     parse_charging_session_details,
+    parse_charging_sessions_page,
+    parse_charging_sessions_summary,
     parse_customer_account_relations,
     parse_electric_vehicles,
     parse_energy_contracts,
@@ -2017,6 +2023,32 @@ _NULLED_PAYLOADS = [
         {"targetBatteryLevel": None, "departureTimeOverride": None, "direct": None},
         id="charging_session_charge_settings",
     ),
+    pytest.param(
+        parse_charging_sessions_page,
+        {
+            "page": {"size": None, "totalItems": None, "totalPages": None, "number": None},
+            "items": [{"id": None}],
+        },
+        id="charging_sessions_page",
+    ),
+    pytest.param(
+        parse_charging_sessions_summary,
+        {
+            "oldestSessionReached": None,
+            "items": [
+                {
+                    "start": "2025-08-01T00:00:00+02:00",
+                    "sessionCount": None,
+                    "totalConsumptionKwh": None,
+                    "managedConsumptionKwh": None,
+                    "publicConsumptionKwh": None,
+                    "cost": None,
+                    "reward": None,
+                }
+            ],
+        },
+        id="charging_sessions_summary",
+    ),
 ]
 
 
@@ -2509,6 +2541,35 @@ _MALFORMED_CASES = [
         lambda r: r == ChargingSessionChargeSettings(target_battery_level=0),
         id="charging_session_charge_settings",
     ),
+    pytest.param(
+        parse_charging_sessions_page,
+        {"page": [0, 20], "items": [{"id": 200001}, "200002", {"id": None}]},
+        lambda r: r == ChargingSessionsPage(items=(ChargingSession(id=200001),), skipped_entries=2),
+        id="charging_sessions_page",
+    ),
+    pytest.param(
+        parse_charging_sessions_summary,
+        {
+            "oldestSessionReached": "true",
+            "items": [
+                {"start": "2025-08-01", "sessionCount": 2},
+                {"start": "2025-07-01T00:00:00+02:00", "sessionCount": "11", "cost": "free"},
+            ],
+        },
+        lambda r: (
+            r.oldest_session_reached is None
+            and r.items
+            == (
+                ChargingSessionsSummaryEntry(
+                    start=datetime(2025, 7, 1, tzinfo=timezone(timedelta(hours=2))),
+                    session_count=11,
+                    cost=0.0,
+                ),
+            )
+            and r.skipped_entries == 1
+        ),
+        id="charging_sessions_summary",
+    ),
 ]
 
 
@@ -2825,6 +2886,21 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
             parse_charging_session_details,
             "latest_charging_session.json",
             id="latest_charging_session",
+        ),
+        pytest.param(
+            parse_charging_session_details,
+            "charging_session_smart_on_target.json",
+            id="charging_session",
+        ),
+        pytest.param(
+            parse_charging_sessions_page,
+            "charging_sessions_last_page.json",
+            id="charging_sessions_page",
+        ),
+        pytest.param(
+            parse_charging_sessions_summary,
+            "charging_sessions_summary.json",
+            id="charging_sessions_summary",
         ),
     ],
 )
@@ -3248,3 +3324,98 @@ def test_parse_latest_charging_session_charge_settings_fixture(
         departure_time_override=datetime(2025, 8, 7, 5, 0, tzinfo=UTC),
         direct=False,
     )
+
+
+_CEST = timezone(timedelta(hours=2))
+
+
+def test_parse_charging_session_smart_off_target_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_charging_session_details(load_fixture("charging_session_smart_off_target.json"))
+    assert result == ChargingSessionDetails(
+        session=ChargingSession(
+            id=200001,
+            vehicle_name="ID.3",
+            session_type="smart_charging",
+            status="ended",
+            source="enode",
+            start=datetime(2025, 6, 14, 11, 43, 32, 817000, tzinfo=_CEST),
+            end=datetime(2025, 6, 14, 12, 20, 20, 923000, tzinfo=_CEST),
+            battery_level_start=11,
+            battery_level_end=21,
+            total_consumption_kwh=5.36,
+            cost=1.691833101287766,
+            reward=0.08,
+            business_agreement_number="000000000001",
+            smart_charge_outcome=SmartChargeOutcome(
+                state="off_target", battery_level_at_ready_by=21
+            ),
+            updated_at=datetime(2025, 6, 14, 12, 23, 3, 295990, tzinfo=_CEST),
+        ),
+        consumptions=(
+            ChargingSessionConsumption(start=datetime(2025, 6, 14, 11, tzinfo=_CEST), kwh=2.86),
+            ChargingSessionConsumption(start=datetime(2025, 6, 14, 12, tzinfo=_CEST), kwh=2.5),
+        ),
+    )
+
+
+def test_parse_charging_session_on_target_has_empty_off_target(load_fixture: LoadFixture) -> None:
+    result = parse_charging_session_details(load_fixture("charging_session_smart_on_target.json"))
+    assert result.session is not None
+    assert result.session.smart_charge_outcome == SmartChargeOutcome(state="on_target")
+    assert result.session.smart_charge_outcome.state == SmartChargeOutcomeState.ON_TARGET
+    assert len(result.consumptions) == 9
+    assert {c.kwh for c in result.consumptions} == {0.0}
+
+
+def test_parse_charging_session_public_has_no_smart_charge_fields(
+    load_fixture: LoadFixture,
+) -> None:
+    result = parse_charging_session_details(load_fixture("charging_session_public.json"))
+    assert result.session is not None
+    assert result.session.session_type == ChargingSessionType.PUBLIC
+    assert result.session.status == ChargingSessionStatus.ENDED
+    assert result.session.smart_charge_outcome is None
+    assert result.session.business_agreement_number is None
+    assert result.session.reward is None
+
+
+def test_parse_charging_sessions_last_page_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_charging_sessions_page(load_fixture("charging_sessions_last_page.json"))
+    assert (result.page_number, result.page_size, result.total_items, result.total_pages) == (
+        1,
+        20,
+        22,
+        2,
+    )
+    assert [s.id for s in result.items] == [200003, 200001]
+    assert [s.session_type for s in result.items] == ["public", "smart_charging"]
+
+
+def test_parse_charging_sessions_empty_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_charging_sessions_page(load_fixture("charging_sessions_empty.json"))
+    assert result == ChargingSessionsPage(page_number=0, page_size=20, total_items=0, total_pages=0)
+
+
+def test_parse_charging_sessions_summary_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_charging_sessions_summary(load_fixture("charging_sessions_summary.json"))
+    assert result.oldest_session_reached is True
+    assert [entry.start for entry in result.items] == [
+        datetime(2025, 8, 1, tzinfo=_CEST),
+        datetime(2025, 7, 1, tzinfo=_CEST),
+        datetime(2025, 6, 1, tzinfo=_CEST),
+    ]
+    assert result.items[2] == ChargingSessionsSummaryEntry(
+        start=datetime(2025, 6, 1, tzinfo=_CEST),
+        session_count=9,
+        total_consumption_kwh=123.24,
+        managed_consumption_kwh=19.3,
+        public_consumption_kwh=103.94,
+        cost=6.090599164530949,
+        reward=0.29,
+    )
+    assert result.items[0].reward is None
+
+
+def test_parse_charging_sessions_summary_empty_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_charging_sessions_summary(load_fixture("charging_sessions_summary_empty.json"))
+    assert result == ChargingSessionsSummary(oldest_session_reached=True)

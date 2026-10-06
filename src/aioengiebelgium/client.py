@@ -15,6 +15,9 @@ from ._endpoints import (
     BILLING_PERIOD_USAGE,
     BUDGET_BILLING_PLAN,
     CANCEL_HAPPY_HOUR_SERVICE,
+    CHARGING_SESSION,
+    CHARGING_SESSIONS,
+    CHARGING_SESSIONS_SUMMARY,
     CUSTOMER_ACCOUNT_RELATIONS,
     ELECTRIC_VEHICLES,
     ENERGY_CONTRACTS,
@@ -40,6 +43,9 @@ from ._endpoints import (
     VEHICLE_CHARGE_SETTINGS,
     BanArgs,
     CanArgs,
+    CanDateRangeArgs,
+    ChargingSessionArgs,
+    ChargingSessionsArgs,
     ContractsArgs,
     EanArgs,
     Endpoint,
@@ -74,6 +80,8 @@ from .models import (
     BudgetBillingPlanDetails,
     ChargingSessionChargeSettings,
     ChargingSessionDetails,
+    ChargingSessionsPage,
+    ChargingSessionsSummary,
     CustomerAccountRelations,
     ElectricVehiclesResponse,
     EnergyContractsResponse,
@@ -411,6 +419,45 @@ class EngieBeClient:
         """Fetch the target battery level and departure time of the latest charging session."""
         args = VehicleArgs(vehicle_id=vehicle_id)
         return await self._call(LATEST_CHARGING_SESSION_CHARGE_SETTINGS, args)
+
+    async def async_get_charging_sessions(
+        self,
+        customer_account_number: str,
+        start_date: date,
+        end_date: date,
+        *,
+        page_number: int = 0,
+        page_size: int = 20,
+    ) -> ChargingSessionsPage:
+        """Fetch one page of the charging sessions of a customer account in a date range.
+
+        ``page_number`` is 0-based. The page metadata holds the total number of
+        sessions and pages. The app sends ``page_size`` 20.
+        """
+        args = ChargingSessionsArgs(
+            can=customer_account_number,
+            start_date=start_date,
+            end_date=end_date,
+            page_number=page_number,
+            page_size=page_size,
+        )
+        return await self._call(CHARGING_SESSIONS, args)
+
+    async def async_get_charging_session(self, session_id: int) -> ChargingSessionDetails:
+        """Fetch one charging session with its energy per interval."""
+        return await self._call(CHARGING_SESSION, ChargingSessionArgs(session_id=session_id))
+
+    async def async_get_charging_sessions_summary(
+        self,
+        customer_account_number: str,
+        start_date: date,
+        end_date: date,
+    ) -> ChargingSessionsSummary:
+        """Fetch the charging totals of a customer account per calendar month."""
+        args = CanDateRangeArgs(
+            can=customer_account_number, start_date=start_date, end_date=end_date
+        )
+        return await self._call(CHARGING_SESSIONS_SUMMARY, args)
 
     async def async_get_epex_prices(
         self,
