@@ -2,7 +2,7 @@ import logging
 import re
 from collections import Counter
 from collections.abc import Callable, Iterable
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from itertools import pairwise
 from types import MappingProxyType
 from typing import Any, Literal
@@ -21,11 +21,13 @@ from .models import (
     BudgetBillingPlanProposal,
     BudgetBillingPlanProposalFactor,
     BusinessAgreement,
+    ChargeSettingValue,
     ConsumptionAddress,
     ContractInfo,
     CustomerAccount,
     CustomerAccountRelations,
     DataAvailability,
+    DepartureTimes,
     EanPrices,
     ElectricityUsage,
     ElectricVehicle,
@@ -97,6 +99,7 @@ from .models import (
     UsageTouCrossPart,
     UsageTouPart,
     VehicleCapabilities,
+    VehicleChargeSettings,
     VehicleChargeState,
     bare_ean,
 )
@@ -1533,3 +1536,51 @@ def parse_electric_vehicles(data: dict[str, Any]) -> ElectricVehiclesResponse:
         data.get("items"), _parse_electric_vehicle, "electric vehicle"
     )
     return ElectricVehiclesResponse(items=tuple(items), skipped_entries=skipped)
+
+
+def _as_wall_time(value: Any) -> time | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        return time.fromisoformat(value)
+    except ValueError:
+        _LOGGER.debug("malformed time value: %s", value)
+        return None
+
+
+def _parse_departure_times(value: Any) -> DepartureTimes | None:
+    if not isinstance(value, dict):
+        return None
+    days = _as_object(value.get("currentValue"))
+    return DepartureTimes(
+        mode=_normalize_vocab(value.get("enable")),
+        monday=_as_wall_time(days.get("monday")),
+        tuesday=_as_wall_time(days.get("tuesday")),
+        wednesday=_as_wall_time(days.get("wednesday")),
+        thursday=_as_wall_time(days.get("thursday")),
+        friday=_as_wall_time(days.get("friday")),
+        saturday=_as_wall_time(days.get("saturday")),
+        sunday=_as_wall_time(days.get("sunday")),
+    )
+
+
+def _parse_charge_setting_value(value: Any) -> ChargeSettingValue | None:
+    if not isinstance(value, dict):
+        return None
+    return ChargeSettingValue(
+        mode=_normalize_vocab(value.get("enable")),
+        current_value=_as_int_or_none(value.get("currentValue")),
+        min_value=_as_int_or_none(value.get("minValue")),
+        max_value=_as_int_or_none(value.get("maxValue")),
+    )
+
+
+def parse_vehicle_charge_settings(data: dict[str, Any]) -> VehicleChargeSettings:
+    return VehicleChargeSettings(
+        departure_times=_parse_departure_times(data.get("departureTimes")),
+        smart_charging_enabled=_as_bool_or_none(data.get("smartChargingEnabled")),
+        solar_charging_enabled=_as_bool_or_none(data.get("solarChargingEnabled")),
+        battery_reserve=_parse_charge_setting_value(data.get("batteryReserve")),
+        target_battery_level=_parse_charge_setting_value(data.get("targetBatteryLevel")),
+        max_target_battery_level=_as_int_or_none(data.get("maxAllowedTargetSoC")),
+    )

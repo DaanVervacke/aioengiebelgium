@@ -85,6 +85,12 @@ class VehiclePolicyState(StrEnum):
     SCHEDULE = "schedule"
 
 
+class ChargeSettingMode(StrEnum):
+    """Known charge setting modes, stored lowercase. Unknown modes pass through lowercased."""
+
+    NATIVE = "native"
+
+
 class EpexGranularity(Enum):
     """Granularity options for EPEX market data, valued in minutes."""
 

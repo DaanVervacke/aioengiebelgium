@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Callable
-from datetime import UTC, date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, time, timedelta, timezone
 from functools import partial
 from itertools import pairwise
 from typing import Any
@@ -10,9 +10,11 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from aioengiebelgium.const import VehicleChargeStatus, VehiclePolicyState
+from aioengiebelgium.const import ChargeSettingMode, VehicleChargeStatus, VehiclePolicyState
 from aioengiebelgium.models import (
     BillingPeriodUsage,
+    ChargeSettingValue,
+    DepartureTimes,
     ElectricVehicle,
     ElectricVehiclesResponse,
     EnergyCostPair,
@@ -33,6 +35,7 @@ from aioengiebelgium.models import (
     SimulatedEnergyFlow,
     TouCombinedSlot,
     VehicleCapabilities,
+    VehicleChargeSettings,
     VehicleChargeState,
     bare_ean,
     ean_with_delivery_point_suffix,
@@ -63,6 +66,7 @@ from aioengiebelgium.parsers import (
     parse_solar_surplus_forecasts,
     parse_tou_schedules,
     parse_usage_details,
+    parse_vehicle_charge_settings,
 )
 
 LoadFixture = Callable[[str], dict[str, Any]]
@@ -1964,6 +1968,18 @@ _NULLED_PAYLOADS = [
         },
         id="electric_vehicles",
     ),
+    pytest.param(
+        parse_vehicle_charge_settings,
+        {
+            "departureTimes": {"enable": None, "currentValue": {"monday": None}},
+            "smartChargingEnabled": None,
+            "batteryReserve": {"enable": None, "currentValue": None, "maxValue": None},
+            "targetBatteryLevel": None,
+            "solarChargingEnabled": None,
+            "maxAllowedTargetSoC": None,
+        },
+        id="vehicle_charge_settings",
+    ),
 ]
 
 
@@ -2393,6 +2409,25 @@ _MALFORMED_CASES = [
         },
         lambda r: r.items == (ElectricVehicle(id=10002),) and r.skipped_entries == 2,
         id="electric_vehicles",
+    ),
+    pytest.param(
+        parse_vehicle_charge_settings,
+        {
+            "departureTimes": {
+                "enable": 1,
+                "currentValue": {"monday": "7h", "tuesday": "25:00", "wednesday": "07:30"},
+            },
+            "batteryReserve": "20",
+            "targetBatteryLevel": {"currentValue": "eighty"},
+            "smartChargingEnabled": "true",
+        },
+        lambda r: (
+            r.departure_times == DepartureTimes(wednesday=time(7, 30))
+            and r.battery_reserve is None
+            and r.target_battery_level == ChargeSettingValue(current_value=0)
+            and r.smart_charging_enabled is None
+        ),
+        id="vehicle_charge_settings",
     ),
 ]
 
@@ -3057,3 +3092,35 @@ def test_parse_electric_vehicles_empty_fixture(load_fixture: LoadFixture) -> Non
     assert parse_electric_vehicles(load_fixture("electric_vehicles_empty.json")) == (
         ElectricVehiclesResponse()
     )
+
+
+def test_parse_vehicle_charge_settings_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_vehicle_charge_settings(load_fixture("vehicle_charge_settings.json"))
+    seven = time(7, 0)
+    assert result == VehicleChargeSettings(
+        departure_times=DepartureTimes(
+            mode="native",
+            monday=seven,
+            tuesday=seven,
+            wednesday=seven,
+            thursday=seven,
+            friday=seven,
+            saturday=seven,
+            sunday=seven,
+        ),
+        smart_charging_enabled=True,
+        solar_charging_enabled=True,
+        battery_reserve=ChargeSettingValue(
+            mode="native", current_value=20, min_value=0, max_value=20
+        ),
+        target_battery_level=ChargeSettingValue(
+            mode="native", current_value=80, min_value=0, max_value=100
+        ),
+        max_target_battery_level=100,
+    )
+    assert result.battery_reserve is not None
+    assert result.battery_reserve.mode == ChargeSettingMode.NATIVE
+
+
+def test_parse_vehicle_charge_settings_empty_payload() -> None:
+    assert parse_vehicle_charge_settings({}) == VehicleChargeSettings()

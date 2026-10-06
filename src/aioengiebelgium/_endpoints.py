@@ -58,6 +58,7 @@ from .models import (
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
+    VehicleChargeSettings,
 )
 from .parsers import (
     parse_account_balance,
@@ -83,6 +84,7 @@ from .parsers import (
     parse_solar_surplus_forecasts,
     parse_tou_schedules,
     parse_usage_details,
+    parse_vehicle_charge_settings,
 )
 
 
@@ -152,6 +154,12 @@ def _validate_ban(ban: str) -> None:
         raise ValueError(msg)
 
 
+def _validate_positive_id(label: str, value: int) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        msg = f"{label} must be a positive integer: {value!r}"
+        raise ValueError(msg)
+
+
 def _validate_year_month(year: int, month: int) -> None:
     if not _MIN_MONTH <= month <= _MAX_MONTH:
         msg = f"month must be between {_MIN_MONTH} and {_MAX_MONTH}: {month}"
@@ -184,6 +192,14 @@ class CanArgs:
         if not _BAN_RE.fullmatch(self.can):
             msg = f"customer account number must be digits: {self.can!r}"
             raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class VehicleArgs:
+    vehicle_id: int
+
+    def __post_init__(self) -> None:
+        _validate_positive_id("vehicle id", self.vehicle_id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -559,6 +575,13 @@ ELECTRIC_VEHICLES: Endpoint[CanArgs, ElectricVehiclesResponse] = Endpoint(
     parse=lambda raw, _a: parse_electric_vehicles(raw),
 )
 
+VEHICLE_CHARGE_SETTINGS: Endpoint[VehicleArgs, VehicleChargeSettings] = Endpoint(
+    name="vehicle_charge_settings",
+    method="GET",
+    url=lambda a: f"{EV_V2_BASE_URL}/vehicles/{a.vehicle_id}/charge-settings",
+    parse=lambda raw, _a: parse_vehicle_charge_settings(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -595,6 +618,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     ENERGY_SCORE,
     SMART_CHARGE_SERVICES,
     ELECTRIC_VEHICLES,
+    VEHICLE_CHARGE_SETTINGS,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

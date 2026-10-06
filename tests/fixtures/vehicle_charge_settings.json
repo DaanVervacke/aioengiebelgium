@@ -1,0 +1,30 @@
+{
+  "departureTimes": {
+    "enable": "NATIVE",
+    "currentValue": {
+      "monday": "07:00",
+      "tuesday": "07:00",
+      "wednesday": "07:00",
+      "thursday": "07:00",
+      "friday": "07:00",
+      "saturday": "07:00",
+      "sunday": "07:00"
+    }
+  },
+  "smartChargingEnabled": true,
+  "batteryReserve": {
+    "enable": "NATIVE",
+    "currentValue": 20,
+    "maxValue": 20,
+    "minValue": 0
+  },
+  "targetBatteryLevel": {
+    "enable": "NATIVE",
+    "currentValue": 80,
+    "maxValue": 100,
+    "minValue": 0
+  },
+  "solarChargingEnabled": true,
+  "maxAllowedTargetSoC": 100,
+  "deeplinkOEM": ""
+}

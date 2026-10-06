@@ -29,6 +29,7 @@ from aioengiebelgium._endpoints import (
     MonthArgs,
     PeaksArgs,
     SolarArgs,
+    VehicleArgs,
 )
 from aioengiebelgium.client import EngieBeClient
 from aioengiebelgium.const import (
@@ -65,6 +66,7 @@ _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
 
 _BAN = "000000000001"
 _CAN = "1500000001"
+_VEHICLE_ID = 10001
 _EAN = "541448860000000001_ID1"
 _DELIVERY_POINT_ID = "DP001"
 _TOKEN = "test-token"
@@ -771,6 +773,17 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "vehicle_charge_settings": (
+        _WireCase(
+            id="vehicle_charge_settings",
+            fixture_name="vehicle_charge_settings.json",
+            call=lambda c: c.async_get_vehicle_charge_settings(_VEHICLE_ID),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charge-settings",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
@@ -984,6 +997,12 @@ def test_can_args_strip_spaces_and_reject_non_digits() -> None:
     assert CanArgs(can="1500 000 001").can == _CAN
     with pytest.raises(ValueError, match="customer account number must be digits"):
         CanArgs(can="15000x0001")
+
+
+@pytest.mark.parametrize("vehicle_id", [0, -1, True, "10001"])
+def test_vehicle_args_reject_non_positive_ids(vehicle_id: Any) -> None:
+    with pytest.raises(ValueError, match="vehicle id must be a positive integer"):
+        VehicleArgs(vehicle_id=vehicle_id)
 
 
 def test_ean_args_reject_malformed_ean() -> None:

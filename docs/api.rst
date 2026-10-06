@@ -58,6 +58,9 @@ Models
 .. autoclass:: aioengiebelgium.BusinessAgreement
    :members:
 
+.. autoclass:: aioengiebelgium.ChargeSettingValue
+   :members:
+
 .. autoclass:: aioengiebelgium.ConsumptionAddress
    :members:
 
@@ -71,6 +74,9 @@ Models
    :members:
 
 .. autoclass:: aioengiebelgium.DataAvailability
+   :members:
+
+.. autoclass:: aioengiebelgium.DepartureTimes
    :members:
 
 .. autoclass:: aioengiebelgium.EanPrices
@@ -286,11 +292,17 @@ Models
 .. autoclass:: aioengiebelgium.VehicleCapabilities
    :members:
 
+.. autoclass:: aioengiebelgium.VehicleChargeSettings
+   :members:
+
 .. autoclass:: aioengiebelgium.VehicleChargeState
    :members:
 
 Enums
 =====
+
+.. autoclass:: aioengiebelgium.ChargeSettingMode
+   :members:
 
 .. autoclass:: aioengiebelgium.EpexGranularity
    :members:

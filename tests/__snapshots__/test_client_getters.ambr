@@ -6161,3 +6161,32 @@
     ),
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[vehicle_charge_settings]
+  VehicleChargeSettings(
+    battery_reserve=ChargeSettingValue(
+      current_value=20,
+      max_value=20,
+      min_value=0,
+      mode='native',
+    ),
+    departure_times=DepartureTimes(
+      friday=datetime.time(7, 0),
+      mode='native',
+      monday=datetime.time(7, 0),
+      saturday=datetime.time(7, 0),
+      sunday=datetime.time(7, 0),
+      thursday=datetime.time(7, 0),
+      tuesday=datetime.time(7, 0),
+      wednesday=datetime.time(7, 0),
+    ),
+    max_target_battery_level=100,
+    smart_charging_enabled=True,
+    solar_charging_enabled=True,
+    target_battery_level=ChargeSettingValue(
+      current_value=80,
+      max_value=100,
+      min_value=0,
+      mode='native',
+    ),
+  )
+# ---

@@ -35,6 +35,7 @@ from ._endpoints import (
     SOLAR_SURPLUS_FORECASTS,
     TOU_SCHEDULES,
     USAGE_DETAILS,
+    VEHICLE_CHARGE_SETTINGS,
     BanArgs,
     CanArgs,
     ContractsArgs,
@@ -48,6 +49,7 @@ from ._endpoints import (
     PeaksArgs,
     SolarArgs,
     UsageArgs,
+    VehicleArgs,
     WireRequest,
 )
 from ._tokens import TokenLifecycle
@@ -88,6 +90,7 @@ from .models import (
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
+    VehicleChargeSettings,
     ean_with_delivery_point_suffix,
 )
 
@@ -388,6 +391,10 @@ class EngieBeClient:
         Inactive vehicles are included. Check ``active`` on each vehicle.
         """
         return await self._call(ELECTRIC_VEHICLES, CanArgs(can=customer_account_number))
+
+    async def async_get_vehicle_charge_settings(self, vehicle_id: int) -> VehicleChargeSettings:
+        """Fetch the Smart Charge settings of a vehicle: departure times and battery levels."""
+        return await self._call(VEHICLE_CHARGE_SETTINGS, VehicleArgs(vehicle_id=vehicle_id))
 
     async def async_get_epex_prices(
         self,

@@ -1211,3 +1211,47 @@ class ElectricVehiclesResponse:
 
     items: tuple[ElectricVehicle, ...] = ()
     skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class DepartureTimes:
+    """The departure time per weekday of a vehicle.
+
+    ``mode`` is a lowercase open vocabulary. Known values are in
+    ``ChargeSettingMode``.
+    """
+
+    mode: str | None = None
+    monday: time | None = None
+    tuesday: time | None = None
+    wednesday: time | None = None
+    thursday: time | None = None
+    friday: time | None = None
+    saturday: time | None = None
+    sunday: time | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ChargeSettingValue:
+    """A battery percentage setting of a vehicle with the range it may be set to.
+
+    ``mode`` is a lowercase open vocabulary. Known values are in
+    ``ChargeSettingMode``.
+    """
+
+    mode: str | None = None
+    current_value: int | None = None
+    min_value: int | None = None
+    max_value: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class VehicleChargeSettings:
+    """The Smart Charge settings of a vehicle. Battery levels are percentages."""
+
+    departure_times: DepartureTimes | None = None
+    smart_charging_enabled: bool | None = None
+    solar_charging_enabled: bool | None = None
+    battery_reserve: ChargeSettingValue | None = None
+    target_battery_level: ChargeSettingValue | None = None
+    max_target_battery_level: int | None = None
