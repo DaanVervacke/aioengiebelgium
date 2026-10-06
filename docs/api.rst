@@ -76,6 +76,12 @@ Models
 .. autoclass:: aioengiebelgium.EanPrices
    :members:
 
+.. autoclass:: aioengiebelgium.ElectricVehicle
+   :members:
+
+.. autoclass:: aioengiebelgium.ElectricVehiclesResponse
+   :members:
+
 .. autoclass:: aioengiebelgium.ElectricityUsage
    :members:
 
@@ -277,6 +283,12 @@ Models
 .. autoclass:: aioengiebelgium.UsageTouPart
    :members:
 
+.. autoclass:: aioengiebelgium.VehicleCapabilities
+   :members:
+
+.. autoclass:: aioengiebelgium.VehicleChargeState
+   :members:
+
 Enums
 =====
 
@@ -299,6 +311,12 @@ Enums
    :members:
 
 .. autoclass:: aioengiebelgium.UsageGranularity
+   :members:
+
+.. autoclass:: aioengiebelgium.VehicleChargeStatus
+   :members:
+
+.. autoclass:: aioengiebelgium.VehiclePolicyState
    :members:
 
 Exceptions

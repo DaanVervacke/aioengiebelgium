@@ -16,6 +16,7 @@ from ._endpoints import (
     BUDGET_BILLING_PLAN,
     CANCEL_HAPPY_HOUR_SERVICE,
     CUSTOMER_ACCOUNT_RELATIONS,
+    ELECTRIC_VEHICLES,
     ENERGY_CONTRACTS,
     ENERGY_SCORE,
     EPEX_PRICES,
@@ -68,6 +69,7 @@ from .models import (
     BillingPeriodUsage,
     BudgetBillingPlanDetails,
     CustomerAccountRelations,
+    ElectricVehiclesResponse,
     EnergyContractsResponse,
     EnergyScore,
     EpexPayload,
@@ -376,6 +378,16 @@ class EngieBeClient:
     ) -> EvServiceInfo:
         """Fetch the Smart Charge onboarding state and service status of a customer account."""
         return await self._call(SMART_CHARGE_SERVICES, CanArgs(can=customer_account_number))
+
+    async def async_get_electric_vehicles(
+        self,
+        customer_account_number: str,
+    ) -> ElectricVehiclesResponse:
+        """Fetch the vehicles of a customer account with their capabilities and charge state.
+
+        Inactive vehicles are included. Check ``active`` on each vehicle.
+        """
+        return await self._call(ELECTRIC_VEHICLES, CanArgs(can=customer_account_number))
 
     async def async_get_epex_prices(
         self,

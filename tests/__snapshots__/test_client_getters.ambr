@@ -473,6 +473,56 @@
     skipped_entries=0,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[electric_vehicles]
+  ElectricVehiclesResponse(
+    items=tuple(
+      ElectricVehicle(
+        active=True,
+        brand_id=63,
+        brand_logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/volkswagen.png',
+        brand_name='Volkswagen',
+        capabilities=VehicleCapabilities(
+          charge_state=True,
+          information=True,
+          location=True,
+          odometer=True,
+          set_max_current=False,
+          smart_charging=True,
+          start_charging=True,
+          stop_charging=True,
+        ),
+        charge_state=VehicleChargeState(
+          battery_level=83,
+          business_agreement_number='000000000001',
+          charge_power=0.0,
+          max_battery_level=100,
+          policy_state='schedule',
+          range=288,
+          session_has_error=False,
+          session_type=None,
+          status='unplugged',
+          updated_at=datetime.datetime(2025, 8, 4, 16, 26, 52, tzinfo=datetime.timezone.utc),
+        ),
+        created_at=datetime.datetime(2025, 6, 12, 15, 33, 3, 569782, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        display_name='ID.3',
+        id=10001,
+        model_name='ID.3',
+        reachable=True,
+        updated_at=datetime.datetime(2025, 8, 6, 7, 29, 41, 711043, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+        vin='WVWZZZE1ZZP000001',
+        year=2024,
+      ),
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[electric_vehicles_empty]
+  ElectricVehiclesResponse(
+    items=tuple(
+    ),
+    skipped_entries=0,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_active_only]
   EnergyContractsResponse(
     items=tuple(

@@ -17,6 +17,7 @@ from .const import (
     ENERGY_INSIGHTS_V2_BASE_URL,
     EPEX_BASE_URL,
     EV_BASE_URL,
+    EV_V2_BASE_URL,
     FEATURE_FLAG_APP_VERSION,
     FEATURE_FLAG_PLATFORM,
     FEATURE_FLAG_PLATFORM_VERSION,
@@ -38,6 +39,7 @@ from .models import (
     BillingPeriodUsage,
     BudgetBillingPlanDetails,
     CustomerAccountRelations,
+    ElectricVehiclesResponse,
     EnergyContractsResponse,
     EnergyScore,
     EpexPayload,
@@ -62,6 +64,7 @@ from .parsers import (
     parse_billing_period_usage,
     parse_budget_billing_plan_details,
     parse_customer_account_relations,
+    parse_electric_vehicles,
     parse_energy_contracts,
     parse_energy_score,
     parse_epex_prices,
@@ -548,6 +551,14 @@ SMART_CHARGE_SERVICES: Endpoint[CanArgs, EvServiceInfo] = Endpoint(
     parse=lambda raw, _a: parse_ev_service_info(raw),
 )
 
+ELECTRIC_VEHICLES: Endpoint[CanArgs, ElectricVehiclesResponse] = Endpoint(
+    name="electric_vehicles",
+    method="GET",
+    url=lambda a: f"{EV_V2_BASE_URL}/customer-accounts/{a.can}/vehicles",
+    params={"includeInactive": "true"},
+    parse=lambda raw, _a: parse_electric_vehicles(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -583,6 +594,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     CANCEL_HAPPY_HOUR_SERVICE,
     ENERGY_SCORE,
     SMART_CHARGE_SERVICES,
+    ELECTRIC_VEHICLES,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

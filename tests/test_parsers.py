@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Callable
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta, timezone
 from functools import partial
 from itertools import pairwise
 from typing import Any
@@ -10,8 +10,11 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from aioengiebelgium.const import VehicleChargeStatus, VehiclePolicyState
 from aioengiebelgium.models import (
     BillingPeriodUsage,
+    ElectricVehicle,
+    ElectricVehiclesResponse,
     EnergyCostPair,
     EnergyScore,
     EnergyScoreActions,
@@ -29,6 +32,8 @@ from aioengiebelgium.models import (
     SimulatedEnergy,
     SimulatedEnergyFlow,
     TouCombinedSlot,
+    VehicleCapabilities,
+    VehicleChargeState,
     bare_ean,
     ean_with_delivery_point_suffix,
 )
@@ -39,6 +44,7 @@ from aioengiebelgium.parsers import (
     parse_billing_period_usage,
     parse_budget_billing_plan_details,
     parse_customer_account_relations,
+    parse_electric_vehicles,
     parse_energy_contracts,
     parse_energy_score,
     parse_epex_prices,
@@ -1934,6 +1940,30 @@ _NULLED_PAYLOADS = [
         },
         id="ev_service_info",
     ),
+    pytest.param(
+        parse_electric_vehicles,
+        {
+            "items": [
+                {
+                    "id": 10001,
+                    "vin": None,
+                    "active": None,
+                    "brandId": None,
+                    "year": None,
+                    "capabilities": {"chargeState": None, "location": {"isCapable": None}},
+                    "chargeState": {
+                        "status": None,
+                        "chargePower": None,
+                        "batteryLevel": None,
+                        "range": None,
+                        "policyState": None,
+                    },
+                    "updatedAt": None,
+                }
+            ]
+        },
+        id="electric_vehicles",
+    ),
 ]
 
 
@@ -2347,6 +2377,23 @@ _MALFORMED_CASES = [
         ),
         id="ev_service_info",
     ),
+    pytest.param(
+        parse_electric_vehicles,
+        {
+            "items": [
+                {"id": "10001"},
+                {"id": True},
+                {
+                    "id": 10002,
+                    "capabilities": [],
+                    "chargeState": "UNPLUGGED",
+                    "createdAt": "2025-06-12T15:33:03",
+                },
+            ]
+        },
+        lambda r: r.items == (ElectricVehicle(id=10002),) and r.skipped_entries == 2,
+        id="electric_vehicles",
+    ),
 ]
 
 
@@ -2658,6 +2705,7 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
             "ev_services_smart_charge_active.json",
             id="ev_service_info",
         ),
+        pytest.param(parse_electric_vehicles, "electric_vehicles.json", id="electric_vehicles"),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -2952,3 +3000,60 @@ def test_parse_ev_service_info_not_onboarded_fixture(load_fixture: LoadFixture) 
 
 def test_parse_ev_service_info_empty_payload() -> None:
     assert parse_ev_service_info({}) == EvServiceInfo()
+
+
+def test_parse_electric_vehicles_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_electric_vehicles(load_fixture("electric_vehicles.json"))
+    cest = timezone(timedelta(hours=2))
+    assert result == ElectricVehiclesResponse(
+        items=(
+            ElectricVehicle(
+                id=10001,
+                vin="WVWZZZE1ZZP000001",
+                active=True,
+                reachable=True,
+                model_name="ID.3",
+                display_name="ID.3",
+                brand_name="Volkswagen",
+                brand_id=63,
+                brand_logo_url="https://www.engie.be/dam/app/ev/vehicles-brands/volkswagen.png",
+                year=2024,
+                capabilities=VehicleCapabilities(
+                    information=True,
+                    charge_state=True,
+                    location=True,
+                    odometer=True,
+                    set_max_current=False,
+                    start_charging=True,
+                    stop_charging=True,
+                    smart_charging=True,
+                ),
+                charge_state=VehicleChargeState(
+                    status="unplugged",
+                    updated_at=datetime(2025, 8, 4, 16, 26, 52, tzinfo=UTC),
+                    charge_power=0.0,
+                    battery_level=83,
+                    max_battery_level=100,
+                    range=288,
+                    policy_state="schedule",
+                    session_has_error=False,
+                    business_agreement_number="000000000001",
+                ),
+                updated_at=datetime(2025, 8, 6, 7, 29, 41, 711043, tzinfo=cest),
+                created_at=datetime(2025, 6, 12, 15, 33, 3, 569782, tzinfo=cest),
+            ),
+        ),
+    )
+
+
+def test_parse_electric_vehicles_vocab_matches_enums(load_fixture: LoadFixture) -> None:
+    (vehicle,) = parse_electric_vehicles(load_fixture("electric_vehicles.json")).items
+    assert vehicle.charge_state is not None
+    assert vehicle.charge_state.status == VehicleChargeStatus.UNPLUGGED
+    assert vehicle.charge_state.policy_state == VehiclePolicyState.SCHEDULE
+
+
+def test_parse_electric_vehicles_empty_fixture(load_fixture: LoadFixture) -> None:
+    assert parse_electric_vehicles(load_fixture("electric_vehicles_empty.json")) == (
+        ElectricVehiclesResponse()
+    )

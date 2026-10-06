@@ -28,6 +28,8 @@ from .models import (
     DataAvailability,
     EanPrices,
     ElectricityUsage,
+    ElectricVehicle,
+    ElectricVehiclesResponse,
     EnergyContract,
     EnergyContractsResponse,
     EnergyCostPair,
@@ -94,6 +96,8 @@ from .models import (
     UsageItem,
     UsageTouCrossPart,
     UsageTouPart,
+    VehicleCapabilities,
+    VehicleChargeState,
     bare_ean,
 )
 
@@ -1460,3 +1464,72 @@ def parse_ev_service_info(data: dict[str, Any]) -> EvServiceInfo:
         services=tuple(services),
         skipped_entries=skipped,
     )
+
+
+def _as_id(value: Any) -> int | None:
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _parse_capability(value: Any) -> bool | None:
+    return _as_bool_or_none(value.get("isCapable")) if isinstance(value, dict) else None
+
+
+def _parse_vehicle_capabilities(value: Any) -> VehicleCapabilities | None:
+    if not isinstance(value, dict):
+        return None
+    return VehicleCapabilities(
+        information=_parse_capability(value.get("information")),
+        charge_state=_parse_capability(value.get("chargeState")),
+        location=_parse_capability(value.get("location")),
+        odometer=_parse_capability(value.get("odometer")),
+        set_max_current=_parse_capability(value.get("setMaxCurrent")),
+        start_charging=_parse_capability(value.get("startCharging")),
+        stop_charging=_parse_capability(value.get("stopCharging")),
+        smart_charging=_parse_capability(value.get("smartCharging")),
+    )
+
+
+def _parse_vehicle_charge_state(value: Any) -> VehicleChargeState | None:
+    if not isinstance(value, dict):
+        return None
+    return VehicleChargeState(
+        status=_normalize_vocab(value.get("status")),
+        updated_at=_as_aware_datetime(value.get("updatedAt")),
+        charge_power=_as_float_or_none(value.get("chargePower")),
+        battery_level=_as_int_or_none(value.get("batteryLevel")),
+        max_battery_level=_as_int_or_none(value.get("maxBatteryLevel")),
+        range=_as_int_or_none(value.get("range")),
+        policy_state=_normalize_vocab(value.get("policyState")),
+        session_type=_normalize_vocab(value.get("sessionType")),
+        session_has_error=_as_bool_or_none(value.get("sessionHasError")),
+        business_agreement_number=_as_str_or_none(value.get("businessAgreementNumber")),
+    )
+
+
+def _parse_electric_vehicle(raw: dict[str, Any]) -> ElectricVehicle | None:
+    vehicle_id = _as_id(raw.get("id"))
+    if vehicle_id is None:
+        return None
+    return ElectricVehicle(
+        id=vehicle_id,
+        vin=_as_str_or_none(raw.get("vin")),
+        active=_as_bool_or_none(raw.get("active")),
+        reachable=_as_bool_or_none(raw.get("reachable")),
+        model_name=_as_str_or_none(raw.get("modelName")),
+        display_name=_as_str_or_none(raw.get("displayName")),
+        brand_name=_as_str_or_none(raw.get("brandName")),
+        brand_id=_as_int_or_none(raw.get("brandId")),
+        brand_logo_url=_as_str_or_none(raw.get("brandLogoUrl")),
+        year=_as_int_or_none(raw.get("year")),
+        capabilities=_parse_vehicle_capabilities(raw.get("capabilities")),
+        charge_state=_parse_vehicle_charge_state(raw.get("chargeState")),
+        updated_at=_as_aware_datetime(raw.get("updatedAt")),
+        created_at=_as_aware_datetime(raw.get("createdAt")),
+    )
+
+
+def parse_electric_vehicles(data: dict[str, Any]) -> ElectricVehiclesResponse:
+    items, skipped = _parse_items_counted(
+        data.get("items"), _parse_electric_vehicle, "electric vehicle"
+    )
+    return ElectricVehiclesResponse(items=tuple(items), skipped_entries=skipped)

@@ -36,3 +36,5 @@ variables:
   value: '{{process.env.ENGIE_CAN}}'
 - name: evBaseUrl
   value: https://api.engie.be/engie/ms/ev/customer/v1
+- name: evV2BaseUrl
+  value: https://api.engie.be/engie/ms/ev/customer/v2

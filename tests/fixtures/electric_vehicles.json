@@ -1,0 +1,63 @@
+{
+  "items": [
+    {
+      "id": 10001,
+      "vin": "WVWZZZE1ZZP000001",
+      "reachable": true,
+      "modelName": "ID.3",
+      "brandName": "Volkswagen",
+      "brandId": 63,
+      "brandLogoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/volkswagen.png",
+      "capabilities": {
+        "chargeState": {
+          "interventionIds": [],
+          "isCapable": true
+        },
+        "information": {
+          "interventionIds": [],
+          "isCapable": true
+        },
+        "location": {
+          "interventionIds": [],
+          "isCapable": true
+        },
+        "odometer": {
+          "interventionIds": [],
+          "isCapable": true
+        },
+        "setMaxCurrent": {
+          "interventionIds": [],
+          "isCapable": false
+        },
+        "smartCharging": {
+          "interventionIds": [],
+          "isCapable": true
+        },
+        "startCharging": {
+          "interventionIds": [],
+          "isCapable": true
+        },
+        "stopCharging": {
+          "interventionIds": [],
+          "isCapable": true
+        }
+      },
+      "chargeState": {
+        "status": "UNPLUGGED",
+        "updatedAt": "2025-08-04T16:26:52Z",
+        "chargePower": 0.0,
+        "batteryLevel": 83,
+        "businessAgreementNumber": "000000000001",
+        "maxBatteryLevel": 100,
+        "policyState": "SCHEDULE",
+        "range": 288,
+        "sessionHasError": false
+      },
+      "updatedAt": "2025-08-06T07:29:41.711043+02:00",
+      "createdAt": "2025-06-12T15:33:03.569782+02:00",
+      "active": true,
+      "displayName": "ID.3",
+      "year": 2024
+    }
+  ]
+}

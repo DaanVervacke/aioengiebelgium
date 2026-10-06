@@ -1148,3 +1148,66 @@ class EvServiceInfo:
     customer_onboarded: bool | None = None
     services: tuple[EvService, ...] = ()
     skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class VehicleCapabilities:
+    """What ENGIE can read from or control on a vehicle, None when the API leaves it out."""
+
+    information: bool | None = None
+    charge_state: bool | None = None
+    location: bool | None = None
+    odometer: bool | None = None
+    set_max_current: bool | None = None
+    start_charging: bool | None = None
+    stop_charging: bool | None = None
+    smart_charging: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class VehicleChargeState:
+    """The last charge state ENGIE received from a vehicle.
+
+    ``status``, ``policy_state`` and ``session_type`` are lowercase open
+    vocabularies. Known values of the first two are in ``VehicleChargeStatus``
+    and ``VehiclePolicyState``. ``charge_power`` is in kW and ``range`` in km.
+    """
+
+    status: str | None = None
+    updated_at: datetime | None = None
+    charge_power: float | None = None
+    battery_level: int | None = None
+    max_battery_level: int | None = None
+    range: int | None = None
+    policy_state: str | None = None
+    session_type: str | None = None
+    session_has_error: bool | None = None
+    business_agreement_number: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ElectricVehicle:
+    """An electric vehicle linked to a customer account."""
+
+    id: int
+    vin: str | None = None
+    active: bool | None = None
+    reachable: bool | None = None
+    model_name: str | None = None
+    display_name: str | None = None
+    brand_name: str | None = None
+    brand_id: int | None = None
+    brand_logo_url: str | None = None
+    year: int | None = None
+    capabilities: VehicleCapabilities | None = None
+    charge_state: VehicleChargeState | None = None
+    updated_at: datetime | None = None
+    created_at: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ElectricVehiclesResponse:
+    """Response from the vehicles endpoint of a customer account."""
+
+    items: tuple[ElectricVehicle, ...] = ()
+    skipped_entries: int = 0
