@@ -39,6 +39,8 @@ from .models import (
     EnergyScoreQuestionAnswer,
     EpexPayload,
     EpexSlot,
+    EvService,
+    EvServiceInfo,
     FeatureFlag,
     FinancialTransaction,
     GasUsage,
@@ -1435,4 +1437,26 @@ def parse_energy_score(data: dict[str, Any]) -> EnergyScore:
         criteria=_parse_energy_score_criteria(data.get("scoring")),
         actions=_parse_energy_score_actions(data.get("actions")),
         details=_parse_energy_score_details(data.get("details")),
+    )
+
+
+def _parse_ev_service(raw: dict[str, Any]) -> EvService | None:
+    service_type = _as_str_or_none(raw.get("type"))
+    if service_type is None:
+        return None
+    return EvService(
+        type=service_type,
+        status=_as_str_or_none(raw.get("status")),
+        activation=_as_aware_datetime(raw.get("activation")),
+        deactivation=_as_aware_datetime(raw.get("deactivation")),
+    )
+
+
+def parse_ev_service_info(data: dict[str, Any]) -> EvServiceInfo:
+    services, skipped = _parse_items_counted(data.get("services"), _parse_ev_service, "EV service")
+    return EvServiceInfo(
+        has_rewardable_contract=_as_bool_or_none(data.get("hasRewardableContract")),
+        customer_onboarded=_as_bool_or_none(data.get("customerOnboarded")),
+        services=tuple(services),
+        skipped_entries=skipped,
     )

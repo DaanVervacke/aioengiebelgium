@@ -19,6 +19,8 @@ from aioengiebelgium.models import (
     EnergyScoreDataAvailability,
     EnergyScoreDetails,
     EnergyScoreQuestionAnswer,
+    EvService,
+    EvServiceInfo,
     GasUsage,
     HappyHourEligibility,
     HappyHourServiceStatus,
@@ -40,6 +42,7 @@ from aioengiebelgium.parsers import (
     parse_energy_contracts,
     parse_energy_score,
     parse_epex_prices,
+    parse_ev_service_info,
     parse_feature_flag,
     parse_happy_hour_eligibility,
     parse_happy_hour_event,
@@ -1922,6 +1925,15 @@ _NULLED_PAYLOADS = [
         },
         id="energy_score",
     ),
+    pytest.param(
+        parse_ev_service_info,
+        {
+            "hasRewardableContract": None,
+            "customerOnboarded": None,
+            "services": [{"type": None, "status": None, "activation": None}],
+        },
+        id="ev_service_info",
+    ),
 ]
 
 
@@ -2318,6 +2330,23 @@ _MALFORMED_CASES = [
         ),
         id="energy_score",
     ),
+    pytest.param(
+        parse_ev_service_info,
+        {
+            "hasRewardableContract": "yes",
+            "services": [
+                "SMART_CHARGE",
+                {"status": "ACTIVE"},
+                {"type": "SMART_CHARGE", "activation": "2025-06-12T13:33:06"},
+            ],
+        },
+        lambda r: (
+            r.has_rewardable_contract is None
+            and r.services == (EvService(type="SMART_CHARGE"),)
+            and r.skipped_entries == 2
+        ),
+        id="ev_service_info",
+    ),
 ]
 
 
@@ -2624,6 +2653,11 @@ def test_parse_usage_details_counts_skipped_entries() -> None:
             "happy_hour_eligibility_not_eligible.json",
             id="happy_hour_eligibility",
         ),
+        pytest.param(
+            parse_ev_service_info,
+            "ev_services_smart_charge_active.json",
+            id="ev_service_info",
+        ),
     ],
 )
 def test_clean_payloads_have_zero_skipped_entries(
@@ -2894,3 +2928,27 @@ def test_parse_energy_score_absent_block_is_none(
     result = parse_energy_score(payload)
     field = {"scoring": "criteria", "actions": "actions", "details": "details"}[block]
     assert getattr(result, field) is None
+
+
+def test_parse_ev_service_info_active_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_ev_service_info(load_fixture("ev_services_smart_charge_active.json"))
+    assert result == EvServiceInfo(
+        has_rewardable_contract=True,
+        customer_onboarded=True,
+        services=(
+            EvService(
+                type="SMART_CHARGE",
+                status="ACTIVE",
+                activation=datetime(2025, 6, 12, 13, 33, 6, 507231, tzinfo=UTC),
+            ),
+        ),
+    )
+
+
+def test_parse_ev_service_info_not_onboarded_fixture(load_fixture: LoadFixture) -> None:
+    result = parse_ev_service_info(load_fixture("ev_services_not_onboarded.json"))
+    assert result == EvServiceInfo(has_rewardable_contract=False, customer_onboarded=False)
+
+
+def test_parse_ev_service_info_empty_payload() -> None:
+    assert parse_ev_service_info({}) == EvServiceInfo()

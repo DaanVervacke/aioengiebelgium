@@ -1128,3 +1128,23 @@ class EnergyScore:
     criteria: EnergyScoreCriteria | None = None
     actions: EnergyScoreActions | None = None
     details: EnergyScoreDetails | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EvService:
+    """One EV service of a customer account, for example SMART_CHARGE."""
+
+    type: str
+    status: str | None = None
+    activation: datetime | None = None
+    deactivation: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EvServiceInfo:
+    """Response from the EV services endpoint of a customer account."""
+
+    has_rewardable_contract: bool | None = None
+    customer_onboarded: bool | None = None
+    services: tuple[EvService, ...] = ()
+    skipped_entries: int = 0

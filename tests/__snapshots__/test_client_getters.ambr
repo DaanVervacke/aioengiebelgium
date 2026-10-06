@@ -2398,6 +2398,30 @@
     skipped_entries=0,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[smart_charge_services_active]
+  EvServiceInfo(
+    customer_onboarded=True,
+    has_rewardable_contract=True,
+    services=tuple(
+      EvService(
+        activation=datetime.datetime(2025, 6, 12, 13, 33, 6, 507231, tzinfo=datetime.timezone.utc),
+        deactivation=None,
+        status='ACTIVE',
+        type='SMART_CHARGE',
+      ),
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[smart_charge_services_not_onboarded]
+  EvServiceInfo(
+    customer_onboarded=False,
+    has_rewardable_contract=False,
+    services=tuple(
+    ),
+    skipped_entries=0,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[solar_surplus_forecasts]
   SolarSurplusForecasts(
     forecasts=tuple(

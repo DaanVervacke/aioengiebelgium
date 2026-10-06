@@ -1,0 +1,11 @@
+info:
+  name: 09 Smart Charge
+  type: folder
+  seq: 9
+request:
+  auth: inherit
+docs: |-
+  The Smart Charge service of a customer account. These requests need
+  ENGIE_CAN, the customerAccountNumber from 03-accounts/Customer account
+  relations. Set it by hand, because a login can reach several customer
+  accounts and only some of them have Smart Charge.

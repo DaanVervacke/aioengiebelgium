@@ -1,0 +1,11 @@
+{
+  "hasRewardableContract": true,
+  "customerOnboarded": true,
+  "services": [
+    {
+      "type": "SMART_CHARGE",
+      "status": "ACTIVE",
+      "activation": "2025-06-12T13:33:06.507231Z"
+    }
+  ]
+}

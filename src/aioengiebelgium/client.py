@@ -30,10 +30,12 @@ from ._endpoints import (
     PRICES,
     SERVICE_POINT,
     SERVICE_POINTS,
+    SMART_CHARGE_SERVICES,
     SOLAR_SURPLUS_FORECASTS,
     TOU_SCHEDULES,
     USAGE_DETAILS,
     BanArgs,
+    CanArgs,
     ContractsArgs,
     EanArgs,
     Endpoint,
@@ -69,6 +71,7 @@ from .models import (
     EnergyContractsResponse,
     EnergyScore,
     EpexPayload,
+    EvServiceInfo,
     FeatureFlag,
     HappyHourEligibility,
     HappyHourEvent,
@@ -366,6 +369,13 @@ class EngieBeClient:
         """Fetch the energy score grade for a month with the criteria behind it."""
         args = MonthArgs(ban=business_agreement_number, year=year, month=month)
         return await self._call(ENERGY_SCORE, args)
+
+    async def async_get_smart_charge_services(
+        self,
+        customer_account_number: str,
+    ) -> EvServiceInfo:
+        """Fetch the Smart Charge onboarding state and service status of a customer account."""
+        return await self._call(SMART_CHARGE_SERVICES, CanArgs(can=customer_account_number))
 
     async def async_get_epex_prices(
         self,

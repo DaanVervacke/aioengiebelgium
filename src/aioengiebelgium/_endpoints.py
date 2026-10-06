@@ -16,6 +16,7 @@ from .const import (
     BUSINESS_AGREEMENTS_BASE_URL,
     ENERGY_INSIGHTS_V2_BASE_URL,
     EPEX_BASE_URL,
+    EV_BASE_URL,
     FEATURE_FLAG_APP_VERSION,
     FEATURE_FLAG_PLATFORM,
     FEATURE_FLAG_PLATFORM_VERSION,
@@ -40,6 +41,7 @@ from .models import (
     EnergyContractsResponse,
     EnergyScore,
     EpexPayload,
+    EvServiceInfo,
     FeatureFlag,
     HappyHourEligibility,
     HappyHourEvent,
@@ -63,6 +65,7 @@ from .parsers import (
     parse_energy_contracts,
     parse_energy_score,
     parse_epex_prices,
+    parse_ev_service_info,
     parse_feature_flag,
     parse_happy_hour_eligibility,
     parse_happy_hour_event,
@@ -167,6 +170,17 @@ class BanArgs:
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
         _validate_ban(self.ban)
+
+
+@dataclass(frozen=True, slots=True)
+class CanArgs:
+    can: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "can", _normalize_ban(self.can))
+        if not _BAN_RE.fullmatch(self.can):
+            msg = f"customer account number must be digits: {self.can!r}"
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True, slots=True)
@@ -526,6 +540,14 @@ ENERGY_SCORE: Endpoint[MonthArgs, EnergyScore] = Endpoint(
     parse=lambda raw, _a: parse_energy_score(raw),
 )
 
+SMART_CHARGE_SERVICES: Endpoint[CanArgs, EvServiceInfo] = Endpoint(
+    name="smart_charge_services",
+    method="GET",
+    url=lambda a: f"{EV_BASE_URL}/customer-accounts/{a.can}/services",
+    params={"type": "SMART_CHARGE"},
+    parse=lambda raw, _a: parse_ev_service_info(raw),
+)
+
 EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     name="epex_prices",
     method="GET",
@@ -560,6 +582,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     ACTIVATE_HAPPY_HOUR_SERVICE,
     CANCEL_HAPPY_HOUR_SERVICE,
     ENERGY_SCORE,
+    SMART_CHARGE_SERVICES,
     EPEX_PRICES,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

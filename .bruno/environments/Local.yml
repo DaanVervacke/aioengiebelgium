@@ -51,3 +51,9 @@ variables:
   - name: epexUrl
     value: https://api.engie.be/engie/ms/pricing/v1/public/prices/epex
     description: ""
+  - secret: true
+    name: ENGIE_CAN
+    description: ""
+  - name: evBaseUrl
+    value: https://api.engie.be/engie/ms/ev/customer/v1
+    description: ""

@@ -112,6 +112,12 @@ Models
 .. autoclass:: aioengiebelgium.EpexSlot
    :members:
 
+.. autoclass:: aioengiebelgium.EvService
+   :members:
+
+.. autoclass:: aioengiebelgium.EvServiceInfo
+   :members:
+
 .. autoclass:: aioengiebelgium.FeatureFlag
    :members:
 

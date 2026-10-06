@@ -14,6 +14,7 @@ BILLING_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v1"
 BILLING_V2_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v2"
 BUSINESS_AGREEMENTS_BASE_URL = "https://api.engie.be/engie/ms/business-agreements/customer/v1"
 EPEX_BASE_URL = "https://api.engie.be/engie/ms/pricing/v1/public/prices/epex"
+EV_BASE_URL = "https://api.engie.be/engie/ms/ev/customer/v1"
 
 DEFAULT_CLIENT_ID = "R0PQyUdjO5B2tBaRnltgitVnnUmjGyld"
 REDIRECT_URI = "be.engie.smart://login-callback/nl"

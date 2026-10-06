@@ -32,3 +32,7 @@ variables:
   value: https://api.engie.be/engie/ms/business-agreements/customer/v1
 - name: epexUrl
   value: https://api.engie.be/engie/ms/pricing/v1/public/prices/epex
+- name: ENGIE_CAN
+  value: '{{process.env.ENGIE_CAN}}'
+- name: evBaseUrl
+  value: https://api.engie.be/engie/ms/ev/customer/v1

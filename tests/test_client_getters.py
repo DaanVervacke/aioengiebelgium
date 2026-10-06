@@ -19,6 +19,7 @@ from yarl import URL
 from aioengiebelgium._endpoints import (
     CATALOG,
     BanArgs,
+    CanArgs,
     ContractsArgs,
     EanArgs,
     Endpoint,
@@ -39,6 +40,7 @@ from aioengiebelgium.const import (
     BUSINESS_AGREEMENTS_BASE_URL,
     ENERGY_INSIGHTS_V2_BASE_URL,
     EPEX_BASE_URL,
+    EV_BASE_URL,
     FEATURE_FLAG_APP_VERSION,
     FEATURE_FLAG_PLATFORM,
     FEATURE_FLAG_PLATFORM_VERSION,
@@ -61,6 +63,7 @@ LoadFixture = Callable[[str], dict[str, Any]]
 _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
 
 _BAN = "000000000001"
+_CAN = "1500000001"
 _EAN = "541448860000000001_ID1"
 _DELIVERY_POINT_ID = "DP001"
 _TOKEN = "test-token"
@@ -727,6 +730,26 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_NATIVE,
         ),
     ),
+    "smart_charge_services": (
+        _WireCase(
+            id="smart_charge_services_active",
+            fixture_name="ev_services_smart_charge_active.json",
+            call=lambda c: c.async_get_smart_charge_services(_CAN),
+            request_method="GET",
+            url=f"{EV_BASE_URL}/customer-accounts/{_CAN}/services",
+            expected_params={"type": "SMART_CHARGE"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="smart_charge_services_not_onboarded",
+            fixture_name="ev_services_not_onboarded.json",
+            call=lambda c: c.async_get_smart_charge_services(_CAN),
+            request_method="GET",
+            url=f"{EV_BASE_URL}/customer-accounts/{_CAN}/services",
+            expected_params={"type": "SMART_CHARGE"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
     "epex_prices": (
         _WireCase(
             id="epex_prices",
@@ -934,6 +957,12 @@ def test_ban_args_reject_non_digit_ban() -> None:
         SolarArgs(ban="12.3", delivery_point_id=_DELIVERY_POINT_ID)
     with pytest.raises(ValueError, match="business agreement number must be digits"):
         FlagArgs(flag=FeatureFlagKey.TOU_IS_ACTIVE, ban="123-456")
+
+
+def test_can_args_strip_spaces_and_reject_non_digits() -> None:
+    assert CanArgs(can="1500 000 001").can == _CAN
+    with pytest.raises(ValueError, match="customer account number must be digits"):
+        CanArgs(can="15000x0001")
 
 
 def test_ean_args_reject_malformed_ean() -> None:
