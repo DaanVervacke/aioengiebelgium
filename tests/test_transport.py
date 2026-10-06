@@ -103,7 +103,7 @@ async def test_non_dict_json_raises_invalid_response_error() -> None:
 async def test_timeout_param_defaults_to_30s_and_is_overridable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The timeout parameter reaches asyncio.timeout; default is 30 seconds."""
+    """The timeout parameter reaches asyncio.timeout, and the default is 30 seconds."""
     captured: list[float | None] = []
     real_timeout = asyncio.timeout
 
@@ -136,7 +136,7 @@ async def test_request_text_location_lookup_is_case_insensitive() -> None:
 
 
 async def test_unmatched_request_raises() -> None:
-    """No registered mock means the request raises; nothing reaches the network."""
+    """No registered mock means the request raises, and nothing reaches the network."""
     with aioresponses():
         async with aiohttp.ClientSession() as session:
             with pytest.raises(EngieBeCommunicationError, match="ClientConnectionError") as excinfo:

@@ -122,7 +122,7 @@ class TokenLifecycle:
     def bearer(self) -> str:
         """The Authorization header value. Raises when unauthenticated."""
         if self._access_token is None:
-            msg = "Not authenticated — call async_refresh_token() or authenticate first"
+            msg = "Not authenticated: call async_refresh_token() or authenticate first"
             raise EngieBeAuthenticationError(msg)
         return f"Bearer {self._access_token}"
 

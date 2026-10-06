@@ -2,7 +2,6 @@ name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
 categories:
   - title: Breaking changes
-    # Pre-1.0 semver: breaking changes ship as minor bumps (0.2.0 -> 0.3.0).
     semver-increment: minor
     when:
       labels: [breaking-change]

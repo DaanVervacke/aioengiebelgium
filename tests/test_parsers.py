@@ -2579,7 +2579,7 @@ def test_parsers_drop_malformed_entries(
     payload: dict[str, Any],
     check: Callable[[Any], bool],
 ) -> None:
-    """Malformed entries are skipped; valid siblings survive; nothing raises."""
+    """Malformed entries are skipped, valid siblings survive, and nothing raises."""
     assert check(parser(payload))
 
 

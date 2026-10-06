@@ -157,7 +157,7 @@ async def test_refresh_token_happy_path() -> None:
 
 
 async def test_refresh_request_carries_grant_fields_and_rotates_token() -> None:
-    """The refresh POST pins the wire contract; the next refresh uses the rotated token."""
+    """The refresh POST pins the wire contract, and the next refresh uses the rotated token."""
     with aioresponses() as m:
         m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
         m.post(
@@ -197,7 +197,7 @@ async def test_refresh_invalid_grant_is_authentication_error(status: int) -> Non
     """A burned refresh token (captured 403 invalid_grant) means re-authenticate.
 
     The captured contract (tests/fixtures/token_invalid_grant.http) is a
-    token-endpoint 403 with an ``invalid_grant`` JSON body; Auth0 documents
+    token-endpoint 403 with an ``invalid_grant`` JSON body. Auth0 documents
     400 for the same rejection, so both are pinned.
     """
     body = _capture_body("token_invalid_grant.http")
@@ -380,7 +380,7 @@ def test_subject_allows_empty_string() -> None:
 async def test_concurrent_refreshes_do_exactly_one_request(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Two racing refreshes serialize on the lock; the loser adopts the winner's tokens."""
+    """Two racing refreshes serialize on the lock, and the loser adopts the winner's tokens."""
     real_exchange_token = exchange_token
 
     async def yielding_exchange_token(*args: Any, **kwargs: Any) -> tuple[str, str]:
@@ -765,7 +765,7 @@ async def test_submit_mfa_callback_shortcircuit(
 
 
 async def test_token_exchange_carries_code_and_verifier_matching_challenge() -> None:
-    """The code exchange pins its form fields; the verifier matches the sent challenge."""
+    """The code exchange pins its form fields, and the verifier matches the sent challenge."""
     with aioresponses() as m:
         _register_auth_steps_1_to_7(m)
         client = EngieBeClient()
@@ -1123,7 +1123,7 @@ async def test_raising_callback_does_not_break_getter(
     load_fixture: Callable[[str], dict[str, Any]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """A raising callback during auto-refresh is logged; the getter still succeeds."""
+    """A raising callback during auto-refresh is logged, and the getter still succeeds."""
 
     async def callback(_access: str, _refresh: str) -> None:
         msg = "boom"
@@ -1169,12 +1169,12 @@ async def test_reentrant_callback_does_not_deadlock() -> None:
 
 
 async def test_stale_rotation_delivery_dropped(caplog: pytest.LogCaptureFixture) -> None:
-    """A delivery superseded by newer rotations is dropped; the newest pair lands last.
+    """A delivery superseded by newer rotations is dropped. The newest pair lands last.
 
     The first rotation's delivery stalls (asyncio event) past two further
     rotations.  Deliveries stay in rotation order: the stalled one finishes
     first, the superseded middle one never fires, and the newest pair is the
-    last thing the consumer observes — never overwritten by an older pair.
+    last thing the consumer observes, and an older pair never overwrites it.
     """
     deliveries: list[tuple[str, str]] = []
     first_delivery_started = asyncio.Event()
@@ -1259,7 +1259,7 @@ async def test_closed_client_raises_client_closed_error() -> None:
 
 
 async def test_closed_client_context_manager() -> None:
-    """A client is unusable after its context exits; re-entry raises too."""
+    """A client is unusable after its context exits, and re-entry raises too."""
     async with EngieBeClient(access_token="stored-access") as client:
         pass
 
@@ -1287,8 +1287,10 @@ def _location_stub(path: str) -> str:
 
 
 async def test_authorize_state_read_from_location_header() -> None:
-    """Live Auth0 serves the authorize redirect as an anchor-less stub; the
-    continuation state comes from the Location header, not the body."""
+    """Live Auth0 serves the authorize redirect as an anchor-less stub.
+
+    The continuation state comes from the Location header, not the body.
+    """
     with aioresponses() as m:
         m.get(
             _q(_AUTHORIZE_URL),
@@ -1306,8 +1308,10 @@ async def test_authorize_state_read_from_location_header() -> None:
 
 
 async def test_full_flow_with_location_only_redirects() -> None:
-    """Every redirect stub carries its state in the Location header only; the
-    full login still completes."""
+    """Every redirect stub carries its state in the Location header only.
+
+    The full login still completes.
+    """
     with aioresponses() as m:
         m.get(
             _q(_AUTHORIZE_URL),

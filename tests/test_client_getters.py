@@ -981,7 +981,7 @@ async def test_tokenless_call_matches_auth_mode(
     endpoint: Endpoint[Any, Any],
     load_fixture: LoadFixture,
 ) -> None:
-    """Auth-required rows fail fast with no request; the optional-auth row omits the header."""
+    """Auth-required rows fail fast with no request, and the optional-auth row omits the header."""
     case = _WIRE_CASES[endpoint.name][0]
     with aioresponses() as m:
         _register_wire_response(m, case, load_fixture)

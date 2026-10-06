@@ -188,8 +188,6 @@ def created_sessions(monkeypatch: pytest.MonkeyPatch) -> list[aiohttp.ClientSess
     return created
 
 
-# aioresponses<=0.7.9 misses aiohttp>=3.14's stream_writer kwarg (aioresponses#288, unreleased).
-# Delete this shim when the dev pin can move past 0.7.9.
 _original_build_response = _aioresponses_core.RequestMatch._build_response
 
 

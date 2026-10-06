@@ -449,7 +449,7 @@ async def _switch_to_email_mfa(
     *,
     timeout: float = 30.0,  # noqa: ASYNC109
 ) -> str:
-    """Switch MFA method to email; return the email-challenge page body for input harvest."""
+    """Switch MFA method to email and return the email-challenge page body for input harvest."""
     sms_body, _ = await _auth_request(
         session, "GET", "/u/mfa-sms-challenge", challenge_state, timeout=timeout
     )
