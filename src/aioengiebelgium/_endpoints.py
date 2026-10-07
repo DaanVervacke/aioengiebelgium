@@ -322,6 +322,8 @@ class UsageArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
+        _validate_ban(self.ban)
+        _validate_date_range(self.start_date, self.end_date)
 
 
 @dataclass(frozen=True, slots=True)

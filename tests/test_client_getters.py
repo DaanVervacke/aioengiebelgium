@@ -32,6 +32,7 @@ from aioengiebelgium._endpoints import (
     MonthArgs,
     PeaksArgs,
     SolarArgs,
+    UsageArgs,
     VehicleArgs,
 )
 from aioengiebelgium.client import EngieBeClient
@@ -1299,6 +1300,40 @@ def test_meter_reads_args_strip_and_validate_ban() -> None:
     assert args.ban == "000000000001"
     with pytest.raises(ValueError, match="must be digits"):
         MeterReadsArgs(ban="abc", latest=True, start_date=None, end_date=None)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        pytest.param({"ban": "12a"}, "business agreement number must be digits", id="bad_ban"),
+        pytest.param(
+            {"start_date": date(2026, 5, 1), "end_date": date(2026, 4, 30)},
+            "start_date 2026-05-01 is after end_date 2026-04-30",
+            id="reversed_range",
+        ),
+    ],
+)
+def test_usage_args_reject_invalid_values(kwargs: dict[str, Any], message: str) -> None:
+    base: dict[str, Any] = {
+        "ban": _BAN,
+        "start_date": date(2026, 4, 1),
+        "end_date": date(2026, 4, 30),
+        "granularity": UsageGranularity.HOURLY,
+        "include_simulation": False,
+    }
+    with pytest.raises(ValueError, match=message):
+        UsageArgs(**(base | kwargs))
+
+
+def test_usage_args_strip_ban_and_accept_single_day() -> None:
+    args = UsageArgs(
+        ban="0000 0000 0001",
+        start_date=date(2026, 4, 1),
+        end_date=date(2026, 4, 1),
+        granularity=UsageGranularity.DAILY,
+        include_simulation=False,
+    )
+    assert args.ban == "000000000001"
 
 
 def test_epex_args_reject_naive_datetimes() -> None:
