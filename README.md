@@ -54,7 +54,9 @@ async def first_login() -> None:
         await flow.async_submit_mfa("123456")
 
         relations = await client.async_get_customer_account_relations()
-        print(relations)
+        for relation in relations.accounts:
+            for agreement in relation.customer_account.business_agreements:
+                print(agreement.business_agreement_number)
 
 
 async def next_run() -> None:
@@ -67,6 +69,7 @@ async def next_run() -> None:
         refresh_token=tokens["refresh"],
         on_token_refresh=persist_tokens,
     ) as client:
+        # A business agreement number printed by first_login().
         contracts = await client.async_get_energy_contracts("1234567890")
         print(contracts)
 
@@ -81,15 +84,19 @@ else:
 
 ENGIE rotates the refresh token on every refresh call, and the previous refresh
 token becomes invalid immediately. If you pass an `on_token_refresh` callback, it
-receives the new `(access_token, refresh_token)` pair whenever the tokens change
-(manual refresh, an automatic refresh before expiry, or a refresh triggered by a
-401). You must persist that pair durably. If you keep using the old refresh
-token after a rotation, the next refresh fails and the user has to log in again.
+receives the new `(access_token, refresh_token)` pair whenever the tokens change:
+after a completed login, a manual refresh, an automatic refresh before expiry, or
+a refresh triggered by a 401. You must persist that pair durably. If you keep
+using the old refresh token after a rotation, the next refresh fails and the user
+has to log in again.
+
+The client logs an exception raised by `on_token_refresh` and continues. It does
+not re-raise it, so handle and report storage failures inside the callback.
 
 ## EPEX prices (no login required)
 
-The EPEX day-ahead market endpoint is public. Fetch it from an unauthenticated
-client, with no tokens and no login:
+The EPEX day-ahead market endpoint is public. It works on a client with no
+tokens and no login. A logged-in client can call it too and sends its token.
 
 ```python
 import asyncio
@@ -112,16 +119,21 @@ asyncio.run(main())
 
 ### Constructor
 
-`EngieBeClient(...)`:
+`EngieBeClient(session=None, *, ...)`. Every argument after `session` is
+keyword-only.
 
 | Argument | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `session` | `aiohttp.ClientSession \| None` | `None` | Caller-owned session. The client closes only a session it created itself. |
 | `client_id` | `str` | `DEFAULT_CLIENT_ID` | OAuth client id used for the Auth0 flow. |
 | `access_token` | `str \| None` | `None` | Previously stored access token. Skips the login flow. |
-| `refresh_token` | `str \| None` | `None` | Previously stored refresh token. Rotated on every refresh. |
+| `refresh_token` | `str \| None` | `None` | Previously stored refresh token. Rotated on every refresh. On its own it also skips the login flow: the first request refreshes the pair. |
 | `on_token_refresh` | `Callable[[str, str], Awaitable[None]] \| None` | `None` | Async callback receiving the new `(access_token, refresh_token)` pair on every rotation. |
 | `request_timeout` | `float` | `30.0` | Per-request timeout in seconds. |
+
+Close the client with `await client.close()`, or use it as `async with
+EngieBeClient(...) as client:`. The session is closed only if the client created
+it. A closed client raises `EngieBeClientClosedError`.
 
 ### Token state
 
@@ -131,19 +143,23 @@ asyncio.run(main())
 | `refresh_token` | `str \| None` | Current refresh token, or `None` when unauthenticated. |
 | `access_token_expiry` | `datetime \| None` | Expiry from the access token's JWT `exp` claim, or `None` when unknown. |
 | `subject` | `str \| None` | JWT `sub` claim of the access token, the stable account identifier. |
-| `is_access_token_expired(now)` | `bool` | `True` when the expiry is known and `now` is at or past it. |
+| `is_access_token_expired(now)` | `bool` | `True` when the expiry is known and `now` is at or past it. `now` must be timezone-aware, otherwise `ValueError` is raised. |
 
 ### Authentication
 
 | Method | Returns | Notes |
 | --- | --- | --- |
-| `async_start_authentication(username, password, mfa_method=MfaMethod.SMS, *, auth_session=None)` | `AuthFlow` | Runs login steps 1-7 and returns an `AuthFlow` awaiting the MFA code. Finish with `await flow.async_submit_mfa("123456")`. |
+| `async_start_authentication(username, password, mfa_method=MfaMethod.SMS, *, auth_session=None)` | `AuthFlow` | Runs login steps 1-7 and returns an `AuthFlow` awaiting the MFA code. |
+| `AuthFlow.async_submit_mfa(code)` | `tuple[str, str]` | Submits the MFA code, finishes the login and returns `(access_token, refresh_token)`. After an `EngieBeMfaError` the flow stays open, so you can submit a new code. |
+| `AuthFlow.async_abort()` | `None` | Abandons the flow and closes the login session if the flow created it. |
 | `async_refresh_token()` | `tuple[str, str]` | Refreshes the tokens and returns `(new_access_token, new_refresh_token)`. |
-| `close()` | `None` | Closes the client. The session is closed only if this client created it. |
 
 Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-rotation).
 
 ### Data getters
+
+Response models that hold lists carry `skipped_entries`, the number of malformed
+entries the parser dropped. A non-zero count means the response is incomplete.
 
 | Getter | Returns | Description |
 | --- | --- | --- |
@@ -168,7 +184,7 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 | `async_get_happy_hour_service_status(business_agreement_number)` | `HappyHourServiceStatus` | The happy hour service status (for example `ACTIVE` or `NOT_ACTIVATED`) and when it last changed. |
 | `async_get_energy_score(business_agreement_number, year, month)` | `EnergyScore` | The app's energy score grade (A to E) for a month, the criteria behind it and the actions the app suggests. Some criteria track app use (monthly graph viewed, monthly question answered). A criterion that does not count for the contract is `None`. |
 | `async_get_smart_charge_services(customer_account_number)` | `EvServiceInfo` | Whether the customer account is onboarded for Smart Charge and the status of its `SMART_CHARGE` service. The customer account number comes from `CustomerAccount.customer_account_number`. |
-| `async_get_electric_vehicles(customer_account_number)` | `ElectricVehiclesResponse` | The vehicles of a customer account, with what ENGIE can read or control on each and the last charge state (battery level, range, plug status, charge power). Inactive vehicles are included with `active=False`. |
+| `async_get_electric_vehicles(customer_account_number)` | `ElectricVehiclesResponse` | The vehicles of a customer account, with what ENGIE can read or control on each and the last charge state (battery level, range, plug status, charge power). Inactive vehicles are included. Check `active` on each vehicle. |
 | `async_get_vehicle_charge_settings(vehicle_id)` | `VehicleChargeSettings` | The Smart Charge settings of a vehicle: departure time per weekday, target battery level, battery reserve and whether smart and solar charging are on. `vehicle_id` is `ElectricVehicle.id`. |
 | `async_get_latest_charging_session(vehicle_id)` | `ChargingSessionDetails` | The latest charging session of a vehicle with the energy charged per interval. A session with status `unknown` has no start, end or end battery level yet. |
 | `async_get_latest_charging_session_charge_settings(vehicle_id)` | `ChargingSessionChargeSettings` | The target battery level, the departure time override and the direct-charging flag of the latest charging session. |
@@ -188,23 +204,47 @@ These calls change the customer's ENGIE service. They were built from the ENGIE 
 
 ### Exceptions
 
-All exceptions derive from `EngieBeError`, which carries an optional HTTP
+Client errors derive from `EngieBeError`, which carries an optional HTTP
 `status`:
 
-| Exception | Meaning |
-| --- | --- |
-| `EngieBeError` | Base exception for all client errors. |
-| `EngieBeClientClosedError` | The client was used after `close()`. |
-| `EngieBeCommunicationError` | Communication errors: network failure, non-auth HTTP >= 400. |
-| `EngieBeTimeoutError` | The request timed out. Safe to retry. |
-| `EngieBeEpexNotPublishedError` | EPEX day-ahead prices are not yet published for the requested window (HTTP 404). |
-| `EngieBeInvalidResponseError` | A 2xx response whose body is not the expected JSON object. |
-| `EngieBeAuthenticationError` | Authentication errors: bad credentials, expired token. |
-| `EngieBeMfaError` | MFA-related errors, such as an invalid code. |
+| Exception | Parent | Meaning |
+| --- | --- | --- |
+| `EngieBeError` | `Exception` | Base exception for all client errors. |
+| `EngieBeClientClosedError` | `EngieBeError` | The client was used after `close()`. |
+| `EngieBeCommunicationError` | `EngieBeError` | Communication errors: network failure, non-auth HTTP >= 400. |
+| `EngieBeTimeoutError` | `EngieBeCommunicationError` | The request timed out. Retrying a getter is safe. After a service action, check the service status before you retry. |
+| `EngieBeEpexNotPublishedError` | `EngieBeCommunicationError` | EPEX day-ahead prices are not yet published for the requested window (HTTP 404). |
+| `EngieBeInvalidResponseError` | `EngieBeError` | A 2xx response whose body is not the expected JSON object. |
+| `EngieBeAuthenticationError` | `EngieBeError` | Authentication errors: bad credentials, expired token. |
+| `EngieBeMfaError` | `EngieBeAuthenticationError` | MFA-related errors, such as an invalid code. |
+
+Catch a subclass before its parent. Invalid arguments raise `ValueError` before
+any request is sent. Examples are a business agreement number that is not all
+digits, a month outside 1-12, a start date after the end date and a datetime
+without a timezone.
 
 EPEX day-ahead prices are published in the afternoon for the following day.
 Requesting a window whose prices have not been published yet raises
 `EngieBeEpexNotPublishedError`. Retry later.
+
+### Enums and helpers
+
+| Name | Values | Used by |
+| --- | --- | --- |
+| `MfaMethod` | `SMS`, `EMAIL` | `async_start_authentication` |
+| `UsageGranularity` | `HOURLY`, `DAILY`, `MONTHLY`, `YEARLY` | `async_get_usage_details` |
+| `EpexGranularity` | `HOURLY`, `QUARTER_HOURLY` | `async_get_epex_prices` |
+| `FeatureFlagKey` | `HAPPY_HOURS_SERVICE_ENABLED`, `SOLAR_SURPLUS_SHOWN_DASHBOARD`, `TOU_IS_ACTIVE` | `async_get_feature_flag` |
+
+The other exported enums (`TouSlotCode`, `SolarSurplusLevel`,
+`SolarInferenceKey`, `VehicleChargeStatus`, `VehiclePolicyState`,
+`ChargingSessionType`, `ChargingSessionStatus`, `ChargingSessionSource`,
+`SmartChargeOutcomeState`, `ChargeSettingMode`) list the known values of model
+fields.
+
+`bare_ean(ean)` strips the delivery-point suffix (`_ID1`) from an EAN.
+`ean_with_delivery_point_suffix(ean)` appends it. `__version__` holds the
+installed package version.
 
 ## Development
 
