@@ -44,7 +44,9 @@ pair.
            await flow.async_submit_mfa("123456")
 
            relations = await client.async_get_customer_account_relations()
-           print(relations)
+           for relation in relations.accounts:
+               for agreement in relation.customer_account.business_agreements:
+                   print(agreement.business_agreement_number)
 
 
    async def next_run() -> None:
@@ -57,6 +59,7 @@ pair.
            refresh_token=tokens["refresh"],
            on_token_refresh=persist_tokens,
        ) as client:
+           # A business agreement number printed by first_login().
            contracts = await client.async_get_energy_contracts("1234567890")
            print(contracts)
 

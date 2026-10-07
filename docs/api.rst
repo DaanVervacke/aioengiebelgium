@@ -4,6 +4,30 @@ API reference
 Client
 ======
 
+Every constructor argument after ``session`` is keyword-only.
+
+=====================  ==========================================================
+Argument               Meaning
+=====================  ==========================================================
+``session``            Caller-owned ``aiohttp.ClientSession``. The client closes
+                       only a session it created itself.
+``client_id``          OAuth client id for the Auth0 flow. Defaults to
+                       ``DEFAULT_CLIENT_ID``.
+``access_token``       Previously stored access token. Skips the login flow.
+``refresh_token``      Previously stored refresh token. Rotated on every
+                       refresh. On its own it also skips the login flow.
+``on_token_refresh``   Async callback that receives every new
+                       ``(access_token, refresh_token)`` pair.
+``request_timeout``    Per-request timeout in seconds. Defaults to ``30.0``.
+=====================  ==========================================================
+
+``async_activate_happy_hour_service`` and ``async_cancel_happy_hour_service``
+change the customer's ENGIE service. They were built from the ENGIE Smart
+App's API contract and have not been run against a live account. An
+:class:`~aioengiebelgium.EngieBeInvalidResponseError` after activation can
+still mean the activation worked, so confirm with
+``async_get_happy_hour_service_status``.
+
 .. autoclass:: aioengiebelgium.EngieBeClient
    :members:
    :special-members: __init__
@@ -19,8 +43,14 @@ Constants
 
 .. autodata:: aioengiebelgium.DEFAULT_CLIENT_ID
 
+.. autodata:: aioengiebelgium.__version__
+
 Models
 ======
+
+Response models that hold lists carry ``skipped_entries``, the number of
+malformed entries the parser dropped. A non-zero count means the response is
+incomplete.
 
 .. autoclass:: aioengiebelgium.AccountBalance
    :members:
@@ -370,29 +400,43 @@ Enums
 Exceptions
 ==========
 
+Client errors derive from :class:`~aioengiebelgium.EngieBeError`. Catch a
+subclass before its parent. Invalid arguments raise ``ValueError`` before any
+request is sent. Examples are a business agreement number that is not all
+digits, a month outside 1-12, a start date after the end date and a datetime
+without a timezone.
+
 .. autoclass:: aioengiebelgium.EngieBeAuthenticationError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeClientClosedError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeCommunicationError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeEpexNotPublishedError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeInvalidResponseError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeMfaError
    :members:
+   :show-inheritance:
 
 .. autoclass:: aioengiebelgium.EngieBeTimeoutError
    :members:
+   :show-inheritance:
 
 Helpers
 =======

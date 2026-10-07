@@ -1,9 +1,9 @@
 EPEX prices
 ===========
 
-The EPEX day-ahead endpoint is public. Fetch it from an unauthenticated
-client, with no tokens and no login. The request carries no
-``Authorization`` header.
+The EPEX day-ahead endpoint is public. It works on a client with no tokens
+and no login, and then the request carries no ``Authorization`` header. A
+logged-in client can call it too and sends its token.
 
 .. code-block:: python
 

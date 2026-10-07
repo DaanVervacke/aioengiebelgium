@@ -24,8 +24,14 @@ once you receive the code.
 ``SMS`` and ``EMAIL``.
 
 A failed code raises
-:class:`~aioengiebelgium.EngieBeMfaError`. Bad credentials or an expired
-token raise :class:`~aioengiebelgium.EngieBeAuthenticationError`.
+:class:`~aioengiebelgium.EngieBeMfaError`. The flow stays open after that
+error, so you can call ``async_submit_mfa`` again with a new code. Call
+``async_abort`` to give up. It closes the login session if the flow created
+it. Bad credentials or an expired token raise
+:class:`~aioengiebelgium.EngieBeAuthenticationError`.
+
+``async_submit_mfa`` returns the new ``(access_token, refresh_token)`` pair
+and also passes it to ``on_token_refresh``.
 
 Token rotation
 --------------
@@ -34,8 +40,8 @@ ENGIE rotates the refresh token on every refresh call, and the previous
 refresh token becomes invalid immediately. If you pass an
 ``on_token_refresh`` callback, it receives the new
 ``(access_token, refresh_token)`` pair whenever the tokens change. That
-happens on a manual refresh, on an automatic refresh before expiry, and on
-a refresh triggered by a 401.
+happens after a completed login, on a manual refresh, on an automatic
+refresh before expiry, and on a refresh triggered by a 401.
 
 You must persist every rotated pair durably. If you keep using the old
 refresh token after a rotation, the next refresh fails and the user has to
@@ -43,6 +49,9 @@ log in again.
 
 Deliveries to the callback are ordered. A pair superseded before delivery
 is dropped, so the callback always ends on the newest pair.
+
+The client logs an exception raised by the callback and continues. It does
+not re-raise it, so handle and report storage failures inside the callback.
 
 Reusing saved tokens
 --------------------
@@ -62,6 +71,9 @@ Pass a stored token pair to the constructor to skip the login entirely:
        ) as client:
            relations = await client.async_get_customer_account_relations()
 
+``persist_tokens`` is the callback from :doc:`quickstart`. A refresh token
+on its own also skips the login: the first request refreshes the pair.
+
 Refreshes are serialized behind a lock, so concurrent requests trigger at
 most one refresh call.
 
@@ -70,6 +82,7 @@ Token state
 
 The access token is a JWT. ``access_token_expiry`` reads its ``exp`` claim,
 and ``is_access_token_expired(now)`` takes a caller-supplied aware ``now``.
+A naive ``now`` raises ``ValueError``.
 The JWT ``sub`` claim, exposed as ``subject``, is the stable account
 identifier. Do not substitute the user's email for it.
 
@@ -79,3 +92,7 @@ Session ownership
 An injected ``session`` is caller-owned. The client closes only a session
 it created itself, so a caller that injects a session keeps responsibility
 for closing it.
+
+Close the client with ``await client.close()`` or use it as
+``async with``. A closed client raises
+:class:`~aioengiebelgium.EngieBeClientClosedError`.
