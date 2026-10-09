@@ -7,6 +7,7 @@ from base64 import urlsafe_b64decode
 from collections import deque
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import aiohttp
 
@@ -19,18 +20,20 @@ _LOGGER = logging.getLogger(__name__)
 _EXPIRY_SKEW = timedelta(seconds=30)
 
 
-def _jwt_expiry(token: str) -> datetime | None:
+def _jwt_payload(token: str) -> dict[str, Any]:
     try:
         _header, payload_b64, _signature = token.split(".")
     except ValueError:
-        return None
+        return {}
     try:
         payload = json.loads(urlsafe_b64decode(payload_b64 + "=" * (-len(payload_b64) % 4)))
     except ValueError:
-        return None
-    if not isinstance(payload, dict):
-        return None
-    exp = payload.get("exp")
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _jwt_expiry(token: str) -> datetime | None:
+    exp = _jwt_payload(token).get("exp")
     if not isinstance(exp, int | float):
         return None
     try:
@@ -40,20 +43,8 @@ def _jwt_expiry(token: str) -> datetime | None:
 
 
 def _jwt_subject(token: str) -> str | None:
-    try:
-        _header, payload_b64, _signature = token.split(".")
-    except ValueError:
-        return None
-    try:
-        payload = json.loads(urlsafe_b64decode(payload_b64 + "=" * (-len(payload_b64) % 4)))
-    except ValueError:
-        return None
-    if not isinstance(payload, dict):
-        return None
-    sub = payload.get("sub")
-    if not isinstance(sub, str):
-        return None
-    return sub
+    sub = _jwt_payload(token).get("sub")
+    return sub if isinstance(sub, str) else None
 
 
 class TokenLifecycle:
