@@ -2913,6 +2913,126 @@ def test_clean_payloads_have_zero_skipped_entries(
     assert parser(load_fixture(fixture_name)).skipped_entries == 0
 
 
+_DAY_START = "2026-10-01T00:00:00+02:00"
+_DAY_END = "2026-10-02T00:00:00+02:00"
+
+
+@pytest.mark.parametrize(
+    ("parser", "payload"),
+    [
+        pytest.param(
+            parse_customer_account_relations,
+            {
+                "items": [
+                    {
+                        "customerAccount": {
+                            "customerAccountNumber": "1",
+                            "businessAgreements": [{"businessAgreementNumber": "2"}, {}],
+                        }
+                    }
+                ]
+            },
+            id="business_agreements",
+        ),
+        pytest.param(
+            parse_prices,
+            {
+                "items": [
+                    {
+                        "ean": "1",
+                        "prices": [
+                            {"proportionalPriceConfigurations": {"offtake": [4], "injection": []}},
+                        ],
+                    }
+                ]
+            },
+            id="price_slots",
+        ),
+        pytest.param(parse_prices, {"items": [{"ean": "1", "prices": [4]}]}, id="price_periods"),
+        pytest.param(
+            parse_account_balance,
+            {"details": {"financialTransactions": [{"dueAmount": 1}, 4]}},
+            id="financial_transactions",
+        ),
+        pytest.param(
+            parse_solar_surplus_forecasts,
+            {"forecasts": [{"forecastDate": "2026-10-01", "details": [4]}]},
+            id="solar_surplus_slots",
+        ),
+        pytest.param(
+            parse_tou_schedules,
+            {"items": [{"eanWithSuffix": "1_ID1", "gridMeterTimeOfUseSchedules": [4]}]},
+            id="tou_grid_meters",
+        ),
+        pytest.param(
+            parse_tou_schedules,
+            {
+                "items": [
+                    {
+                        "eanWithSuffix": "1_ID1",
+                        "gridMeterTimeOfUseSchedules": [
+                            {"supplierSchedule": {"offtake": {"monday": [{"startTime": "00:00"}]}}}
+                        ],
+                    }
+                ]
+            },
+            id="tou_slots",
+        ),
+        pytest.param(
+            parse_usage_details,
+            {
+                "items": [
+                    {
+                        "start": _DAY_START,
+                        "end": _DAY_END,
+                        "energy": {"electricity": {"offtake": {"supplierParts": [{}]}}},
+                    }
+                ]
+            },
+            id="usage_tou_parts",
+        ),
+        pytest.param(
+            parse_usage_details,
+            {
+                "items": [],
+                "total": {
+                    "start": _DAY_START,
+                    "end": _DAY_END,
+                    "costs": {"electricity": {"offtake": {"parts": [{}]}}},
+                },
+            },
+            id="usage_total_tou_cross_parts",
+        ),
+        pytest.param(
+            parse_meter_reads,
+            {
+                "items": [
+                    {
+                        "ean": "1",
+                        "meterReadDate": "2026-10-01",
+                        "registers": [{"indexRead": 1, "registerType": "T1"}, 4],
+                    }
+                ]
+            },
+            id="meter_registers",
+        ),
+    ],
+)
+def test_nested_malformed_entries_count_as_skipped(
+    parser: Callable[[dict[str, Any]], Any],
+    payload: dict[str, Any],
+) -> None:
+    assert parser(payload).skipped_entries == 1
+
+
+def test_nested_parse_without_open_tally_still_drops_entry() -> None:
+    meter = _parse_tou_grid_meter({"supplierSchedule": {"offtake": {"monday": [4]}}})
+    assert meter is not None
+    assert meter.supplier is not None
+    assert meter.supplier.offtake is not None
+    assert meter.supplier.offtake.monday == ()
+
+
 def test_parse_service_points_counts_skipped_entries() -> None:
     result = parse_service_points({"items": [{"ean": "541448820000000001"}, {"division": "GAS"}]})
     assert len(result.items) == 1

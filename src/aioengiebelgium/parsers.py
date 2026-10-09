@@ -1,7 +1,10 @@
 import logging
 import re
 from collections import Counter
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from itertools import pairwise
 from types import MappingProxyType
@@ -210,13 +213,42 @@ def _parse_items_counted[T](
     return items, n_skipped
 
 
+@dataclass(slots=True)
+class _NestedSkipTally:
+    count: int = 0
+
+
+_nested_skip_tally: ContextVar[_NestedSkipTally | None] = ContextVar(
+    "_nested_skip_tally", default=None
+)
+
+
+@contextmanager
+def _tally_nested_skips() -> Iterator[_NestedSkipTally]:
+    """Count the entries that nested ``_parse_items`` calls drop inside the block."""
+    tally = _NestedSkipTally()
+    token = _nested_skip_tally.set(tally)
+    try:
+        yield tally
+    finally:
+        _nested_skip_tally.reset(token)
+
+
 def _parse_items[T](
     data: object,
     item_parser: Callable[[dict[str, Any]], T | None],
     label: str,
 ) -> list[T]:
-    """Parse a list defensively."""
-    return _parse_items_counted(data, item_parser, label)[0]
+    """Parse a nested list defensively and add its dropped entries to the open tally."""
+    items, skipped = _parse_items_counted(data, item_parser, label)
+    _record_nested_skips(skipped)
+    return items
+
+
+def _record_nested_skips(skipped: int) -> None:
+    tally = _nested_skip_tally.get()
+    if tally is not None:
+        tally.count += skipped
 
 
 def _parse_business_agreement(ag: dict[str, Any]) -> BusinessAgreement | None:
@@ -298,10 +330,13 @@ def _parse_account_relation(item: dict[str, Any]) -> AccountRelation | None:
 
 
 def parse_customer_account_relations(data: dict[str, Any]) -> CustomerAccountRelations:
-    accounts, skipped = _parse_items_counted(
-        data.get("items"), _parse_account_relation, "account relation"
+    with _tally_nested_skips() as nested:
+        accounts, skipped = _parse_items_counted(
+            data.get("items"), _parse_account_relation, "account relation"
+        )
+    return CustomerAccountRelations(
+        accounts=tuple(accounts), skipped_entries=skipped + nested.count
     )
-    return CustomerAccountRelations(accounts=tuple(accounts), skipped_entries=skipped)
 
 
 def _parse_price_slot(s: dict[str, Any]) -> PriceSlot:
@@ -336,8 +371,9 @@ def _parse_ean_prices(item: dict[str, Any]) -> EanPrices:
 
 
 def parse_prices(data: dict[str, Any]) -> PricesResponse:
-    items, skipped = _parse_items_counted(data.get("items"), _parse_ean_prices, "price")
-    return PricesResponse(items=tuple(items), skipped_entries=skipped)
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(data.get("items"), _parse_ean_prices, "price")
+    return PricesResponse(items=tuple(items), skipped_entries=skipped + nested.count)
 
 
 def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
@@ -425,8 +461,9 @@ def parse_account_balance(data: dict[str, Any]) -> AccountBalance:
 
     details_raw = data.get("details")
     details = None
+    skipped = 0
     if isinstance(details_raw, dict):
-        txns = _parse_items(
+        txns, skipped = _parse_items_counted(
             details_raw.get("financialTransactions"),
             _parse_financial_transaction,
             "financial transaction",
@@ -449,6 +486,7 @@ def parse_account_balance(data: dict[str, Any]) -> AccountBalance:
         overview=overview,
         details=details,
         refund_blocked=refund_blocked,
+        skipped_entries=skipped,
     )
 
 
@@ -714,10 +752,11 @@ def _parse_solar_surplus_day(day: dict[str, Any]) -> SolarSurplusDay:
 
 
 def parse_solar_surplus_forecasts(data: dict[str, Any]) -> SolarSurplusForecasts:
-    days, skipped = _parse_items_counted(
-        data.get("forecasts"), _parse_solar_surplus_day, "solar surplus"
-    )
-    return SolarSurplusForecasts(forecasts=tuple(days), skipped_entries=skipped)
+    with _tally_nested_skips() as nested:
+        days, skipped = _parse_items_counted(
+            data.get("forecasts"), _parse_solar_surplus_day, "solar surplus"
+        )
+    return SolarSurplusForecasts(forecasts=tuple(days), skipped_entries=skipped + nested.count)
 
 
 _TOU_DIRECTION_PREFIX = re.compile(r"(?:^|_)(?:OFFTAKE|INJECTION)_")
@@ -891,10 +930,11 @@ def _parse_tou_schedule_item(item: dict[str, Any]) -> TouScheduleItem | None:
 
 
 def parse_tou_schedules(data: dict[str, Any]) -> TouSchedulesResponse:
-    items, skipped = _parse_items_counted(
-        data.get("items"), _parse_tou_schedule_item, "TOU schedule"
-    )
-    return TouSchedulesResponse(items=tuple(items), skipped_entries=skipped)
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(
+            data.get("items"), _parse_tou_schedule_item, "TOU schedule"
+        )
+    return TouSchedulesResponse(items=tuple(items), skipped_entries=skipped + nested.count)
 
 
 def _parse_usage_tou_parts(
@@ -1033,10 +1073,13 @@ def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:
 
 
 def parse_usage_details(data: dict[str, Any]) -> UsageDetailsResponse:
-    items, skipped = _parse_items_counted(data.get("items"), _parse_usage_item, "usage")
-    total_raw = data.get("total")
-    total = _parse_usage_item(total_raw) if isinstance(total_raw, dict) else None
-    return UsageDetailsResponse(items=tuple(items), total=total, skipped_entries=skipped)
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(data.get("items"), _parse_usage_item, "usage")
+        total_raw = data.get("total")
+        total = _parse_usage_item(total_raw) if isinstance(total_raw, dict) else None
+    return UsageDetailsResponse(
+        items=tuple(items), total=total, skipped_entries=skipped + nested.count
+    )
 
 
 def _parse_metering_configuration(sub: Any) -> MeteringConfiguration | None:
@@ -1183,9 +1226,12 @@ def _parse_meter_read(item: dict[str, Any]) -> MeterRead | None:
     if ean is None or read_date is None:
         return None
     raw_registers = item.get("registers")
-    registers = _parse_items(raw_registers, _parse_meter_register_read, "meter register")
+    registers, skipped_registers = _parse_items_counted(
+        raw_registers, _parse_meter_register_read, "meter register"
+    )
     if raw_registers and not registers:
         return None
+    _record_nested_skips(skipped_registers)
     return MeterRead(
         ean=ean,
         read_date=read_date,
@@ -1197,8 +1243,9 @@ def _parse_meter_read(item: dict[str, Any]) -> MeterRead | None:
 
 
 def parse_meter_reads(data: dict[str, Any]) -> MeterReadsResponse:
-    items, skipped = _parse_items_counted(data.get("items"), _parse_meter_read, "meter read")
-    return MeterReadsResponse(items=tuple(items), skipped_entries=skipped)
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(data.get("items"), _parse_meter_read, "meter read")
+    return MeterReadsResponse(items=tuple(items), skipped_entries=skipped + nested.count)
 
 
 def _parse_payment_slice(raw: dict[str, Any]) -> PaymentSlice | None:

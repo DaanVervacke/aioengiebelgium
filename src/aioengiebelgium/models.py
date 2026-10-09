@@ -271,6 +271,7 @@ class AccountBalance:
     overview: BillingOverview | None = None
     details: BillingDetails | None = None
     refund_blocked: bool = False
+    skipped_entries: int = 0
 
     def earliest_due_date(self, tz: ZoneInfo) -> datetime | None:
         """Return the earliest due date among open transactions, or ``None``."""
