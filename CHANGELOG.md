@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Before 1.0, breaking changes ship as minor bumps.
 
+## [Unreleased]
+
+### Bug Fixes
+
+- Validate the BAN and date range of usage details requests
+- Count entries dropped from nested lists in skipped_entries
+
+### Documentation
+
+- Correct and complete the README API reference
+- Correct and complete the Sphinx documentation
+- Document the nested skip count and the remaining argument checks
+
+### Maintenance
+
+- Build the Sphinx documentation in CI
+
 ## [0.6.0] - 2026-10-06
 
 ### Features
