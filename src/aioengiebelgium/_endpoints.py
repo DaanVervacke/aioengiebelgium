@@ -143,11 +143,7 @@ class Endpoint[ArgsT, ModelT]:
         raise err
 
 
-def _normalize_ban(value: str) -> str:
-    return value.replace(" ", "")
-
-
-_BAN_RE = re.compile(r"[0-9]+")
+_DIGITS_RE = re.compile(r"[0-9]+")
 _EAN_RE = re.compile(r"[0-9]+(?:_ID[0-9]+)?")
 _MIN_MONTH = 1
 _MAX_MONTH = 12
@@ -156,9 +152,25 @@ _MAX_YEAR = 2100
 _MIN_DAY = 1
 
 
-def _validate_ban(ban: str) -> None:
-    if not _BAN_RE.fullmatch(ban):
-        msg = f"business agreement number must be digits: {ban!r}"
+def _clean_digits(label: str, value: str) -> str:
+    cleaned = value.replace(" ", "")
+    if not _DIGITS_RE.fullmatch(cleaned):
+        msg = f"{label} must be digits: {cleaned!r}"
+        raise ValueError(msg)
+    return cleaned
+
+
+def _clean_ban(value: str) -> str:
+    return _clean_digits("business agreement number", value)
+
+
+def _clean_can(value: str) -> str:
+    return _clean_digits("customer account number", value)
+
+
+def _validate_ean(label: str, value: str) -> None:
+    if not _EAN_RE.fullmatch(value):
+        msg = f"{label} must be digits with an optional _ID<n> suffix: {value!r}"
         raise ValueError(msg)
 
 
@@ -193,8 +205,7 @@ class BanArgs:
     ban: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
 
 
 @dataclass(frozen=True, slots=True)
@@ -202,10 +213,7 @@ class CanArgs:
     can: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "can", _normalize_ban(self.can))
-        if not _BAN_RE.fullmatch(self.can):
-            msg = f"customer account number must be digits: {self.can!r}"
-            raise ValueError(msg)
+        object.__setattr__(self, "can", _clean_can(self.can))
 
 
 @dataclass(frozen=True, slots=True)
@@ -233,7 +241,7 @@ class ChargingSessionsArgs:
     page_size: int
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "can", CanArgs(can=self.can).can)
+        object.__setattr__(self, "can", _clean_can(self.can))
         _validate_date_range(self.start_date, self.end_date)
         if self.page_number < 0:
             msg = f"page_number must not be negative: {self.page_number}"
@@ -250,7 +258,7 @@ class CanDateRangeArgs:
     end_date: date
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "can", CanArgs(can=self.can).can)
+        object.__setattr__(self, "can", _clean_can(self.can))
         _validate_date_range(self.start_date, self.end_date)
 
 
@@ -259,9 +267,7 @@ class EanArgs:
     ean: str
 
     def __post_init__(self) -> None:
-        if not _EAN_RE.fullmatch(self.ean):
-            msg = f"EAN must be digits with an optional _ID<n> suffix: {self.ean!r}"
-            raise ValueError(msg)
+        _validate_ean("EAN", self.ean)
 
 
 @dataclass(frozen=True, slots=True)
@@ -271,8 +277,7 @@ class MonthArgs:
     month: int
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
         _validate_year_month(self.year, self.month)
 
 
@@ -284,8 +289,7 @@ class PeaksArgs:
     day: int | None = None
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
         _validate_year_month(self.year, self.month)
         if self.day is None:
             return
@@ -308,8 +312,7 @@ class ContractsArgs:
     include_inactive: bool
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
 
 
 @dataclass(frozen=True, slots=True)
@@ -321,8 +324,7 @@ class UsageArgs:
     include_simulation: bool
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
         _validate_date_range(self.start_date, self.end_date)
 
 
@@ -332,14 +334,8 @@ class SolarArgs:
     delivery_point_id: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
-        if not _EAN_RE.fullmatch(self.delivery_point_id):
-            msg = (
-                "delivery point id must be digits with an optional _ID<n> suffix: "
-                f"{self.delivery_point_id!r}"
-            )
-            raise ValueError(msg)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
+        _validate_ean("delivery point id", self.delivery_point_id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -348,8 +344,7 @@ class FlagArgs:
     ban: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
 
 
 @dataclass(frozen=True, slots=True)
@@ -360,21 +355,15 @@ class MeterReadsArgs:
     end_date: date | None
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "ban", _normalize_ban(self.ban))
-        _validate_ban(self.ban)
+        object.__setattr__(self, "ban", _clean_ban(self.ban))
         if (self.start_date is None) != (self.end_date is None):
             msg = "start_date and end_date must be given together"
             raise ValueError(msg)
         if self.latest and self.start_date is not None:
             msg = "latest cannot be combined with a date range"
             raise ValueError(msg)
-        if (
-            self.start_date is not None
-            and self.end_date is not None
-            and self.start_date > self.end_date
-        ):
-            msg = f"start_date {self.start_date} is after end_date {self.end_date}"
-            raise ValueError(msg)
+        if self.start_date is not None and self.end_date is not None:
+            _validate_date_range(self.start_date, self.end_date)
 
 
 def _meter_reads_params(args: MeterReadsArgs) -> dict[str, str]:
