@@ -1124,7 +1124,10 @@ def test_ban_args_reject_non_digit_ban() -> None:
         FlagArgs(flag=FeatureFlagKey.TOU_IS_ACTIVE, ban="123-456")
 
 
-@pytest.mark.parametrize("delivery_point_id", ["DP001", "../541448860000000001", "", "1/2"])
+@pytest.mark.parametrize(
+    "delivery_point_id",
+    ["DP001", "../541448860000000001", "", "1/2", "541448860000000001"],
+)
 def test_solar_args_reject_malformed_delivery_point_id(delivery_point_id: str) -> None:
     with pytest.raises(ValueError, match="delivery point id must be digits"):
         SolarArgs(ban=_BAN, delivery_point_id=delivery_point_id)

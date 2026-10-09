@@ -145,6 +145,7 @@ class Endpoint[ArgsT, ModelT]:
 
 _DIGITS_RE = re.compile(r"[0-9]+")
 _EAN_RE = re.compile(r"[0-9]+(?:_ID[0-9]+)?")
+_DELIVERY_POINT_ID_RE = re.compile(r"[0-9]+_ID[0-9]+")
 _MIN_MONTH = 1
 _MAX_MONTH = 12
 _MIN_YEAR = 2000
@@ -171,6 +172,12 @@ def _clean_can(value: str) -> str:
 def _validate_ean(label: str, value: str) -> None:
     if not _EAN_RE.fullmatch(value):
         msg = f"{label} must be digits with an optional _ID<n> suffix: {value!r}"
+        raise ValueError(msg)
+
+
+def _validate_delivery_point_id(value: str) -> None:
+    if not _DELIVERY_POINT_ID_RE.fullmatch(value):
+        msg = f"delivery point id must be digits with an _ID<n> suffix: {value!r}"
         raise ValueError(msg)
 
 
@@ -335,7 +342,7 @@ class SolarArgs:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _clean_ban(self.ban))
-        _validate_ean("delivery point id", self.delivery_point_id)
+        _validate_delivery_point_id(self.delivery_point_id)
 
 
 @dataclass(frozen=True, slots=True)
