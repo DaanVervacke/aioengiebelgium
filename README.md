@@ -152,6 +152,7 @@ it. A closed client raises `EngieBeClientClosedError`.
 | `async_start_authentication(username, password, mfa_method=MfaMethod.SMS, *, auth_session=None)` | `AuthFlow` | Runs login steps 1-7 and returns an `AuthFlow` awaiting the MFA code. |
 | `AuthFlow.async_submit_mfa(code)` | `tuple[str, str]` | Submits the MFA code, finishes the login and returns `(access_token, refresh_token)`. After an `EngieBeMfaError` the flow stays open, so you can submit a new code. |
 | `AuthFlow.async_abort()` | `None` | Abandons the flow and closes the login session if the flow created it. |
+| `async with flow:` | `AuthFlow` | Calls `async_abort()` when the block exits, so an unfinished flow never leaves its login session open. |
 | `async_refresh_token()` | `tuple[str, str]` | Refreshes the tokens and returns `(new_access_token, new_refresh_token)`. |
 
 Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-rotation).

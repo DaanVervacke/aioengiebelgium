@@ -8,6 +8,7 @@ import re
 from base64 import urlsafe_b64encode
 from collections.abc import Awaitable, Callable, Mapping
 from http import HTTPStatus
+from typing import Self
 from urllib.parse import parse_qs, urlsplit
 
 import aiohttp
@@ -193,6 +194,12 @@ class AuthFlow:
         self._client_id = client_id
         self._token_adopter = token_adopter
         self._timeout = timeout
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(self, *args: object) -> None:
+        await self.async_abort()
 
     async def async_submit_mfa(self, code: str) -> tuple[str, str]:
         """Submit the MFA code and finish the login."""

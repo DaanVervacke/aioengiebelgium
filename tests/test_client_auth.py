@@ -546,6 +546,45 @@ async def test_start_authentication_cancelled_closes_created_session(
     assert created_sessions[0].closed
 
 
+async def test_auth_flow_context_exit_closes_created_session(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """Leaving the flow's ``async with`` block without a code aborts the flow."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        async with await _start_flow(client):
+            assert not created_sessions[0].closed
+
+    assert created_sessions[0].closed
+
+
+async def test_auth_flow_context_exit_after_submit_keeps_tokens(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """Exiting the block after a successful submit is harmless."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        async with await _start_flow(client) as flow:
+            _register_submit_shortcircuit(m, state=flow._expected_state)
+            await flow.async_submit_mfa("123456")
+
+    assert created_sessions[0].closed
+    assert client.access_token == _TOKEN_RESPONSE["access_token"]
+    await client.close()
+
+
+async def test_auth_flow_context_exit_keeps_injected_session_open() -> None:
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        async with aiohttp.ClientSession() as injected:
+            client = EngieBeClient()
+            async with await _start_flow(client, auth_session=injected):
+                pass
+            assert not injected.closed
+
+
 async def test_start_authentication_missing_login_state_raises() -> None:
     with aioresponses() as m:
         m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
