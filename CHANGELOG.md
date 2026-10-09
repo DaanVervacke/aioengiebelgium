@@ -12,12 +12,20 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Validate the BAN and date range of usage details requests
 - Count entries dropped from nested lists in skipped_entries
+- Close the login session when authentication is cancelled
+- Validate the delivery point id of solar surplus requests
+- Require the _ID suffix on solar surplus delivery point ids
 
 ### Documentation
 
 - Correct and complete the README API reference
 - Correct and complete the Sphinx documentation
 - Document the nested skip count and the remaining argument checks
+- List every argument check and match the contributor guides to CI
+
+### Features
+
+- Close an unfinished login flow on async with exit
 
 ### Maintenance
 
