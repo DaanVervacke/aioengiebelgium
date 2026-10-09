@@ -532,6 +532,20 @@ async def test_start_authentication_failure_keeps_injected_session_open() -> Non
             assert not injected.closed
 
 
+async def test_start_authentication_cancelled_closes_created_session(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A start cancelled mid-flow still closes the session the client created."""
+    with aioresponses() as m:
+        m.get(_q(_AUTHORIZE_URL), exception=asyncio.CancelledError())
+        client = EngieBeClient()
+        with pytest.raises(asyncio.CancelledError):
+            await client.async_start_authentication(_USERNAME, _PASSWORD)
+
+    assert len(created_sessions) == 1
+    assert created_sessions[0].closed
+
+
 async def test_start_authentication_missing_login_state_raises() -> None:
     with aioresponses() as m:
         m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))

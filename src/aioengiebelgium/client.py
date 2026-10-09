@@ -196,7 +196,7 @@ class EngieBeClient:
                 token_adopter=self._tokens.adopt,
                 timeout=self._request_timeout,
             )
-        except Exception:
+        except BaseException:
             await auth.close_if_owned()
             raise
 
