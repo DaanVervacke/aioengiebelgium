@@ -21,6 +21,8 @@ from .exceptions import (
 
 _LOGGER = logging.getLogger(__name__)
 
+DEFAULT_TIMEOUT = 30.0
+
 
 @dataclass(slots=True)
 class OwnedSession:
@@ -46,7 +48,7 @@ async def request(
     params: dict[str, str] | None = None,
     allow_redirects: bool = False,
     raise_on_error: bool = True,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> AsyncIterator[aiohttp.ClientResponse]:
     """Perform one HTTP request, mapping failures to library exceptions."""
     try:
@@ -115,7 +117,7 @@ async def request_json(
     headers: dict[str, str] | None = None,
     json_body: dict[str, Any] | None = None,
     params: dict[str, str] | None = None,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
     expect_body: bool = True,
 ) -> dict[str, Any]:
     """Make a request and return its JSON object, or an empty dict when no body is expected."""
@@ -146,7 +148,7 @@ async def request_text(
     params: dict[str, str] | None = None,
     allow_redirects: bool = False,
     raise_on_error: bool = True,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, Mapping[str, str]]:
     """Make a request and return (text, response_headers)."""
     async with request(

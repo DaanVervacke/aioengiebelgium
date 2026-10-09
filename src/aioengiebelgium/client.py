@@ -61,6 +61,7 @@ from ._endpoints import (
     WireRequest,
 )
 from ._tokens import TokenLifecycle
+from ._transport import DEFAULT_TIMEOUT
 from .const import (
     DEFAULT_CLIENT_ID,
     EpexGranularity,
@@ -120,7 +121,7 @@ class EngieBeClient:
         access_token: str | None = None,
         refresh_token: str | None = None,
         on_token_refresh: Callable[[str, str], Awaitable[None]] | None = None,
-        request_timeout: float = 30.0,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ) -> None:
         self._api = _transport.OwnedSession(session, owned=False) if session is not None else None
         self._client_id = client_id

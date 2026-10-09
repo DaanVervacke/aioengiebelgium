@@ -14,7 +14,7 @@ from urllib.parse import parse_qs, urlsplit
 import aiohttp
 
 from ._oauth import exchange_token
-from ._transport import OwnedSession, request, request_text
+from ._transport import DEFAULT_TIMEOUT, OwnedSession, request, request_text
 from .const import (
     AUTH_BASE_URL,
     OAUTH_AUDIENCE,
@@ -134,7 +134,7 @@ async def _auth_request(
     *,
     data: dict[str, str] | None = None,
     raise_on_error: bool = True,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, Mapping[str, str]]:
     return await request_text(
         session,
@@ -153,7 +153,7 @@ async def _resume_authorization(
     session: aiohttp.ClientSession,
     login_state: str,
     *,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, Mapping[str, str]]:
     return await request_text(
         session,
@@ -181,7 +181,7 @@ class AuthFlow:
         mfa_method: MfaMethod,
         client_id: str,
         token_adopter: Callable[[str, str], Awaitable[None]],
-        timeout: float = 30.0,
+        timeout: float = DEFAULT_TIMEOUT,
     ) -> None:
         self._owned = owned_session
         self._session = owned_session.session
@@ -288,7 +288,7 @@ async def start_auth_flow(
     password: str,
     mfa_method: MfaMethod,
     token_adopter: Callable[[str, str], Awaitable[None]],
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> AuthFlow:
     """Execute OAuth2/PKCE authorization steps 1-7 and return the pending flow."""
     session = owned_session.session
@@ -406,7 +406,7 @@ async def _prime_mfa_challenge(
     challenge_state: str,
     mfa_method: MfaMethod,
     *,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> dict[str, str]:
     """Trigger the MFA challenge and return the primary form's hidden inputs for the code POST."""
     match mfa_method:
@@ -430,7 +430,7 @@ async def _submit_mfa_code(
     mfa_method: MfaMethod,
     mfa_form_inputs: dict[str, str],
     *,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, Mapping[str, str]]:
     match mfa_method:
         case MfaMethod.SMS:
@@ -454,7 +454,7 @@ async def _switch_to_email_mfa(
     session: aiohttp.ClientSession,
     challenge_state: str,
     *,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> str:
     """Switch MFA method to email and return the email-challenge page body for input harvest."""
     sms_body, _ = await _auth_request(

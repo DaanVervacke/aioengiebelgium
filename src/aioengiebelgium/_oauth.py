@@ -6,7 +6,7 @@ from http import HTTPStatus
 
 import aiohttp
 
-from ._transport import json_object, request
+from ._transport import DEFAULT_TIMEOUT, json_object, request
 from .const import AUTH_BASE_URL, USER_AGENT_NATIVE
 from .exceptions import (
     EngieBeAuthenticationError,
@@ -44,7 +44,7 @@ async def exchange_token(
     session: aiohttp.ClientSession,
     data: dict[str, str],
     *,
-    timeout: float = 30.0,  # noqa: ASYNC109
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, str]:
     """POST the OAuth token endpoint and return (access_token, refresh_token)."""
     async with request(
