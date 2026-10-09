@@ -16,6 +16,7 @@ from aioresponses import aioresponses
 from syrupy.assertion import SnapshotAssertion
 from yarl import URL
 
+from aioengiebelgium import _endpoints
 from aioengiebelgium._endpoints import (
     CATALOG,
     BanArgs,
@@ -942,6 +943,14 @@ def _register_wire_response(m: aioresponses, case: _WireCase, load_fixture: Load
 def test_every_catalog_endpoint_has_wire_cases() -> None:
     """The wire table and the endpoint catalog cover each other exactly."""
     assert set(_WIRE_CASES) == {endpoint.name for endpoint in CATALOG}
+
+
+def test_catalog_lists_every_endpoint_defined_in_the_module() -> None:
+    """An Endpoint defined in _endpoints but left out of CATALOG fails here."""
+    defined = [value for value in vars(_endpoints).values() if isinstance(value, Endpoint)]
+    assert {id(endpoint) for endpoint in defined} == {id(endpoint) for endpoint in CATALOG}
+    assert len(CATALOG) == len(defined)
+    assert len({endpoint.name for endpoint in CATALOG}) == len(CATALOG)
 
 
 @pytest.mark.parametrize(
