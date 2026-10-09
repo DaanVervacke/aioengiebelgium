@@ -159,7 +159,9 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 ### Data getters
 
 Response models that hold lists carry `skipped_entries`, the number of malformed
-entries the parser dropped. A non-zero count means the response is incomplete.
+entries the parser dropped. The count includes entries dropped from nested lists,
+such as the business agreements of an account or the registers of a meter read.
+A non-zero count means the response is incomplete.
 
 | Getter | Returns | Description |
 | --- | --- | --- |
@@ -176,7 +178,7 @@ entries the parser dropped. A non-zero count means the response is incomplete.
 | `async_get_tou_schedules(business_agreement_number)` | `TouSchedulesResponse` | Time-of-use tariff schedules. |
 | `async_get_account_balance(business_agreement_number)` | `AccountBalance` | The billing account balance. |
 | `async_get_service_points(business_agreement_number)` | `ServicePointsResponse` | Service points of a business agreement, with their metering data sources (P1, P4, billing, meter reads, IMV) and how far back measured data reaches. |
-| `async_get_meter_reads(business_agreement_number, *, latest=False, start_date=None, end_date=None)` | `MeterReadsResponse` | Meter register indexes. Pass `latest=True` for the most recent read, a date range for the reads in it, or nothing for the full history. |
+| `async_get_meter_reads(business_agreement_number, *, latest=False, start_date=None, end_date=None)` | `MeterReadsResponse` | Meter register indexes. Pass `latest=True` for the most recent read, a date range for the reads in it, or nothing for the full history. Pass both dates or neither, and do not combine `latest=True` with a date range. |
 | `async_get_monthly_billed_budget(business_agreement_number)` | `MonthlyBilledBudget` | Costs so far, expected costs and the monthly payment status of the current billed budget period. ENGIE answers HTTP 500 for a contract without a monthly billed budget. |
 | `async_get_billing_period_usage(business_agreement_number)` | `BillingPeriodUsage` | Cost used so far in the current billing period, the expected yearly invoice and their ratio. When ENGIE cannot compute the cost, only `used_amount_failure_reason` is set (for example `MISSING_DATA`). |
 | `async_get_budget_billing_plan_details(business_agreement_number)` | `BudgetBillingPlanDetails` | The budget billing plan of the current billing period: amounts, payment slices, the amounts it can be set to, ENGIE's proposed new amount and the same details per energy contract. A business agreement without an adjustable plan returns only the flags. |
@@ -220,8 +222,9 @@ Client errors derive from `EngieBeError`, which carries an optional HTTP
 
 Catch a subclass before its parent. Invalid arguments raise `ValueError` before
 any request is sent. Examples are a business agreement number that is not all
-digits, a month outside 1-12, a start date after the end date and a datetime
-without a timezone.
+digits, a month outside 1-12, a year outside 2000-2100, a start date after the
+end date and a datetime without a timezone. Spaces in a business agreement or
+customer account number are removed before the check.
 
 EPEX day-ahead prices are published in the afternoon for the following day.
 Requesting a window whose prices have not been published yet raises

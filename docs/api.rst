@@ -49,8 +49,9 @@ Models
 ======
 
 Response models that hold lists carry ``skipped_entries``, the number of
-malformed entries the parser dropped. A non-zero count means the response is
-incomplete.
+malformed entries the parser dropped. The count includes entries dropped from
+nested lists, such as the business agreements of an account or the registers
+of a meter read. A non-zero count means the response is incomplete.
 
 .. autoclass:: aioengiebelgium.AccountBalance
    :members:
@@ -403,8 +404,11 @@ Exceptions
 Client errors derive from :class:`~aioengiebelgium.EngieBeError`. Catch a
 subclass before its parent. Invalid arguments raise ``ValueError`` before any
 request is sent. Examples are a business agreement number that is not all
-digits, a month outside 1-12, a start date after the end date and a datetime
-without a timezone.
+digits, a month outside 1-12, a year outside 2000-2100, a start date after
+the end date and a datetime without a timezone. Spaces in a business
+agreement or customer account number are removed before the check.
+``async_get_meter_reads`` needs both dates or neither, and rejects
+``latest=True`` combined with a date range.
 
 .. autoclass:: aioengiebelgium.EngieBeAuthenticationError
    :members:
