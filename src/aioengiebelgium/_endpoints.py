@@ -334,6 +334,12 @@ class SolarArgs:
     def __post_init__(self) -> None:
         object.__setattr__(self, "ban", _normalize_ban(self.ban))
         _validate_ban(self.ban)
+        if not _EAN_RE.fullmatch(self.delivery_point_id):
+            msg = (
+                "delivery point id must be digits with an optional _ID<n> suffix: "
+                f"{self.delivery_point_id!r}"
+            )
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True, slots=True)

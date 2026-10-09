@@ -73,7 +73,7 @@ _CAN = "1500000001"
 _VEHICLE_ID = 10001
 _SESSION_ID = 200001
 _EAN = "541448860000000001_ID1"
-_DELIVERY_POINT_ID = "DP001"
+_DELIVERY_POINT_ID = "541448860000000001_ID1"
 _TOKEN = "test-token"
 
 _PRICES_URL = f"{BILLING_BASE_URL}/business-agreements/{_BAN}/supplier-energy-prices"
@@ -1113,6 +1113,12 @@ def test_ban_args_reject_non_digit_ban() -> None:
         SolarArgs(ban="12.3", delivery_point_id=_DELIVERY_POINT_ID)
     with pytest.raises(ValueError, match="business agreement number must be digits"):
         FlagArgs(flag=FeatureFlagKey.TOU_IS_ACTIVE, ban="123-456")
+
+
+@pytest.mark.parametrize("delivery_point_id", ["DP001", "../541448860000000001", "", "1/2"])
+def test_solar_args_reject_malformed_delivery_point_id(delivery_point_id: str) -> None:
+    with pytest.raises(ValueError, match="delivery point id must be digits"):
+        SolarArgs(ban=_BAN, delivery_point_id=delivery_point_id)
 
 
 def test_can_args_strip_spaces_and_reject_non_digits() -> None:
