@@ -9,8 +9,11 @@ Use [uv](https://docs.astral.sh/uv/) (>= 0.12.21, < 0.13) to install the
 environment:
 
 ```bash
-uv sync
+uv sync --all-groups
 ```
+
+The `--all-groups` flag also installs the `docs` group, which the
+documentation build needs.
 
 ## Running the checks
 
@@ -35,6 +38,13 @@ uv audit
 
 Coverage measures branches in `src/` and requires 98%. `uv audit` needs network
 access. Your pull request must pass this gate completely.
+
+CI also builds the documentation and fails on any Sphinx warning. Run the same
+build locally when you change docstrings or files under `docs/`:
+
+```bash
+uv run sphinx-build -W --keep-going -b html docs docs/_build/html
+```
 
 ## Adding an endpoint
 
@@ -63,7 +73,7 @@ release, rename the Unreleased heading to `## [X.Y.Z] - YYYY-MM-DD`, add the
 ## Commit style
 
 One conventional-commit subject line, no body. Write the description as a
-humanized sentence, for example: `chore: add the EPEX day-ahead endpoint`. Do
+humanized sentence, for example: `feat: add the EPEX day-ahead endpoint`. Do
 not mention the plan or issue number in the subject.
 
 ## Deprecation policy

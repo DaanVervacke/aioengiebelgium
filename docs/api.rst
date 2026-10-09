@@ -403,12 +403,19 @@ Exceptions
 
 Client errors derive from :class:`~aioengiebelgium.EngieBeError`. Catch a
 subclass before its parent. Invalid arguments raise ``ValueError`` before any
-request is sent. Examples are a business agreement number that is not all
-digits, a month outside 1-12, a year outside 2000-2100, a start date after
-the end date and a datetime without a timezone. Spaces in a business
-agreement or customer account number are removed before the check.
-``async_get_meter_reads`` needs both dates or neither, and rejects
-``latest=True`` combined with a date range.
+request is sent:
+
+- A business agreement or customer account number that is not all digits.
+  Spaces are removed before the check.
+- An EAN that is not digits with an optional ``_ID<n>`` suffix. A solar
+  surplus delivery point id must carry the suffix.
+- A month outside 1-12, a year outside 2000-2100 or a ``day`` outside the
+  requested month.
+- A start date after the end date, or a datetime without a timezone.
+- A ``vehicle_id`` or ``session_id`` that is not a positive integer.
+- A negative ``page_number`` or a ``page_size`` below 1.
+- For ``async_get_meter_reads``: only one of the two dates, or
+  ``latest=True`` combined with a date range.
 
 .. autoclass:: aioengiebelgium.EngieBeAuthenticationError
    :members:
