@@ -69,7 +69,7 @@ class TokenLifecycle:
         self._lock = asyncio.Lock()
         self._rotation_seq = 0
         self._pending: deque[tuple[int, str, str]] = deque()
-        self._delivering = False
+        self._delivery: asyncio.Task[None] | None = None
 
     @property
     def access_token(self) -> str | None:
@@ -113,7 +113,7 @@ class TokenLifecycle:
     def bearer(self) -> str:
         """The Authorization header value. Raises when unauthenticated."""
         if self._access_token is None:
-            msg = "Not authenticated: call async_refresh_token() or authenticate first"
+            msg = "Not authenticated: log in or pass a token pair first"
             raise EngieBeAuthenticationError(msg)
         return f"Bearer {self._access_token}"
 
@@ -168,24 +168,37 @@ class TokenLifecycle:
             self._pending.append((self._rotation_seq, access_token, refresh_token))
 
     async def _deliver_pending(self) -> None:
-        """Drain queued deliveries in rotation order, dropping superseded ones."""
-        on_rotation = self._on_rotation
-        if on_rotation is None or self._delivering:
+        """Start draining queued deliveries unless a drain already runs.
+
+        The drain runs in its own task, so cancelling the caller does not stop
+        the delivery of newer pairs.
+        """
+        if self._on_rotation is None:
             return
-        self._delivering = True
-        try:
-            while self._pending:
-                seq, access_token, refresh_token = self._pending.popleft()
-                if seq < self._rotation_seq:
-                    _LOGGER.debug(
-                        "rotation %d superseded by rotation %d; dropping stale delivery",
-                        seq,
-                        self._rotation_seq,
-                    )
-                    continue
-                try:
-                    await on_rotation(access_token, refresh_token)
-                except Exception:
-                    _LOGGER.exception("on_token_refresh callback failed")
-        finally:
-            self._delivering = False
+        if self._delivery is not None and not self._delivery.done():
+            return
+        self._delivery = asyncio.get_running_loop().create_task(
+            self._drain_pending(self._on_rotation)
+        )
+        await asyncio.shield(self._delivery)
+
+    async def _drain_pending(self, on_rotation: Callable[[str, str], Awaitable[None]]) -> None:
+        """Deliver queued pairs in rotation order, dropping superseded ones."""
+        while self._pending:
+            seq, access_token, refresh_token = self._pending.popleft()
+            if seq < self._rotation_seq:
+                _LOGGER.debug(
+                    "dropping stale delivery: rotation %d superseded by rotation %d",
+                    seq,
+                    self._rotation_seq,
+                )
+                continue
+            try:
+                await on_rotation(access_token, refresh_token)
+            except asyncio.CancelledError:
+                task = asyncio.current_task()
+                if task is None or task.cancelling():
+                    raise
+                _LOGGER.exception("on_token_refresh callback failed")
+            except Exception:
+                _LOGGER.exception("on_token_refresh callback failed")

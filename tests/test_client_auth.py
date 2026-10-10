@@ -182,6 +182,34 @@ async def test_refresh_request_carries_grant_fields_and_rotates_token() -> None:
     assert client.refresh_token == "second-refresh"
 
 
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param({"access_token": "a", "refresh_token": None}, id="null_refresh"),
+        pytest.param({"access_token": None, "refresh_token": "r"}, id="null_access"),
+        pytest.param({"access_token": "", "refresh_token": "r"}, id="empty_access"),
+        pytest.param({"access_token": 5, "refresh_token": ["x"]}, id="wrong_types"),
+    ],
+)
+async def test_refresh_token_response_with_unusable_tokens_raises_auth_error(
+    payload: dict[str, object],
+) -> None:
+    """A token response with null, empty or non-string tokens never replaces the stored pair."""
+    delivered: list[tuple[str, str]] = []
+
+    async def on_refresh(access: str, refresh: str) -> None:
+        delivered.append((access, refresh))
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=payload)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=on_refresh)
+        with pytest.raises(EngieBeAuthenticationError, match="missing tokens"):
+            await client.async_refresh_token()
+        assert client.refresh_token == "old-refresh"
+        assert delivered == []
+        await client.close()
+
+
 async def test_refresh_token_response_missing_tokens_raises_auth_error() -> None:
     """A 200 token response without refresh_token surfaces as an auth error, not KeyError."""
     with aioresponses() as m:
@@ -784,6 +812,36 @@ async def test_start_authentication_password_post_500_is_communication_error() -
             await client.async_start_authentication(_USERNAME, _PASSWORD)
 
 
+async def test_start_authentication_password_post_429_is_communication_error() -> None:
+    """A rate limit on the password POST is not misread as bad credentials."""
+    with aioresponses() as m:
+        m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
+        m.get(_q(_LOGIN_IDENTIFIER_URL), body="")
+        m.post(_q(_LOGIN_IDENTIFIER_URL), body="")
+        m.get(_q(_LOGIN_PASSWORD_URL), body="")
+        m.post(_q(_LOGIN_PASSWORD_URL), status=429, body="<html>slow down</html>")
+
+        client = EngieBeClient()
+        with pytest.raises(EngieBeCommunicationError, match="API error 429") as excinfo:
+            await client.async_start_authentication(_USERNAME, _PASSWORD)
+    assert excinfo.value.status == 429
+
+
+async def test_submit_mfa_server_error_is_communication_error(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A server error on the MFA POST is a communication error, not an authentication error."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), status=503, body="<html>down</html>")
+        with pytest.raises(EngieBeCommunicationError, match="API error 503") as excinfo:
+            await flow.async_submit_mfa("123456")
+        assert excinfo.value.status == 503
+        assert created_sessions[0].closed
+
+
 async def test_start_authentication_missing_mfa_state_raises() -> None:
     with aioresponses() as m:
         m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
@@ -1260,6 +1318,79 @@ async def test_stale_rotation_delivery_dropped(caplog: pytest.LogCaptureFixture)
     assert "dropping stale delivery" in caplog.text
 
 
+async def test_cancelled_delivery_still_delivers_newest_pair() -> None:
+    """Cancelling the task that runs a delivery does not strand a newer queued pair."""
+    deliveries: list[tuple[str, str]] = []
+    first_delivery_started = asyncio.Event()
+    release_first_delivery = asyncio.Event()
+
+    async def callback(access: str, refresh: str) -> None:
+        if not first_delivery_started.is_set():
+            first_delivery_started.set()
+            await release_first_delivery.wait()
+        deliveries.append((access, refresh))
+
+    with aioresponses() as m:
+        for n in (1, 2):
+            m.post(
+                _q(_TOKEN_URL),
+                payload={"access_token": f"access-{n}", "refresh_token": f"refresh-{n}"},
+            )
+        client = EngieBeClient(refresh_token="refresh-0", on_token_refresh=callback)
+        first = asyncio.ensure_future(client.async_refresh_token())
+        await first_delivery_started.wait()
+        assert await client.async_refresh_token() == ("access-2", "refresh-2")
+        first.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await first
+        release_first_delivery.set()
+        delivery = client._tokens._delivery
+        assert delivery is not None
+        await asyncio.wait_for(delivery, timeout=5)
+        await client.close()
+
+    assert deliveries[-1] == ("access-2", "refresh-2")
+
+
+async def test_callback_raising_cancelled_error_is_logged(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A callback that raises CancelledError on its own is logged like any other failure."""
+
+    async def callback(_access: str, _refresh: str) -> None:
+        raise asyncio.CancelledError
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=callback)
+        with caplog.at_level(logging.ERROR):
+            assert await client.async_refresh_token() == ("new-access", "new-refresh")
+        await client.close()
+    assert "on_token_refresh callback failed" in caplog.text
+
+
+async def test_cancelling_the_delivery_task_stops_it() -> None:
+    """Cancelling the delivery task itself still cancels it."""
+    started = asyncio.Event()
+
+    async def callback(_access: str, _refresh: str) -> None:
+        started.set()
+        await asyncio.Event().wait()
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=callback)
+        refresh = asyncio.ensure_future(client.async_refresh_token())
+        await started.wait()
+        delivery = client._tokens._delivery
+        assert delivery is not None
+        delivery.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await refresh
+        assert delivery.cancelled()
+        await client.close()
+
+
 async def test_close_closes_owned_session() -> None:
     client = EngieBeClient()
     session = client._ensure_session()
@@ -1309,6 +1440,16 @@ async def test_closed_client_raises_client_closed_error() -> None:
     await client.close()
     with pytest.raises(EngieBeClientClosedError, match=r"^Client is closed"):
         await client.async_get_customer_account_relations()
+
+
+async def test_closed_client_without_tokens_raises_client_closed_error() -> None:
+    """A closed client with no tokens reports the closed state, not a missing login."""
+    client = EngieBeClient()
+    await client.close()
+    with pytest.raises(EngieBeClientClosedError, match=r"^Client is closed"):
+        await client.async_get_customer_account_relations()
+    with pytest.raises(EngieBeClientClosedError, match=r"^Client is closed"):
+        await client.async_refresh_token()
 
 
 async def test_closed_client_context_manager() -> None:

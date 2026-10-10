@@ -11,7 +11,7 @@ import pytest
 from aioresponses import aioresponses
 
 from aioengiebelgium.client import EngieBeClient
-from aioengiebelgium.const import EPEX_BASE_URL, EpexGranularity
+from aioengiebelgium.const import AUTH_BASE_URL, EPEX_BASE_URL, EpexGranularity
 from aioengiebelgium.exceptions import (
     EngieBeAuthenticationError,
     EngieBeCommunicationError,
@@ -166,6 +166,22 @@ async def test_server_error_reraises_communication_error() -> None:
                 )
     assert not isinstance(excinfo.value, EngieBeEpexNotPublishedError)
     assert excinfo.value.status == 500
+
+
+async def test_refresh_404_after_401_is_not_reported_as_not_published() -> None:
+    """A 404 from the token endpoint during the 401 retry stays a communication error."""
+    with aioresponses() as m:
+        m.get(_EPEX_URL, status=401)
+        m.post(f"{AUTH_BASE_URL}/oauth/token", status=404, body="")
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN, refresh_token="refresh")
+            with pytest.raises(EngieBeCommunicationError) as excinfo:
+                await client.async_get_epex_prices(
+                    datetime(2026, 5, 3, 22, 0, tzinfo=UTC),
+                    datetime(2026, 5, 4, 22, 0, tzinfo=UTC),
+                )
+    assert not isinstance(excinfo.value, EngieBeEpexNotPublishedError)
+    assert excinfo.value.status == 404
 
 
 async def test_404_raises_epex_not_published_error() -> None:

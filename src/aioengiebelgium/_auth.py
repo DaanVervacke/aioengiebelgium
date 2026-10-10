@@ -222,7 +222,7 @@ class AuthFlow:
         await self._owned.close_if_owned()
 
     async def _run_steps_8_to_13(self, mfa_code: str) -> tuple[str, str]:
-        body, mfa_headers = await _submit_mfa_code(
+        body, mfa_headers, mfa_status = await _submit_mfa_code(
             self._session,
             self._mfa_challenge_state,
             mfa_code,
@@ -238,6 +238,7 @@ class AuthFlow:
             raise EngieBeMfaError(msg)
 
         if not _state_from_redirect(body, mfa_headers):
+            _raise_for_non_auth_error(mfa_status)
             msg = "MFA submission returned an unrecognized page (no continuation state)"
             raise EngieBeAuthenticationError(msg)
 
@@ -362,8 +363,7 @@ async def start_auth_flow(
         _LOGGER.debug(
             "password submit error: status %s, body length %s", password_status, len(body)
         )
-        msg = f"API error {password_status}"
-        raise EngieBeCommunicationError(msg, status=password_status)
+        _raise_for_non_auth_error(password_status)
     if _FIELD_ERROR_MARKER in body:
         msg = "Invalid credentials"
         raise EngieBeAuthenticationError(msg, status=password_status)
@@ -372,6 +372,7 @@ async def start_auth_flow(
         if password_status == HTTPStatus.BAD_REQUEST:
             msg = "Invalid credentials"
             raise EngieBeAuthenticationError(msg, status=password_status)
+        _raise_for_non_auth_error(password_status)
         msg = "Login failed: could not extract login state (bad credentials?)"
         raise EngieBeAuthenticationError(msg)
     _LOGGER.debug("auth step: password submitted")
@@ -399,6 +400,13 @@ async def start_auth_flow(
         token_adopter=token_adopter,
         timeout=timeout,
     )
+
+
+def _raise_for_non_auth_error(status: int) -> None:
+    """Raise EngieBeCommunicationError for an HTTP error status other than 401."""
+    if status >= HTTPStatus.BAD_REQUEST and status != HTTPStatus.UNAUTHORIZED:
+        msg = f"API error {status}"
+        raise EngieBeCommunicationError(msg, status=status)
 
 
 async def _prime_mfa_challenge(
@@ -431,7 +439,7 @@ async def _submit_mfa_code(
     mfa_form_inputs: dict[str, str],
     *,
     timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
-) -> tuple[str, Mapping[str, str]]:
+) -> tuple[str, Mapping[str, str], int]:
     match mfa_method:
         case MfaMethod.SMS:
             path = "/u/mfa-sms-challenge"
@@ -439,15 +447,18 @@ async def _submit_mfa_code(
         case MfaMethod.EMAIL:
             path = "/u/mfa-email-challenge"
             data = {**mfa_form_inputs, "code": mfa_code, "action": "default"}
-    return await _auth_request(
+    async with request(
         session,
-        "POST",
-        path,
-        challenge_state,
+        method="POST",
+        url=f"{AUTH_BASE_URL}{path}",
+        params={"state": challenge_state, "ui_locales": "nl"},
+        headers=_BROWSER_HEADERS,
         data=data,
+        allow_redirects=False,
         raise_on_error=False,
         timeout=timeout,
-    )
+    ) as response:
+        return await response.text(), response.headers, response.status
 
 
 async def _switch_to_email_mfa(

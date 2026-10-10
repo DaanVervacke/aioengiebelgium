@@ -101,7 +101,7 @@ async def json_object(response: aiohttp.ClientResponse) -> dict[str, Any]:
     try:
         result = await response.json()
     except (aiohttp.ContentTypeError, ValueError) as exc:
-        msg = "Response body is not valid JSON"
+        msg = "Response body is not valid JSON or has a non-JSON content type"
         raise EngieBeInvalidResponseError(msg) from exc
     if not isinstance(result, dict):
         msg = f"Expected JSON object, got {type(result).__name__}"

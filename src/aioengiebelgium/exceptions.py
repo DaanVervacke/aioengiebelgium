@@ -25,11 +25,19 @@ class EngieBeEpexNotPublishedError(EngieBeCommunicationError):
 
 
 class EngieBeInvalidResponseError(EngieBeError):
-    """A 2xx response whose body is not the expected JSON object."""
+    """A response below HTTP 400 that the client cannot use.
+
+    The body is not the expected JSON object, or a call that expects no body
+    got a status outside 2xx.
+    """
 
 
 class EngieBeAuthenticationError(EngieBeError):
-    """Authentication errors (bad credentials, expired token)."""
+    """Authentication errors.
+
+    Bad credentials, no token held, an expired or rejected token, a login page
+    the flow cannot follow, or a token endpoint response without both tokens.
+    """
 
 
 class EngieBeMfaError(EngieBeAuthenticationError):

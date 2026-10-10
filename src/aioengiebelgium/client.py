@@ -3,7 +3,7 @@
 import logging
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
-from typing import Any, Self
+from typing import Any, NoReturn, Self
 
 import aiohttp
 
@@ -104,7 +104,6 @@ from .models import (
     TouSchedulesResponse,
     UsageDetailsResponse,
     VehicleChargeSettings,
-    ean_with_delivery_point_suffix,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -203,6 +202,7 @@ class EngieBeClient:
 
     async def async_refresh_token(self) -> tuple[str, str]:
         """Refresh tokens. Returns (new_access_token, new_refresh_token)."""
+        self._raise_if_closed()
         return await self._tokens.refresh()
 
     async def async_get_prices(self, business_agreement_number: str) -> PricesResponse:
@@ -221,8 +221,7 @@ class EngieBeClient:
 
     async def async_get_service_point(self, ean: str) -> ServicePoint:
         """Fetch service point details for an EAN, bare or with delivery-point suffix."""
-        normalized = ean if "_" in ean else ean_with_delivery_point_suffix(ean)
-        return await self._call(SERVICE_POINT, EanArgs(ean=normalized))
+        return await self._call(SERVICE_POINT, EanArgs(ean=ean))
 
     async def async_get_customer_account_relations(self) -> CustomerAccountRelations:
         """Fetch customer account relations for the authenticated user."""
@@ -500,14 +499,23 @@ class EngieBeClient:
         return headers
 
     async def _call[ArgsT, ModelT](self, endpoint: Endpoint[ArgsT, ModelT], args: ArgsT) -> ModelT:
-        try:
-            raw = await self._request_json_authenticated(endpoint.build(args))
-        except EngieBeCommunicationError as err:
+        def raise_error(err: EngieBeCommunicationError) -> NoReturn:
             endpoint.raise_error(err, args)
+
+        raw = await self._request_json_authenticated(endpoint.build(args), raise_error)
         return endpoint.parse(raw, args)
 
-    async def _request_json_authenticated(self, wire: WireRequest) -> dict[str, Any]:
-        """Make an authenticated JSON request, refreshing proactively then on 401."""
+    async def _request_json_authenticated(
+        self,
+        wire: WireRequest,
+        raise_error: Callable[[EngieBeCommunicationError], NoReturn],
+    ) -> dict[str, Any]:
+        """Make a JSON request, refreshing proactively then on 401.
+
+        Optional-auth endpoints skip the proactive refresh and send no token when none is held.
+        Only errors of the request itself go through ``raise_error``, never refresh errors.
+        """
+        self._raise_if_closed()
         if not wire.optional_auth:
             await self._tokens.ensure_fresh()
         for attempt in range(2):
@@ -524,10 +532,12 @@ class EngieBeClient:
                     timeout=self._request_timeout,
                     expect_body=wire.expect_body,
                 )
+            except EngieBeCommunicationError as err:
+                raise_error(err)
             except EngieBeAuthenticationError as err:
                 if attempt or not with_auth:
                     raise
-                _LOGGER.debug("request unauthorized (401); refreshing tokens and retrying")
+                _LOGGER.debug("request unauthorized (401): refreshing tokens and retrying")
                 try:
                     await self.async_refresh_token()
                 except EngieBeError as refresh_err:

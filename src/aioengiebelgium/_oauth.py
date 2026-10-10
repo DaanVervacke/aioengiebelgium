@@ -63,8 +63,12 @@ async def exchange_token(
         if response.status >= HTTPStatus.BAD_REQUEST:
             raise _token_endpoint_error(response.status, await response.text())
         result = await json_object(response)
-    try:
-        return result["access_token"], result["refresh_token"]
-    except KeyError as exc:
+    access_token = result.get("access_token")
+    refresh_token = result.get("refresh_token")
+    if not (isinstance(access_token, str) and access_token):
         msg = "Token endpoint response missing tokens"
-        raise EngieBeAuthenticationError(msg) from exc
+        raise EngieBeAuthenticationError(msg)
+    if not (isinstance(refresh_token, str) and refresh_token):
+        msg = "Token endpoint response missing tokens"
+        raise EngieBeAuthenticationError(msg)
+    return access_token, refresh_token
