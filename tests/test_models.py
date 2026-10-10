@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from datetime import UTC, date, datetime, time, timedelta
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pytest
@@ -30,6 +31,7 @@ from aioengiebelgium.models import (
     TouSlot,
     _parse_hhmm,
 )
+from aioengiebelgium.parsers import parse_tou_schedules
 
 _BRUSSELS = ZoneInfo("Europe/Brussels")
 
@@ -65,6 +67,8 @@ def test_price_period_contains(
         pytest.param("06:00", time(6, 0), id="normal"),
         pytest.param("23:59", time(23, 59), id="max_valid"),
         pytest.param("00:00", time(0, 0), id="sentinel"),
+        pytest.param("06:00:00", time(6, 0), id="with_seconds"),
+        pytest.param("23:59:59", time(23, 59, 59), id="max_valid_with_seconds"),
     ],
 )
 def test_parse_hhmm_valid(raw: str, expected: time) -> None:
@@ -78,6 +82,12 @@ def test_parse_hhmm_valid(raw: str, expected: time) -> None:
         pytest.param("ab:cd", id="non_integer"),
         pytest.param("25:00", id="hour_out_of_range"),
         pytest.param("06:60", id="minute_out_of_range"),
+        pytest.param("06:00:60", id="second_out_of_range"),
+        pytest.param("06:00:00:00", id="too_many_parts"),
+        pytest.param("7:05", id="single_digit_hour"),
+        pytest.param("+7:00", id="sign"),
+        pytest.param(" 7:00", id="leading_space"),
+        pytest.param("1_0:00", id="underscore"),
     ],
 )
 def test_parse_hhmm_invalid(raw: str) -> None:
@@ -256,6 +266,20 @@ def test_current_slot_normal_case_returns_code_and_end() -> None:
     code, end_dt = schedule.current_slot(now, _BRUSSELS)
     assert code == "peak"
     assert end_dt == datetime(2026, 7, 6, 22, 0, tzinfo=_BRUSSELS)
+
+
+def test_current_slot_reads_captured_schedule_times(
+    load_fixture: Callable[[str], dict[str, Any]],
+) -> None:
+    response = parse_tou_schedules(load_fixture("tou_schedules_bihoraire.json"))
+    meter = response.items[0].primary_meter()
+    assert meter is not None
+    assert meter.supplier is not None
+    assert meter.supplier.offtake is not None
+    now = datetime(2026, 10, 12, 10, 0, tzinfo=_BRUSSELS)
+    code, end_dt = meter.supplier.offtake.current_slot(now, _BRUSSELS)
+    assert code == "peak"
+    assert end_dt == datetime(2026, 10, 12, 21, 0, tzinfo=_BRUSSELS)
 
 
 def test_current_slot_unparseable_times() -> None:

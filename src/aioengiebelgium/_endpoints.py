@@ -1,4 +1,7 @@
-"""Endpoint catalog: every wire fact for each API endpoint lives in one descriptor."""
+"""Endpoint catalog: the method, URL, params, body, user agent and parser of each API endpoint.
+
+The client adds the shared request headers.
+"""
 
 import calendar
 import re
@@ -63,6 +66,7 @@ from .models import (
     TouSchedulesResponse,
     UsageDetailsResponse,
     VehicleChargeSettings,
+    ean_with_delivery_point_suffix,
 )
 from .parsers import (
     parse_account_balance,
@@ -275,6 +279,8 @@ class EanArgs:
 
     def __post_init__(self) -> None:
         _validate_ean("EAN", self.ean)
+        if "_" not in self.ean:
+            object.__setattr__(self, "ean", ean_with_delivery_point_suffix(self.ean))
 
 
 @dataclass(frozen=True, slots=True)

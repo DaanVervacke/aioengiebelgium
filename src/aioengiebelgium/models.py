@@ -1,3 +1,4 @@
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
@@ -23,17 +24,18 @@ def _require_aware(value: datetime) -> None:
         raise ValueError(msg)
 
 
+_HHMM_RE = re.compile(r"([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?")
+
+
 def _parse_hhmm(raw: str) -> time | None:
-    parts = raw.split(":", 1)
-    if len(parts) != 2:  # noqa: PLR2004
+    """Parse ``HH:MM`` or ``HH:MM:SS`` with two digits per part, or return None."""
+    match = _HHMM_RE.fullmatch(raw)
+    if match is None:
         return None
-    try:
-        h, m = int(parts[0]), int(parts[1])
-    except ValueError:
+    h, m, s = (int(part or 0) for part in match.groups())
+    if not (h <= 23 and m <= 59 and s <= 59):  # noqa: PLR2004
         return None
-    if not (0 <= h <= 23 and 0 <= m <= 59):  # noqa: PLR2004
-        return None
-    return time(hour=h, minute=m)
+    return time(hour=h, minute=m, second=s)
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,7 +112,12 @@ class CustomerAccountRelations:
 
 @dataclass(frozen=True, slots=True)
 class PriceSlot:
-    """A single time-of-use price slot."""
+    """A single time-of-use price slot.
+
+    ``time_of_use_slot_code`` is the raw wire code, for example
+    ``S_TOU1_OFFTAKE_PEAK``. It is not lowercased and does not match
+    ``TouSlotCode`` values.
+    """
 
     time_of_use_slot_code: str
     price_value: float
@@ -513,7 +520,10 @@ class TouSlot:
 
 @dataclass(frozen=True, slots=True)
 class TouDirectionSchedule:
-    """TOU schedule for one direction, per weekday, with its cheapest slot code."""
+    """TOU schedule for one direction, per weekday, with its best slot code.
+
+    The best slot code is the cheapest for offtake and the dearest for injection.
+    """
 
     optimal_timeslot_code: str | None = None
     monday: tuple[TouSlot, ...] = ()
@@ -666,11 +676,11 @@ class TouScheduleItem:
         return self.grid_meter_schedules[0] if self.grid_meter_schedules else None
 
     def has_supplier_tou(self) -> bool:
-        """True when the primary meter's supplier schedule has more than one slot code."""
+        """True when a direction of the primary meter's supplier schedule has several slot codes."""
         return _schedule_has_tou(self.primary_meter(), source="supplier")
 
     def has_network_tou(self) -> bool:
-        """True when the primary meter's DGO/TGO schedule has more than one slot code."""
+        """True when a direction of the primary meter's DGO/TGO schedule has several slot codes."""
         return _schedule_has_tou(self.primary_meter(), source="dgo_tgo")
 
     def has_tou(self) -> bool:
@@ -712,7 +722,11 @@ class GasUsage:
 
 @dataclass(frozen=True, slots=True)
 class UsageTouPart:
-    """A single TOU-slot value within a usage energy or cost breakdown."""
+    """A single TOU-slot value within a usage energy or cost breakdown.
+
+    ``slot_code`` is the raw wire code, for example ``TOTAL_HOURS``. It is not
+    lowercased and does not match ``TouSlotCode`` values.
+    """
 
     slot_code: str
     value: float = 0.0
@@ -720,7 +734,11 @@ class UsageTouPart:
 
 @dataclass(frozen=True, slots=True)
 class UsageTouCrossPart:
-    """A joint supplier/distribution TOU-slot value for the combined ``parts`` list."""
+    """A joint supplier/distribution TOU-slot value for the combined ``parts`` list.
+
+    Both slot codes are raw wire codes. They are not lowercased and do not
+    match ``TouSlotCode`` values.
+    """
 
     supplier_slot_code: str
     distribution_slot_code: str

@@ -46,7 +46,12 @@ USER_AGENT_NATIVE = (
 
 
 class TouSlotCode(StrEnum):
-    """Known time-of-use slot codes, stored lowercase. Unknown codes pass through lowercased."""
+    """Known time-of-use schedule slot codes, stored lowercase.
+
+    The parser drops any direction prefix such as ``S_TOU1_OFFTAKE_`` and maps
+    ``HIGH_LOAD_HOURS`` and ``LOW_LOAD_HOURS`` to ``peak`` and ``offpeak``.
+    Unknown codes get the same treatment and pass through lowercased.
+    """
 
     PEAK = "peak"
     OFFPEAK = "offpeak"

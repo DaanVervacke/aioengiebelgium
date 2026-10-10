@@ -1192,7 +1192,9 @@ def test_ean_args_reject_malformed_ean() -> None:
         EanArgs(ean="541448860000000001_IDx")
     with pytest.raises(ValueError, match="EAN must be digits"):
         EanArgs(ean="541448860000000001_ID")
-    assert EanArgs(ean="541448860000000001").ean == "541448860000000001"
+    with pytest.raises(ValueError, match=r"EAN must be digits.*: 'abc'$"):
+        EanArgs(ean="abc")
+    assert EanArgs(ean="541448860000000001").ean == "541448860000000001_ID1"
     assert EanArgs(ean=_EAN).ean == _EAN
 
 

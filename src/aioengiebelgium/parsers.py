@@ -225,7 +225,7 @@ _nested_skip_tally: ContextVar[_NestedSkipTally | None] = ContextVar(
 
 @contextmanager
 def _tally_nested_skips() -> Iterator[_NestedSkipTally]:
-    """Count the entries that nested ``_parse_items`` calls drop inside the block."""
+    """Count every nested entry skip recorded inside the block."""
     tally = _NestedSkipTally()
     token = _nested_skip_tally.set(tally)
     try:
@@ -314,7 +314,7 @@ def _parse_account_relation(item: dict[str, Any]) -> AccountRelation | None:
     if not isinstance(can, str) or not can:
         return None
     agreements = _parse_items(
-        ca.get("businessAgreements"), _parse_business_agreement, "account relation"
+        ca.get("businessAgreements"), _parse_business_agreement, "business agreement"
     )
     return AccountRelation(
         id=_as_str(item.get("id")),
@@ -764,7 +764,7 @@ _TOU_SLOT_CODE_ALIASES = {"HIGH_LOAD_HOURS": "PEAK", "LOW_LOAD_HOURS": "OFFPEAK"
 
 
 def _canonicalise_slot_code(raw: str) -> str:
-    """Strip any OFFTAKE_/INJECTION_ prefix, alias-map, then lowercase."""
+    """Drop everything through the first OFFTAKE_/INJECTION_ token, alias-map, then lowercase."""
     upper = raw.upper()
     match = _TOU_DIRECTION_PREFIX.search(upper)
     if match is not None:
