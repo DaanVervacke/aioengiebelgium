@@ -33,7 +33,7 @@ python -m scripts.check_bruno_drift
 coverage run -m pytest
 coverage report
 uv build
-uv audit
+uv audit --locked --preview-features audit-command
 ```
 
 Coverage measures branches in `src/` and requires 98%. `uv audit` needs network
@@ -68,7 +68,9 @@ and `chore:` subjects. Regenerate the unreleased section with
 release, rename the Unreleased heading to `## [X.Y.Z] - YYYY-MM-DD`, add the
 `[X.Y.Z]:` compare link at the bottom of the file, and point the
 `[Unreleased]:` link at the new tag. Bump the version, commit, and tag
-`vX.Y.Z`.
+`vX.Y.Z`. Publish a GitHub release for the tag. The release workflow then
+runs the gate, checks that the tag matches the package version and publishes
+the build to PyPI.
 
 ## Commit style
 
@@ -85,7 +87,7 @@ not mention the plan or issue number in the subject.
 
 ## Pull requests
 
-Every pull request must carry one of the seven repository labels
-(`breaking-change`, `new-feature`, `enhancement`, `bugfix`, `maintenance`,
-`documentation`, `dependencies`). CI fails otherwise. Dependabot pull requests
+Every pull request must carry one of the repository labels `breaking-change`,
+`new-feature`, `enhancement`, `bugfix`, `maintenance`, `documentation` or
+`dependencies`. CI fails otherwise. Dependabot pull requests
 are labeled `dependencies` automatically.

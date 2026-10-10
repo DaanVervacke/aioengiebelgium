@@ -2,7 +2,7 @@ API reference
 =============
 
 Client
-======
+------
 
 Every constructor argument after ``session`` is keyword-only.
 
@@ -15,9 +15,11 @@ Argument               Meaning
                        ``DEFAULT_CLIENT_ID``.
 ``access_token``       Previously stored access token. Skips the login flow.
 ``refresh_token``      Previously stored refresh token. Rotated on every
-                       refresh. On its own it also skips the login flow.
-``on_token_refresh``   Async callback that receives every new
-                       ``(access_token, refresh_token)`` pair.
+                       refresh. On its own it also skips the login flow:
+                       the first authenticated request refreshes the pair.
+``on_token_refresh``   Async callback that receives each new
+                       ``(access_token, refresh_token)`` pair. A pair
+                       superseded before delivery is skipped.
 ``request_timeout``    Per-request timeout in seconds. Defaults to ``30.0``.
 =====================  ==========================================================
 
@@ -33,25 +35,26 @@ still mean the activation worked, so confirm with
    :special-members: __init__
 
 Authentication flow
-===================
+-------------------
 
 .. autoclass:: aioengiebelgium.AuthFlow
    :members:
 
 Constants
-=========
+---------
 
 .. autodata:: aioengiebelgium.DEFAULT_CLIENT_ID
 
 .. autodata:: aioengiebelgium.__version__
 
 Models
-======
+------
 
 Response models that hold lists carry ``skipped_entries``, the number of
 malformed entries the parser dropped. The count includes entries dropped from
 nested lists, such as the business agreements of an account or the registers
-of a meter read. A non-zero count means the response is incomplete.
+of a meter read. A meter read whose registers are all malformed is dropped
+and counts once. A non-zero count means the response is incomplete.
 
 .. autoclass:: aioengiebelgium.AccountBalance
    :members:
@@ -354,7 +357,7 @@ of a meter read. A non-zero count means the response is incomplete.
    :members:
 
 Enums
-=====
+-----
 
 .. autoclass:: aioengiebelgium.ChargeSettingMode
    :members:
@@ -399,7 +402,7 @@ Enums
    :members:
 
 Exceptions
-==========
+----------
 
 Client errors derive from :class:`~aioengiebelgium.EngieBeError`. Catch a
 subclass before its parent. Invalid arguments raise ``ValueError`` before any
@@ -411,7 +414,9 @@ request is sent:
   surplus delivery point id must carry the suffix.
 - A month outside 1-12, a year outside 2000-2100 or a ``day`` outside the
   requested month.
-- A start date after the end date, or a datetime without a timezone.
+- A ``start_date`` after the ``end_date``, or an EPEX datetime without a
+  timezone. The EPEX getter does not check the order of ``from_dt`` and
+  ``to_dt``.
 - A ``vehicle_id`` or ``session_id`` that is not a positive integer.
 - A negative ``page_number`` or a ``page_size`` below 1.
 - For ``async_get_meter_reads``: only one of the two dates, or
@@ -450,7 +455,7 @@ request is sent:
    :show-inheritance:
 
 Helpers
-=======
+-------
 
 .. autofunction:: aioengiebelgium.bare_ean
 

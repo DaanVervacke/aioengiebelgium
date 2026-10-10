@@ -127,8 +127,8 @@ keyword-only.
 | `session` | `aiohttp.ClientSession \| None` | `None` | Caller-owned session. The client closes only a session it created itself. |
 | `client_id` | `str` | `DEFAULT_CLIENT_ID` | OAuth client id used for the Auth0 flow. |
 | `access_token` | `str \| None` | `None` | Previously stored access token. Skips the login flow. |
-| `refresh_token` | `str \| None` | `None` | Previously stored refresh token. Rotated on every refresh. On its own it also skips the login flow: the first request refreshes the pair. |
-| `on_token_refresh` | `Callable[[str, str], Awaitable[None]] \| None` | `None` | Async callback receiving the new `(access_token, refresh_token)` pair on every rotation. |
+| `refresh_token` | `str \| None` | `None` | Previously stored refresh token. Rotated on every refresh. On its own it also skips the login flow: the first authenticated request refreshes the pair. EPEX calls do not. |
+| `on_token_refresh` | `Callable[[str, str], Awaitable[None]] \| None` | `None` | Async callback receiving the new `(access_token, refresh_token)` pair after each rotation. A pair superseded before delivery is skipped. |
 | `request_timeout` | `float` | `30.0` | Per-request timeout in seconds. |
 
 Close the client with `await client.close()`, or use it as `async with
@@ -162,6 +162,7 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 Response models that hold lists carry `skipped_entries`, the number of malformed
 entries the parser dropped. The count includes entries dropped from nested lists,
 such as the business agreements of an account or the registers of a meter read.
+A meter read whose registers are all malformed is dropped and counts once.
 A non-zero count means the response is incomplete.
 
 | Getter | Returns | Description |
@@ -189,7 +190,7 @@ A non-zero count means the response is incomplete.
 | `async_get_smart_charge_services(customer_account_number)` | `EvServiceInfo` | Whether the customer account is onboarded for Smart Charge and the status of its `SMART_CHARGE` service. The customer account number comes from `CustomerAccount.customer_account_number`. |
 | `async_get_electric_vehicles(customer_account_number)` | `ElectricVehiclesResponse` | The vehicles of a customer account, with what ENGIE can read or control on each and the last charge state (battery level, range, plug status, charge power). Inactive vehicles are included. Check `active` on each vehicle. |
 | `async_get_vehicle_charge_settings(vehicle_id)` | `VehicleChargeSettings` | The Smart Charge settings of a vehicle: departure time per weekday, target battery level, battery reserve and whether smart and solar charging are on. `vehicle_id` is `ElectricVehicle.id`. |
-| `async_get_latest_charging_session(vehicle_id)` | `ChargingSessionDetails` | The latest charging session of a vehicle with the energy charged per interval. A session with status `unknown` has no start, end or end battery level yet. |
+| `async_get_latest_charging_session(vehicle_id)` | `ChargingSessionDetails` | The latest charging session of a vehicle with the energy charged per interval. A session with status `unknown` can lack a start, an end and an end battery level. |
 | `async_get_latest_charging_session_charge_settings(vehicle_id)` | `ChargingSessionChargeSettings` | The target battery level, the departure time override and the direct-charging flag of the latest charging session. |
 | `async_get_charging_sessions(customer_account_number, start_date, end_date, *, page_number=0, page_size=20)` | `ChargingSessionsPage` | One page of the charging sessions in a date range, newest first, with the total number of sessions and pages. `page_number` is 0-based. |
 | `async_get_charging_session(session_id)` | `ChargingSessionDetails` | One charging session with the energy charged per interval. Smart Charge sessions also carry whether they reached their target. |
@@ -217,8 +218,8 @@ Client errors derive from `EngieBeError`, which carries an optional HTTP
 | `EngieBeCommunicationError` | `EngieBeError` | Communication errors: network failure, non-auth HTTP >= 400. |
 | `EngieBeTimeoutError` | `EngieBeCommunicationError` | The request timed out. Retrying a getter is safe. After a service action, check the service status before you retry. |
 | `EngieBeEpexNotPublishedError` | `EngieBeCommunicationError` | EPEX day-ahead prices are not yet published for the requested window (HTTP 404). |
-| `EngieBeInvalidResponseError` | `EngieBeError` | A 2xx response whose body is not the expected JSON object. |
-| `EngieBeAuthenticationError` | `EngieBeError` | Authentication errors: bad credentials, expired token. |
+| `EngieBeInvalidResponseError` | `EngieBeError` | A response below HTTP 400 that the client cannot use: a body that is not the expected JSON object, or a status outside 2xx from a call that expects no body. |
+| `EngieBeAuthenticationError` | `EngieBeError` | Authentication errors: bad credentials, no token held, an expired or rejected token, a login page the flow cannot follow, or a token endpoint response without both tokens. |
 | `EngieBeMfaError` | `EngieBeAuthenticationError` | MFA-related errors, such as an invalid code. |
 
 Catch a subclass before its parent. Invalid arguments raise `ValueError` before
@@ -230,9 +231,12 @@ any request is sent:
   delivery point id must carry the suffix.
 - A month outside 1-12, a year outside 2000-2100 or a `day` outside the
   requested month.
-- A start date after the end date, or a datetime without a timezone.
+- A `start_date` after the `end_date`, or an EPEX datetime without a timezone.
+  The EPEX getter does not check the order of `from_dt` and `to_dt`.
 - A `vehicle_id` or `session_id` that is not a positive integer.
 - A negative `page_number` or a `page_size` below 1.
+- For `async_get_meter_reads`: only one of the two dates, or `latest=True`
+  combined with a date range.
 
 EPEX day-ahead prices are published in the afternoon for the following day.
 Requesting a window whose prices have not been published yet raises
@@ -251,7 +255,8 @@ The other exported enums (`TouSlotCode`, `SolarSurplusLevel`,
 `SolarInferenceKey`, `VehicleChargeStatus`, `VehiclePolicyState`,
 `ChargingSessionType`, `ChargingSessionStatus`, `ChargingSessionSource`,
 `SmartChargeOutcomeState`, `ChargeSettingMode`) list the known values of model
-fields.
+fields. `TouSlotCode` covers the time-of-use schedules. Prices and usage
+details keep the raw uppercase slot codes.
 
 `bare_ean(ean)` strips the delivery-point suffix (`_ID1`) from an EAN.
 `ean_with_delivery_point_suffix(ean)` appends it. `__version__` holds the

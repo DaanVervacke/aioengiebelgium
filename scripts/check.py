@@ -1,6 +1,6 @@
 """Local CI gate: run every check tool in order and exit with the first failure's code.
 
-Mirrors the full CI check suite: format, lint, types, tests, coverage, build, audit.
+CI runs this gate, then builds the documentation and checks the wheel.
 """
 
 import subprocess

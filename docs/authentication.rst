@@ -25,7 +25,8 @@ once you receive the code.
 
 A failed code raises
 :class:`~aioengiebelgium.EngieBeMfaError`. The flow stays open after that
-error, so you can call ``async_submit_mfa`` again with a new code. Call
+error, so you can call ``async_submit_mfa`` again with a new code. Any
+other error closes the login session if the flow created it. Call
 ``async_abort`` to give up. It closes the login session if the flow created
 it. Use the flow as ``async with flow:`` to call ``async_abort`` when the
 block exits, including on cancellation. Bad credentials or an expired token raise
@@ -48,7 +49,8 @@ You must persist every rotated pair durably. If you keep using the old
 refresh token after a rotation, the next refresh fails and the user has to
 log in again.
 
-Deliveries to the callback are ordered. A pair superseded before delivery
+Deliveries to the callback are ordered and run in their own task, so
+cancelling a request does not stop them. A pair superseded before delivery
 is dropped, so the callback always ends on the newest pair.
 
 The client logs an exception raised by the callback and continues. It does
@@ -73,10 +75,12 @@ Pass a stored token pair to the constructor to skip the login entirely:
            relations = await client.async_get_customer_account_relations()
 
 ``persist_tokens`` is the callback from :doc:`quickstart`. A refresh token
-on its own also skips the login: the first request refreshes the pair.
+on its own also skips the login: the first authenticated request refreshes
+the pair. The public EPEX endpoint does not trigger that refresh.
 
-Refreshes are serialized behind a lock, so concurrent requests trigger at
-most one refresh call.
+Refreshes are serialized behind a lock. A request that waits on a refresh
+already in progress reuses its new tokens instead of starting another one.
+After a failed refresh, each waiting request tries its own refresh.
 
 Token state
 -----------

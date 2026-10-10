@@ -27,8 +27,10 @@ Slots and granularity
 
 Each :class:`~aioengiebelgium.EpexSlot` is one market-time unit of
 day-ahead prices. It carries an aware start and end plus a value in
-€/kWh, converted from the API's €/MWh. Slot ends are derived from
-consecutive slot starts, not from the requested granularity.
+€/kWh, converted from the API's €/MWh. A slot ends at the next slot's
+start, capped at the most common spacing between slot starts. A response
+with a single slot falls back to the requested granularity. Slots with a
+duplicate start time are dropped.
 
 :class:`~aioengiebelgium.EpexGranularity` selects the market-time-unit
 length:
