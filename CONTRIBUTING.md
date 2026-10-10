@@ -5,7 +5,7 @@ for ENGIE Belgium's reverse-engineered consumer API, targeting Python >= 3.14.
 
 ## Setup
 
-Use [uv](https://docs.astral.sh/uv/) (>= 0.12.21, < 0.13) to install the
+Use [uv](https://docs.astral.sh/uv/) (>= 0.12.21, < 0.14) to install the
 environment:
 
 ```bash
