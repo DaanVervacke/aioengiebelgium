@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Before 1.0, breaking changes ship as minor bumps.
 
+## [Unreleased]
+
+### Bug Fixes
+
+- Read HH:MM:SS schedule times and check EANs before the suffix
+- Correct login, token refresh and closed client error handling
+
+### Documentation
+
+- Match the docs, docstrings and contributor guides to the code
+
 ## [0.7.0] - 2026-10-10
 
 ### Bug Fixes
