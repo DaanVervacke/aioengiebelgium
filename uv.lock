@@ -44,7 +44,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "aiohttp", specifier = ">=3.14.3" }]
+requires-dist = [{ name = "aiohttp", specifier = ">=3.14.4" }]
 
 [package.metadata.requires-dev]
 dev = [
