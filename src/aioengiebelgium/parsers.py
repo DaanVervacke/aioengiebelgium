@@ -1030,7 +1030,11 @@ def _parse_usage_gas(energy: Any, costs: Any) -> GasUsage | None:
     gas_raw = energy.get("gas") if isinstance(energy, dict) else None
     if not isinstance(gas_raw, dict):
         return None
-    return GasUsage(kwh=_as_float(gas_raw.get("kWh")), cost=_usage_cost_value(costs, "gas"))
+    return GasUsage(
+        kwh=_as_float(gas_raw.get("kWh")),
+        cost=_usage_cost_value(costs, "gas"),
+        cubic_meters=_as_float_or_none(gas_raw.get("cubicMeters")),
+    )
 
 
 def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:

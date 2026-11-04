@@ -732,6 +732,26 @@ def test_parse_usage_details_yearly_dual_fuel_gas_and_cost_totals(
     assert result.total.gas.cost is not None
 
 
+def test_parse_usage_details_gas_cubic_meters() -> None:
+    result = parse_usage_details(
+        {
+            "items": [
+                {
+                    "start": "2026-05-04T00:00:00+02:00",
+                    "end": "2026-05-05T00:00:00+02:00",
+                    "partialData": False,
+                    "energy": {"gas": {"kWh": 12.4, "cubicMeters": 1.17}},
+                    "simulatedEnergy": {"gas": {"kWh": 10.0}},
+                }
+            ]
+        }
+    )
+    item = result.items[0]
+
+    assert item.gas == GasUsage(kwh=12.4, cost=None, cubic_meters=1.17)
+    assert item.simulated_gas == GasUsage(kwh=10.0, cost=None, cubic_meters=None)
+
+
 def test_parse_usage_details_electricity_only_has_no_gas_cost(load_fixture: LoadFixture) -> None:
     item = parse_usage_details(load_fixture("usage_details_tou_simulated.json")).items[0]
 

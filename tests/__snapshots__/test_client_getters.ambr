@@ -3836,6 +3836,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=None,
@@ -3879,6 +3880,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=None,
@@ -3922,6 +3924,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=1.776,
         ),
         gas_and_electricity_cost=None,
@@ -3965,6 +3968,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=None,
@@ -4010,6 +4014,7 @@
       ),
       gas=GasUsage(
         cost=None,
+        cubic_meters=None,
         kwh=1.776,
       ),
       gas_and_electricity_cost=None,
@@ -4132,6 +4137,7 @@
         ),
         gas=GasUsage(
           cost=0.59,
+          cubic_meters=None,
           kwh=1.361,
         ),
         gas_and_electricity_cost=1.84,
@@ -4249,6 +4255,7 @@
         ),
         gas=GasUsage(
           cost=0.48,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=1.55,
@@ -4366,6 +4373,7 @@
         ),
         gas=GasUsage(
           cost=0.63,
+          cubic_meters=None,
           kwh=1.772,
         ),
         gas_and_electricity_cost=0.92,
@@ -4485,6 +4493,7 @@
       ),
       gas=GasUsage(
         cost=16.01,
+        cubic_meters=None,
         kwh=19.325,
       ),
       gas_and_electricity_cost=64.63,
@@ -4533,6 +4542,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=None,
@@ -4576,6 +4586,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=None,
@@ -4619,6 +4630,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=1.776,
         ),
         gas_and_electricity_cost=None,
@@ -4662,6 +4674,7 @@
         ),
         gas=GasUsage(
           cost=None,
+          cubic_meters=None,
           kwh=0.0,
         ),
         gas_and_electricity_cost=None,
@@ -4707,6 +4720,7 @@
       ),
       gas=GasUsage(
         cost=None,
+        cubic_meters=None,
         kwh=1.776,
       ),
       gas_and_electricity_cost=None,
@@ -4829,6 +4843,7 @@
         ),
         gas=GasUsage(
           cost=16.01,
+          cubic_meters=None,
           kwh=19.325,
         ),
         gas_and_electricity_cost=64.63,
@@ -4948,6 +4963,7 @@
       ),
       gas=GasUsage(
         cost=16.01,
+        cubic_meters=None,
         kwh=19.325,
       ),
       gas_and_electricity_cost=64.63,
@@ -5773,6 +5789,7 @@
         ),
         gas=GasUsage(
           cost=730.39,
+          cubic_meters=None,
           kwh=2178.82,
         ),
         gas_and_electricity_cost=2997.35,
@@ -5890,6 +5907,7 @@
         ),
         gas=GasUsage(
           cost=1380.56,
+          cubic_meters=None,
           kwh=1761.0,
         ),
         gas_and_electricity_cost=3324.99,
@@ -5994,6 +6012,7 @@
         ),
         simulated_gas=GasUsage(
           cost=1001.83,
+          cubic_meters=None,
           kwh=3410.34,
         ),
         simulated_gas_and_electricity_cost=3602.79,
@@ -6106,6 +6125,7 @@
         ),
         gas=GasUsage(
           cost=683.85,
+          cubic_meters=None,
           kwh=4096.96,
         ),
         gas_and_electricity_cost=2240.8,
@@ -6210,6 +6230,7 @@
         ),
         simulated_gas=GasUsage(
           cost=2069.03,
+          cubic_meters=None,
           kwh=2149.15,
         ),
         simulated_gas_and_electricity_cost=3150.49,
@@ -6324,6 +6345,7 @@
       ),
       gas=GasUsage(
         cost=713.02,
+        cubic_meters=None,
         kwh=4375.11,
       ),
       gas_and_electricity_cost=2289.67,
@@ -6428,6 +6450,7 @@
       ),
       simulated_gas=GasUsage(
         cost=1654.01,
+        cubic_meters=None,
         kwh=4561.8,
       ),
       simulated_gas_and_electricity_cost=3385.12,

@@ -714,10 +714,14 @@ class ElectricityUsage:
 
 @dataclass(frozen=True, slots=True)
 class GasUsage:
-    """Gas usage data."""
+    """Gas usage data.
+
+    ``cubic_meters`` is the same volume in m³ when the API reports it.
+    """
 
     kwh: float = 0.0
     cost: float | None = None
+    cubic_meters: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
