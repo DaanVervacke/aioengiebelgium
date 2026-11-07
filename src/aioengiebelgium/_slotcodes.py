@@ -11,7 +11,7 @@ _TOU_SLOT_CODE_ALIASES = {
 
 
 def canonicalise_slot_code(raw: str) -> str:
-    """Drop everything through the first OFFTAKE_/INJECTION_ token, alias-map, then lowercase."""
+    """Drop everything through the first OFFTAKE or INJECTION token, alias-map, then lowercase."""
     upper = raw.upper()
     match = _TOU_DIRECTION_PREFIX.search(upper)
     if match is not None:
