@@ -185,13 +185,13 @@ class EanPrices:
         """Return the price that applies at ``now`` on the given supplier schedule.
 
         Returns ``None`` when the direction has no switching schedule or when
-        no price period or schedule slot covers ``now``. When no price slot
-        matches the current schedule slot, the current price fields are
-        ``None`` and ``next_transition`` still points at the next slot or
-        period boundary. ``next_transition`` is set even when
-        no price slot matches the next code, in which case the ``next_*``
-        price fields stay ``None``. When the current price period ends before
-        the next slot boundary, ``next_transition`` is the period end and the
+        no schedule slot covers ``now``. When no price period covers ``now``
+        or no price slot matches the current schedule slot, the current price
+        fields are ``None`` and ``next_transition`` still points at the next
+        slot or period boundary. ``next_transition`` is set even when no
+        price slot matches the next code, in which case the ``next_*`` price
+        fields stay ``None``. When a price period ends or starts before the
+        next slot boundary, ``next_transition`` is that boundary and the
         ``next_*`` price fields resolve from the period that starts there.
         """
         _require_aware(now)
@@ -200,9 +200,6 @@ class EanPrices:
             return None
         today = now.astimezone(tz).date()
         period = next((p for p in self.periods if p.contains(today)), None)
-        if period is None:
-            return None
-        price_slots = period.offtake if direction == "offtake" else period.injection
         code, next_transition = direction_schedule.current_slot(now, tz)
         if code is None or next_transition is None:
             return None
@@ -213,15 +210,28 @@ class EanPrices:
                 None,
             )
 
-        slot = _price_slot_for(code, price_slots)
-        next_period: PricePeriod | None = period
-        valid_to = period.valid_to
-        if valid_to is not None:
-            period_end = datetime.combine(valid_to, time.min, tzinfo=tz)
-            if period_end <= next_transition:
-                next_transition = period_end
-                matches = [p for p in self.periods if p.contains(valid_to)]
-                next_period = matches[0] if matches else None
+        if period is not None:
+            price_slots = period.offtake if direction == "offtake" else period.injection
+            slot = _price_slot_for(code, price_slots)
+            period_boundary = (
+                datetime.combine(period.valid_to, time.min, tzinfo=tz)
+                if period.valid_to is not None
+                else None
+            )
+        else:
+            slot = None
+            starts = [
+                datetime.combine(p.valid_from, time.min, tzinfo=tz)
+                for p in self.periods
+                if p.valid_from is not None and p.valid_from > today
+            ]
+            period_boundary = min(starts) if starts else None
+        if period_boundary is not None and period_boundary <= next_transition:
+            next_transition = period_boundary
+        next_period = next(
+            (p for p in self.periods if p.contains(next_transition.astimezone(tz).date())),
+            None,
+        )
         next_slot_code, _ = direction_schedule.current_slot(next_transition, tz)
         next_slot = None
         if next_period is not None and next_slot_code is not None:

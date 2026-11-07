@@ -995,7 +995,7 @@ def test_active_tou_price_missing_direction_returns_none() -> None:
     assert _dual_prices().active_tou_price(schedule, "injection", now, _BRUSSELS) is None
 
 
-def test_active_tou_price_without_covering_period_returns_none() -> None:
+def test_active_tou_price_without_covering_period_keeps_slot_transition() -> None:
     period = PricePeriod(
         valid_from=date(2000, 1, 1),
         valid_to=date(2020, 1, 1),
@@ -1007,7 +1007,66 @@ def test_active_tou_price_without_covering_period_returns_none() -> None:
     prices = EanPrices(ean="541448820000000001_ID1", periods=(period,))
     schedule = TouSchedule(offtake=_dual_direction_schedule())
     now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
-    assert prices.active_tou_price(schedule, "offtake", now, _BRUSSELS) is None
+    active = prices.active_tou_price(schedule, "offtake", now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "peak"
+    assert active.price_value is None
+    assert active.price_value_excl_vat is None
+    assert active.next_transition == datetime(2026, 11, 3, 22, 0, tzinfo=_BRUSSELS)
+    assert active.next_slot_code == "offpeak"
+    assert active.next_price_value is None
+
+
+def test_active_tou_price_gap_wakes_at_next_period_start() -> None:
+    first = PricePeriod(
+        valid_from=date(2000, 1, 1),
+        valid_to=date(2026, 11, 3),
+        vat_tariff=6.0,
+        offtake=(
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_OFFTAKE_PEAK",
+                price_value=0.18,
+                price_value_excl_vat=0.169811,
+            ),
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_OFFTAKE_OFFPEAK",
+                price_value=0.09,
+                price_value_excl_vat=0.084906,
+            ),
+        ),
+    )
+    second = PricePeriod(
+        valid_from=date(2026, 11, 4),
+        valid_to=date(2099, 12, 31),
+        vat_tariff=6.0,
+        offtake=(
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_OFFTAKE_PEAK",
+                price_value=0.20,
+                price_value_excl_vat=0.188679,
+            ),
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_OFFTAKE_OFFPEAK",
+                price_value=0.11,
+                price_value_excl_vat=0.103774,
+            ),
+        ),
+    )
+    prices = EanPrices(ean="541448820000000001_ID1", periods=(first, second))
+    schedule = TouSchedule(offtake=_dual_direction_schedule())
+    gap_now = datetime(2026, 11, 3, 23, 30, tzinfo=_BRUSSELS)
+    active = prices.active_tou_price(schedule, "offtake", gap_now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "offpeak"
+    assert active.price_value is None
+    assert active.next_transition == datetime(2026, 11, 4, 0, 0, tzinfo=_BRUSSELS)
+    assert active.next_slot_code == "offpeak"
+    assert active.next_price_value == 0.11
+    started_now = datetime(2026, 11, 4, 0, 30, tzinfo=_BRUSSELS)
+    active = prices.active_tou_price(schedule, "offtake", started_now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "offpeak"
+    assert active.price_value == 0.11
 
 
 def test_active_tou_price_without_matching_price_slot_keeps_transition() -> None:
