@@ -777,16 +777,27 @@ def test_model_time_helpers_reject_naive_datetime(
         invoke(naive)
 
 
-_WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+def _every_day(
+    slots: tuple[TouSlot, ...],
+    optimal: str | None = None,
+) -> TouDirectionSchedule:
+    """Build a direction schedule that repeats one slot pattern every weekday."""
+    return TouDirectionSchedule(
+        optimal_timeslot_code=optimal,
+        monday=slots,
+        tuesday=slots,
+        wednesday=slots,
+        thursday=slots,
+        friday=slots,
+        saturday=slots,
+        sunday=slots,
+    )
 
 
 def _dual_direction_schedule() -> TouDirectionSchedule:
     peak = TouSlot(start_time="07:00", end_time="22:00", slot_code="peak")
     offpeak = TouSlot(start_time="22:00", end_time="07:00", slot_code="offpeak")
-    return TouDirectionSchedule(
-        optimal_timeslot_code="offpeak",
-        **dict.fromkeys(_WEEKDAYS, (peak, offpeak)),
-    )
+    return _every_day((peak, offpeak), "offpeak")
 
 
 def _dual_prices() -> EanPrices:
@@ -838,10 +849,7 @@ def test_active_tou_price_midnight_crossing_slot() -> None:
 
 def test_active_tou_price_single_code_schedule_returns_none() -> None:
     total = TouSlot(start_time="00:00", end_time="00:00", slot_code="total_hours")
-    direction_schedule = TouDirectionSchedule(
-        **dict.fromkeys(_WEEKDAYS, (total,)),
-    )
-    schedule = TouSchedule(offtake=direction_schedule)
+    schedule = TouSchedule(offtake=_every_day((total,)))
     now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
     assert _dual_prices().active_tou_price(schedule, "offtake", now, _BRUSSELS) is None
 
@@ -887,10 +895,7 @@ def test_active_tou_price_without_matching_price_slot_returns_none() -> None:
 def test_active_tou_price_joins_wire_aliases() -> None:
     night = TouSlot(start_time="22:00", end_time="06:00", slot_code="exclusive_night")
     day = TouSlot(start_time="06:00", end_time="22:00", slot_code="peak")
-    direction_schedule = TouDirectionSchedule(
-        optimal_timeslot_code="exclusive_night",
-        **dict.fromkeys(("monday", "tuesday", "wednesday", "thursday", "friday"), (day, night)),
-    )
+    direction_schedule = _every_day((day, night), "exclusive_night")
     period = PricePeriod(
         valid_from=date(2000, 1, 1),
         valid_to=date(2099, 12, 31),
@@ -932,10 +937,7 @@ def test_active_tou_price_single_rate_capture_returns_none(load_fixture: LoadFix
 def test_active_tou_price_injection_slot_and_next_transition() -> None:
     peak = TouSlot(start_time="07:00", end_time="22:00", slot_code="peak")
     offpeak = TouSlot(start_time="22:00", end_time="07:00", slot_code="offpeak")
-    direction_schedule = TouDirectionSchedule(
-        optimal_timeslot_code="peak",
-        **dict.fromkeys(_WEEKDAYS, (peak, offpeak)),
-    )
+    direction_schedule = _every_day((peak, offpeak), "peak")
     period = PricePeriod(
         valid_from=date(2000, 1, 1),
         valid_to=date(2099, 12, 31),
