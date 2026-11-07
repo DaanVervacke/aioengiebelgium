@@ -6,9 +6,9 @@ from datetime import UTC, datetime
 import pytest
 
 import aioengiebelgium
-from aioengiebelgium import _auth, client, const, exceptions, models
+from aioengiebelgium import _auth, _slotcodes, client, const, exceptions, models
 
-_SOURCE_MODULES = (_auth, client, const, exceptions, models)
+_SOURCE_MODULES = (_auth, _slotcodes, client, const, exceptions, models)
 
 
 def test_all_reexports_are_identity_exports() -> None:

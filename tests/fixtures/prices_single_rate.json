@@ -1,0 +1,350 @@
+{
+  "items": [
+    {
+      "ean": "541448820000000002_ID1",
+      "prices": [
+        {
+          "from": "2026-05-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.0622963908,
+                "priceValueExclVAT": 0.05877018,
+                "priceValueExclVATInEuroCentPerKWH": 5.877,
+                "priceValueExclVATInEuroPerKWH": 0.059,
+                "priceValueInEuroPerKWH": 0.062,
+                "priceValueInEurocentPerKWH": 6.23,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-06-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-06-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.0649053264,
+                "priceValueExclVAT": 0.06123144,
+                "priceValueExclVATInEuroCentPerKWH": 6.123,
+                "priceValueExclVATInEuroPerKWH": 0.061,
+                "priceValueInEuroPerKWH": 0.065,
+                "priceValueInEurocentPerKWH": 6.491,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-07-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-07-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.0624261348,
+                "priceValueExclVAT": 0.05889258,
+                "priceValueExclVATInEuroCentPerKWH": 5.889,
+                "priceValueExclVATInEuroPerKWH": 0.059,
+                "priceValueInEuroPerKWH": 0.062,
+                "priceValueInEurocentPerKWH": 6.243,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-08-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-08-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.072347226,
+                "priceValueExclVAT": 0.0682521,
+                "priceValueExclVATInEuroCentPerKWH": 6.825,
+                "priceValueExclVATInEuroPerKWH": 0.068,
+                "priceValueInEuroPerKWH": 0.072,
+                "priceValueInEurocentPerKWH": 7.235,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-09-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-09-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.0811730616,
+                "priceValueExclVAT": 0.07657836,
+                "priceValueExclVATInEuroCentPerKWH": 7.658,
+                "priceValueExclVATInEuroPerKWH": 0.077,
+                "priceValueInEuroPerKWH": 0.081,
+                "priceValueInEurocentPerKWH": 8.117,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-10-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-10-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.0957152016,
+                "priceValueExclVAT": 0.09029736,
+                "priceValueExclVATInEuroCentPerKWH": 9.03,
+                "priceValueExclVATInEuroPerKWH": 0.09,
+                "priceValueInEuroPerKWH": 0.096,
+                "priceValueInEurocentPerKWH": 9.572,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-11-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-11-01",
+          "proportionalPriceConfigurations": {
+            "injection": [],
+            "offtake": [
+              {
+                "priceValue": 0.0936014556,
+                "priceValueExclVAT": 0.08830326,
+                "priceValueExclVATInEuroCentPerKWH": 8.83,
+                "priceValueExclVATInEuroPerKWH": 0.088,
+                "priceValueInEuroPerKWH": 0.094,
+                "priceValueInEurocentPerKWH": 9.36,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-11-09",
+          "vatTariff": 0.06
+        }
+      ]
+    },
+    {
+      "ean": "541448820000000001_ID1",
+      "prices": [
+        {
+          "from": "2026-05-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.0341058,
+                "priceValueExclVAT": 0.0341058,
+                "priceValueExclVATInEuroCentPerKWH": 3.411,
+                "priceValueExclVATInEuroPerKWH": 0.034,
+                "priceValueInEuroPerKWH": 0.034,
+                "priceValueInEurocentPerKWH": 3.411,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.13826004,
+                "priceValueExclVAT": 0.130434,
+                "priceValueExclVATInEuroCentPerKWH": 13.043,
+                "priceValueExclVATInEuroPerKWH": 0.13,
+                "priceValueInEuroPerKWH": 0.138,
+                "priceValueInEurocentPerKWH": 13.826,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-06-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-06-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.0380174,
+                "priceValueExclVAT": 0.0380174,
+                "priceValueExclVATInEuroCentPerKWH": 3.802,
+                "priceValueExclVATInEuroPerKWH": 0.038,
+                "priceValueInEuroPerKWH": 0.038,
+                "priceValueInEurocentPerKWH": 3.802,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.1478912,
+                "priceValueExclVAT": 0.13952,
+                "priceValueExclVATInEuroCentPerKWH": 13.952,
+                "priceValueExclVATInEuroPerKWH": 0.14,
+                "priceValueInEuroPerKWH": 0.148,
+                "priceValueInEurocentPerKWH": 14.789,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-07-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-07-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.04112636,
+                "priceValueExclVAT": 0.04112636,
+                "priceValueExclVATInEuroCentPerKWH": 4.113,
+                "priceValueExclVATInEuroPerKWH": 0.041,
+                "priceValueInEuroPerKWH": 0.041,
+                "priceValueInEurocentPerKWH": 4.113,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.155546096,
+                "priceValueExclVAT": 0.1467416,
+                "priceValueExclVATInEuroCentPerKWH": 14.674,
+                "priceValueExclVATInEuroPerKWH": 0.147,
+                "priceValueInEuroPerKWH": 0.156,
+                "priceValueInEurocentPerKWH": 15.555,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-08-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-08-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.05151496,
+                "priceValueExclVAT": 0.05151496,
+                "priceValueExclVATInEuroCentPerKWH": 5.151,
+                "priceValueExclVATInEuroPerKWH": 0.052,
+                "priceValueInEuroPerKWH": 0.052,
+                "priceValueInEurocentPerKWH": 5.151,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.181124956,
+                "priceValueExclVAT": 0.1708726,
+                "priceValueExclVATInEuroCentPerKWH": 17.087,
+                "priceValueExclVATInEuroPerKWH": 0.171,
+                "priceValueInEuroPerKWH": 0.181,
+                "priceValueInEurocentPerKWH": 18.112,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-09-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-09-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.05984108,
+                "priceValueExclVAT": 0.05984108,
+                "priceValueExclVATInEuroCentPerKWH": 5.984,
+                "priceValueExclVATInEuroPerKWH": 0.06,
+                "priceValueInEuroPerKWH": 0.06,
+                "priceValueInEurocentPerKWH": 5.984,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.201625568,
+                "priceValueExclVAT": 0.1902128,
+                "priceValueExclVATInEuroCentPerKWH": 19.021,
+                "priceValueExclVATInEuroPerKWH": 0.19,
+                "priceValueInEuroPerKWH": 0.202,
+                "priceValueInEurocentPerKWH": 20.163,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-10-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-10-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.07630536,
+                "priceValueExclVAT": 0.07630536,
+                "priceValueExclVATInEuroCentPerKWH": 7.631,
+                "priceValueExclVATInEuroPerKWH": 0.076,
+                "priceValueInEuroPerKWH": 0.076,
+                "priceValueInEurocentPerKWH": 7.631,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.242163996,
+                "priceValueExclVAT": 0.2284566,
+                "priceValueExclVATInEuroCentPerKWH": 22.846,
+                "priceValueExclVATInEuroPerKWH": 0.228,
+                "priceValueInEuroPerKWH": 0.242,
+                "priceValueInEurocentPerKWH": 24.216,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-11-01",
+          "vatTariff": 0.06
+        },
+        {
+          "from": "2026-11-01",
+          "proportionalPriceConfigurations": {
+            "injection": [
+              {
+                "priceValue": 0.07984104,
+                "priceValueExclVAT": 0.07984104,
+                "priceValueExclVATInEuroCentPerKWH": 7.984,
+                "priceValueExclVATInEuroPerKWH": 0.08,
+                "priceValueInEuroPerKWH": 0.08,
+                "priceValueInEurocentPerKWH": 7.984,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ],
+            "offtake": [
+              {
+                "priceValue": 0.250869564,
+                "priceValueExclVAT": 0.2366694,
+                "priceValueExclVATInEuroCentPerKWH": 23.667,
+                "priceValueExclVATInEuroPerKWH": 0.237,
+                "priceValueInEuroPerKWH": 0.251,
+                "priceValueInEurocentPerKWH": 25.087,
+                "timeOfUseSlotCode": "TOTAL_HOURS"
+              }
+            ]
+          },
+          "to": "2026-11-09",
+          "vatTariff": 0.06
+        }
+      ]
+    }
+  ]
+}

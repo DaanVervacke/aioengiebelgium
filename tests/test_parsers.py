@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from aioengiebelgium import canonicalise_slot_code
 from aioengiebelgium.const import (
     ChargeSettingMode,
     ChargingSessionSource,
@@ -97,8 +98,7 @@ from aioengiebelgium.parsers import (
     parse_user_invitations,
     parse_vehicle_charge_settings,
 )
-
-LoadFixture = Callable[[str], dict[str, Any]]
+from tests.conftest import LoadFixture
 
 
 def test_parse_customer_account_relations_empty() -> None:
@@ -3685,3 +3685,37 @@ def test_parse_happy_hour_month_report_month_block(load_fixture: LoadFixture) ->
     report = parse_happy_hour_month_report(load_fixture("happy_hour_month_report_dual_fuel.json"))
     assert report.energy is not None
     assert report.costs is not None
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        pytest.param("S_TOU1_OFFTAKE_PEAK", "peak", id="direction_prefixed_peak"),
+        pytest.param("S_TOU1_INJECTION_OFFPEAK", "offpeak", id="direction_prefixed_offpeak"),
+        pytest.param("HIGH_LOAD_HOURS", "peak", id="high_load_hours_alias"),
+        pytest.param("LOW_LOAD_HOURS", "offpeak", id="low_load_hours_alias"),
+        pytest.param("EN", "exclusive_night", id="exclusive_night_price_code"),
+        pytest.param(
+            "S_TOU1_OFFTAKE_EN", "exclusive_night", id="direction_prefixed_exclusive_night"
+        ),
+        pytest.param("TOTAL_HOURS", "total_hours", id="total_hours"),
+        pytest.param("NEW_CODE", "new_code", id="unknown_passes_through"),
+    ],
+)
+def test_canonicalise_slot_code(raw: str, expected: str) -> None:
+    assert canonicalise_slot_code(raw) == expected
+
+
+def test_parse_tou_schedules_single_rate_capture(load_fixture: LoadFixture) -> None:
+    result = parse_tou_schedules(load_fixture("tou_schedules_single_rate.json"))
+    item = result.items[0]
+    assert item.has_supplier_tou() is False
+    assert item.has_network_tou() is False
+    assert item.has_tou() is False
+    meter = item.primary_meter()
+    assert meter is not None
+    assert meter.exclusive_night_meter is False
+    supplier = meter.supplier
+    assert supplier is not None
+    assert supplier.offtake is not None
+    assert supplier.offtake.has_multiple_slot_codes() is False

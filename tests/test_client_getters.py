@@ -70,8 +70,8 @@ from aioengiebelgium.exceptions import (
     EngieBeCommunicationError,
 )
 from aioengiebelgium.models import PricesResponse, bare_ean
+from tests.conftest import LoadFixture
 
-LoadFixture = Callable[[str], dict[str, Any]]
 _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
 
 _BAN = "000000000001"

@@ -5,7 +5,12 @@ from datetime import date, datetime, time, timedelta
 from typing import Any, Literal
 from zoneinfo import ZoneInfo
 
-from .const import DELIVERY_POINT_SUFFIX, DYNAMIC_ENERGY_PRODUCTS, SolarSurplusLevel
+from ._slotcodes import canonicalise_slot_code
+from .const import (
+    DELIVERY_POINT_SUFFIX,
+    DYNAMIC_ENERGY_PRODUCTS,
+    SolarSurplusLevel,
+)
 
 
 def bare_ean(ean: str) -> str:
@@ -147,11 +152,79 @@ class PricePeriod:
 
 
 @dataclass(frozen=True, slots=True)
+class ActiveTouPrice:
+    """The price that applies right now on a supplier time-of-use schedule."""
+
+    slot_code: str
+    price_value: float
+    price_value_excl_vat: float
+    next_transition: datetime | None = None
+    next_slot_code: str | None = None
+    next_price_value: float | None = None
+    next_price_value_excl_vat: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class EanPrices:
     """Prices for a single EAN."""
 
     ean: str
     periods: tuple[PricePeriod, ...] = ()
+
+    def active_tou_price(
+        self,
+        schedule: TouSchedule,
+        direction: Literal["offtake", "injection"],
+        now: datetime,
+        tz: ZoneInfo,
+    ) -> ActiveTouPrice | None:
+        """Return the price that applies at ``now`` on the given supplier schedule.
+
+        Returns ``None`` when the direction has no switching schedule, when no
+        price period or schedule slot covers ``now``, or when no price slot
+        matches the current schedule slot. ``next_transition`` is set even when
+        no price slot matches the next code, in which case the ``next_*``
+        price fields stay ``None``.
+        """
+        _require_aware(now)
+        direction_schedule = schedule.offtake if direction == "offtake" else schedule.injection
+        if direction_schedule is None or not direction_schedule.has_multiple_slot_codes():
+            return None
+        today = now.astimezone(tz).date()
+        period = next((p for p in self.periods if p.contains(today)), None)
+        if period is None:
+            return None
+        price_slots = period.offtake if direction == "offtake" else period.injection
+        code, next_transition = direction_schedule.current_slot(now, tz)
+        if code is None or next_transition is None:
+            return None
+
+        def _price_slot_for(slot_code: str) -> PriceSlot | None:
+            return next(
+                (
+                    s
+                    for s in price_slots
+                    if canonicalise_slot_code(s.time_of_use_slot_code) == slot_code
+                ),
+                None,
+            )
+
+        slot = _price_slot_for(code)
+        if slot is None:
+            return None
+        next_slot_code, _ = direction_schedule.current_slot(next_transition, tz)
+        next_slot = _price_slot_for(next_slot_code) if next_slot_code is not None else None
+        return ActiveTouPrice(
+            slot_code=code,
+            price_value=slot.price_value,
+            price_value_excl_vat=slot.price_value_excl_vat,
+            next_transition=next_transition,
+            next_slot_code=next_slot_code,
+            next_price_value=next_slot.price_value if next_slot is not None else None,
+            next_price_value_excl_vat=(
+                next_slot.price_value_excl_vat if next_slot is not None else None
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)

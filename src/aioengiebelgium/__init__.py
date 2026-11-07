@@ -4,6 +4,7 @@ from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
 from importlib.metadata import version as _version
 
 from ._auth import AuthFlow
+from ._slotcodes import canonicalise_slot_code
 from .client import EngieBeClient
 from .const import (
     DEFAULT_CLIENT_ID,
@@ -35,6 +36,7 @@ from .exceptions import (
 from .models import (
     AccountBalance,
     AccountRelation,
+    ActiveTouPrice,
     AssetBrand,
     AssetBrandsResponse,
     AutoProducer,
@@ -166,6 +168,7 @@ __all__ = [
     "DEFAULT_CLIENT_ID",
     "AccountBalance",
     "AccountRelation",
+    "ActiveTouPrice",
     "AssetBrand",
     "AssetBrandsResponse",
     "AuthFlow",
@@ -310,5 +313,6 @@ __all__ = [
     "VehiclePolicyState",
     "__version__",
     "bare_ean",
+    "canonicalise_slot_code",
     "ean_with_delivery_point_suffix",
 ]

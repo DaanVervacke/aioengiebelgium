@@ -1,7 +1,6 @@
 """Tests for EngieBeClient.async_get_epex_prices."""
 
 import re
-from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from zoneinfo import ZoneInfo
@@ -17,8 +16,7 @@ from aioengiebelgium.exceptions import (
     EngieBeCommunicationError,
     EngieBeEpexNotPublishedError,
 )
-
-LoadFixture = Callable[[str], dict[str, Any]]
+from tests.conftest import LoadFixture
 
 _TOKEN = "test-token"
 _EPEX_URL = re.compile(rf"^{re.escape(EPEX_BASE_URL)}(\?.*)?$")

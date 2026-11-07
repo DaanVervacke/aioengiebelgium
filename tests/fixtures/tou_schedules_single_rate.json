@@ -1,0 +1,329 @@
+{
+  "items": [
+    {
+      "eanWithSuffix": "541448820000000001_ID1",
+      "gridMeterTimeOfUseSchedules": [
+        {
+          "combinedSchedule": {
+            "dgoTgoActiveConfigurationId": "TOTAL_HOURS",
+            "injection": {
+              "friday": [],
+              "monday": [],
+              "saturday": [],
+              "sunday": [],
+              "thursday": [],
+              "tuesday": [],
+              "wednesday": []
+            },
+            "offtake": {
+              "friday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ],
+              "monday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ],
+              "saturday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ],
+              "sunday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ],
+              "thursday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ],
+              "tuesday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ],
+              "wednesday": [
+                {
+                  "costIndicator": 5,
+                  "dgoTgoSlotCode": "TOTAL_HOURS",
+                  "endTime": "00:00:00",
+                  "startTime": "00:00:00",
+                  "supplierSlotCode": "TOTAL_HOURS"
+                }
+              ]
+            },
+            "supplierActiveConfigurationId": "TOTAL_HOURS"
+          },
+          "dgoTgoSchedule": {
+            "activeConfigurationId": "TOTAL_HOURS",
+            "injection": {
+              "friday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "monday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "saturday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "sunday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "thursday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "tuesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "wednesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ]
+            },
+            "offtake": {
+              "friday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "monday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "saturday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "sunday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "thursday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "tuesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "wednesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ]
+            }
+          },
+          "exclusiveNightMeter": false,
+          "gridMeterNumber": "1SAG120000000001",
+          "supplierSchedule": {
+            "activeConfigurationId": "TOTAL_HOURS",
+            "injection": {
+              "friday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "monday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "saturday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "sunday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "thursday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "tuesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "wednesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ]
+            },
+            "offtake": {
+              "friday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "monday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "saturday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "sunday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "thursday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "tuesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ],
+              "wednesday": [
+                {
+                  "costIndicator": 3,
+                  "endTime": "00:00:00",
+                  "slotCode": "TOTAL_HOURS",
+                  "startTime": "00:00:00"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

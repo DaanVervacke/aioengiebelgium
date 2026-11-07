@@ -62,6 +62,9 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.AccountRelation
    :members:
 
+.. autoclass:: aioengiebelgium.ActiveTouPrice
+   :members:
+
 .. autoclass:: aioengiebelgium.AssetBrand
    :members:
 
@@ -518,5 +521,7 @@ Helpers
 -------
 
 .. autofunction:: aioengiebelgium.bare_ean
+
+.. autofunction:: aioengiebelgium.canonicalise_slot_code
 
 .. autofunction:: aioengiebelgium.ean_with_delivery_point_suffix

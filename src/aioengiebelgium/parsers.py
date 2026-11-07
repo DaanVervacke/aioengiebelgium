@@ -1,5 +1,4 @@
 import logging
-import re
 from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
@@ -10,6 +9,7 @@ from itertools import pairwise
 from types import MappingProxyType
 from typing import Any, Literal
 
+from ._slotcodes import canonicalise_slot_code
 from .const import EPEX_MWH_TO_KWH
 from .exceptions import EngieBeInvalidResponseError
 from .models import (
@@ -816,19 +816,6 @@ def parse_solar_surplus_forecasts(data: dict[str, Any]) -> SolarSurplusForecasts
     return SolarSurplusForecasts(forecasts=tuple(days), skipped_entries=skipped + nested.count)
 
 
-_TOU_DIRECTION_PREFIX = re.compile(r"(?:^|_)(?:OFFTAKE|INJECTION)_")
-_TOU_SLOT_CODE_ALIASES = {"HIGH_LOAD_HOURS": "PEAK", "LOW_LOAD_HOURS": "OFFPEAK"}
-
-
-def _canonicalise_slot_code(raw: str) -> str:
-    """Drop everything through the first OFFTAKE_/INJECTION_ token, alias-map, then lowercase."""
-    upper = raw.upper()
-    match = _TOU_DIRECTION_PREFIX.search(upper)
-    if match is not None:
-        upper = upper[match.end() :]
-    return _TOU_SLOT_CODE_ALIASES.get(upper, upper).lower()
-
-
 def _parse_tou_slot(s: dict[str, Any]) -> TouSlot | None:
     start_time = s.get("startTime")
     end_time = s.get("endTime")
@@ -842,7 +829,7 @@ def _parse_tou_slot(s: dict[str, Any]) -> TouSlot | None:
     return TouSlot(
         start_time=start_time,
         end_time=end_time,
-        slot_code=_canonicalise_slot_code(slot_code),
+        slot_code=canonicalise_slot_code(slot_code),
         cost_indicator=_as_cost_indicator(s.get("costIndicator")),
     )
 
@@ -870,8 +857,8 @@ def _parse_tou_combined_slot(s: dict[str, Any]) -> TouCombinedSlot | None:
     return TouCombinedSlot(
         start_time=start_time,
         end_time=end_time,
-        supplier_slot_code=_canonicalise_slot_code(supplier_code),
-        dgo_tgo_slot_code=_canonicalise_slot_code(dgo_tgo_code),
+        supplier_slot_code=canonicalise_slot_code(supplier_code),
+        dgo_tgo_slot_code=canonicalise_slot_code(dgo_tgo_code),
         cost_indicator=_as_cost_indicator(s.get("costIndicator")),
     )
 
@@ -933,7 +920,7 @@ def _parse_tou_direction(
     )
     wire_optimal = data.get("optimalTimeslotCode")
     optimal = (
-        _canonicalise_slot_code(wire_optimal)
+        canonicalise_slot_code(wire_optimal)
         if isinstance(wire_optimal, str) and wire_optimal
         else _derive_optimal_slot_code(direction, weekdays)
     )

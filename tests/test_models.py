@@ -11,6 +11,7 @@ from aioengiebelgium.models import (
     AccountBalance,
     BillingDetails,
     ConsumptionAddress,
+    EanPrices,
     EnergyContract,
     EnergyContractsResponse,
     EpexPayload,
@@ -19,6 +20,7 @@ from aioengiebelgium.models import (
     HappyHourEvent,
     HappyHourWindow,
     PricePeriod,
+    PriceSlot,
     ProductConfiguration,
     SolarSurplusDay,
     SolarSurplusForecasts,
@@ -31,7 +33,8 @@ from aioengiebelgium.models import (
     TouSlot,
     _parse_hhmm,
 )
-from aioengiebelgium.parsers import parse_tou_schedules
+from aioengiebelgium.parsers import parse_prices, parse_tou_schedules
+from tests.conftest import LoadFixture
 
 _BRUSSELS = ZoneInfo("Europe/Brussels")
 
@@ -758,6 +761,12 @@ def test_consumption_address_format(fields: dict[str, str], expected: str) -> No
             lambda now: TouDirectionSchedule().current_slot(now, _BRUSSELS),
             id="tou_current_slot",
         ),
+        pytest.param(
+            lambda now: EanPrices(ean="541448820000000001_ID1").active_tou_price(
+                TouSchedule(), "offtake", now, _BRUSSELS
+            ),
+            id="active_tou_price",
+        ),
     ],
 )
 def test_model_time_helpers_reject_naive_datetime(
@@ -766,3 +775,193 @@ def test_model_time_helpers_reject_naive_datetime(
     naive = datetime(2026, 5, 4, 12, 0)  # noqa: DTZ001
     with pytest.raises(ValueError, match="timezone-aware datetimes required"):
         invoke(naive)
+
+
+_WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+def _dual_direction_schedule() -> TouDirectionSchedule:
+    peak = TouSlot(start_time="07:00", end_time="22:00", slot_code="peak")
+    offpeak = TouSlot(start_time="22:00", end_time="07:00", slot_code="offpeak")
+    return TouDirectionSchedule(
+        optimal_timeslot_code="offpeak",
+        **dict.fromkeys(_WEEKDAYS, (peak, offpeak)),
+    )
+
+
+def _dual_prices() -> EanPrices:
+    period = PricePeriod(
+        valid_from=date(2000, 1, 1),
+        valid_to=date(2099, 12, 31),
+        vat_tariff=6.0,
+        offtake=(
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_OFFTAKE_PEAK",
+                price_value=0.18,
+                price_value_excl_vat=0.169811,
+            ),
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_OFFTAKE_OFFPEAK",
+                price_value=0.09,
+                price_value_excl_vat=0.084906,
+            ),
+        ),
+    )
+    return EanPrices(ean="541448820000000001_ID1", periods=(period,))
+
+
+def test_active_tou_price_peak_slot_and_next_transition() -> None:
+    schedule = TouSchedule(offtake=_dual_direction_schedule())
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    active = _dual_prices().active_tou_price(schedule, "offtake", now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "peak"
+    assert active.price_value == 0.18
+    assert active.price_value_excl_vat == 0.169811
+    assert active.next_transition == datetime(2026, 11, 3, 22, 0, tzinfo=_BRUSSELS)
+    assert active.next_slot_code == "offpeak"
+    assert active.next_price_value == 0.09
+    assert active.next_price_value_excl_vat == 0.084906
+
+
+def test_active_tou_price_midnight_crossing_slot() -> None:
+    schedule = TouSchedule(offtake=_dual_direction_schedule())
+    now = datetime(2026, 11, 3, 23, 30, tzinfo=_BRUSSELS)
+    active = _dual_prices().active_tou_price(schedule, "offtake", now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "offpeak"
+    assert active.price_value == 0.09
+    assert active.next_transition == datetime(2026, 11, 4, 7, 0, tzinfo=_BRUSSELS)
+    assert active.next_slot_code == "peak"
+    assert active.next_price_value == 0.18
+
+
+def test_active_tou_price_single_code_schedule_returns_none() -> None:
+    total = TouSlot(start_time="00:00", end_time="00:00", slot_code="total_hours")
+    direction_schedule = TouDirectionSchedule(
+        **dict.fromkeys(_WEEKDAYS, (total,)),
+    )
+    schedule = TouSchedule(offtake=direction_schedule)
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    assert _dual_prices().active_tou_price(schedule, "offtake", now, _BRUSSELS) is None
+
+
+def test_active_tou_price_missing_direction_returns_none() -> None:
+    schedule = TouSchedule(offtake=None)
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    assert _dual_prices().active_tou_price(schedule, "injection", now, _BRUSSELS) is None
+
+
+def test_active_tou_price_without_covering_period_returns_none() -> None:
+    period = PricePeriod(
+        valid_from=date(2000, 1, 1),
+        valid_to=date(2020, 1, 1),
+        vat_tariff=6.0,
+        offtake=(
+            PriceSlot(time_of_use_slot_code="PEAK", price_value=0.18, price_value_excl_vat=0.17),
+        ),
+    )
+    prices = EanPrices(ean="541448820000000001_ID1", periods=(period,))
+    schedule = TouSchedule(offtake=_dual_direction_schedule())
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    assert prices.active_tou_price(schedule, "offtake", now, _BRUSSELS) is None
+
+
+def test_active_tou_price_without_matching_price_slot_returns_none() -> None:
+    period = PricePeriod(
+        valid_from=date(2000, 1, 1),
+        valid_to=date(2099, 12, 31),
+        vat_tariff=6.0,
+        offtake=(
+            PriceSlot(
+                time_of_use_slot_code="TOTAL_HOURS", price_value=0.1, price_value_excl_vat=0.09
+            ),
+        ),
+    )
+    prices = EanPrices(ean="541448820000000001_ID1", periods=(period,))
+    schedule = TouSchedule(offtake=_dual_direction_schedule())
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    assert prices.active_tou_price(schedule, "offtake", now, _BRUSSELS) is None
+
+
+def test_active_tou_price_joins_wire_aliases() -> None:
+    night = TouSlot(start_time="22:00", end_time="06:00", slot_code="exclusive_night")
+    day = TouSlot(start_time="06:00", end_time="22:00", slot_code="peak")
+    direction_schedule = TouDirectionSchedule(
+        optimal_timeslot_code="exclusive_night",
+        **dict.fromkeys(("monday", "tuesday", "wednesday", "thursday", "friday"), (day, night)),
+    )
+    period = PricePeriod(
+        valid_from=date(2000, 1, 1),
+        valid_to=date(2099, 12, 31),
+        vat_tariff=6.0,
+        offtake=(
+            PriceSlot(
+                time_of_use_slot_code="HIGH_LOAD_HOURS", price_value=0.2, price_value_excl_vat=0.19
+            ),
+            PriceSlot(time_of_use_slot_code="EN", price_value=0.1, price_value_excl_vat=0.09),
+        ),
+    )
+    prices = EanPrices(ean="541448820000000001_ID1", periods=(period,))
+    schedule = TouSchedule(offtake=direction_schedule)
+    night_now = datetime(2026, 11, 3, 23, 0, tzinfo=_BRUSSELS)
+    active = prices.active_tou_price(schedule, "offtake", night_now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "exclusive_night"
+    assert active.price_value == 0.1
+    day_now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    active = prices.active_tou_price(schedule, "offtake", day_now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "peak"
+    assert active.price_value == 0.2
+
+
+def test_active_tou_price_single_rate_capture_returns_none(load_fixture: LoadFixture) -> None:
+    prices = parse_prices(load_fixture("prices_single_rate.json"))
+    schedules = parse_tou_schedules(load_fixture("tou_schedules_single_rate.json"))
+    item = schedules.items[0]
+    meter = item.primary_meter()
+    assert meter is not None
+    supplier = meter.supplier
+    assert supplier is not None
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    for ean_prices in prices.items:
+        assert ean_prices.active_tou_price(supplier, "offtake", now, _BRUSSELS) is None
+
+
+def test_active_tou_price_injection_slot_and_next_transition() -> None:
+    peak = TouSlot(start_time="07:00", end_time="22:00", slot_code="peak")
+    offpeak = TouSlot(start_time="22:00", end_time="07:00", slot_code="offpeak")
+    direction_schedule = TouDirectionSchedule(
+        optimal_timeslot_code="peak",
+        **dict.fromkeys(_WEEKDAYS, (peak, offpeak)),
+    )
+    period = PricePeriod(
+        valid_from=date(2000, 1, 1),
+        valid_to=date(2099, 12, 31),
+        vat_tariff=6.0,
+        injection=(
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_INJECTION_PEAK",
+                price_value=0.08,
+                price_value_excl_vat=0.075472,
+            ),
+            PriceSlot(
+                time_of_use_slot_code="S_TOU1_INJECTION_OFFPEAK",
+                price_value=0.04,
+                price_value_excl_vat=0.037736,
+            ),
+        ),
+    )
+    prices = EanPrices(ean="541448820000000001_ID1", periods=(period,))
+    schedule = TouSchedule(injection=direction_schedule)
+    now = datetime(2026, 11, 3, 12, 0, tzinfo=_BRUSSELS)
+    active = prices.active_tou_price(schedule, "injection", now, _BRUSSELS)
+    assert active is not None
+    assert active.slot_code == "peak"
+    assert active.price_value == 0.08
+    assert active.price_value_excl_vat == 0.075472
+    assert active.next_transition == datetime(2026, 11, 3, 22, 0, tzinfo=_BRUSSELS)
+    assert active.next_slot_code == "offpeak"
+    assert active.next_price_value == 0.04
+    assert active.next_price_value_excl_vat == 0.037736

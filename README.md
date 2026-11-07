@@ -270,7 +270,10 @@ fields. `TouSlotCode` covers the time-of-use schedules. Prices and usage
 details keep the raw uppercase slot codes.
 
 `bare_ean(ean)` strips the delivery-point suffix (`_ID1`) from an EAN.
-`ean_with_delivery_point_suffix(ean)` appends it. `__version__` holds the
+`ean_with_delivery_point_suffix(ean)` appends it.
+`canonicalise_slot_code(raw)` maps a raw time-of-use slot code to its
+lowercase form, dropping any `OFFTAKE_`/`INJECTION_` prefix and mapping the
+`HIGH_LOAD_HOURS`, `LOW_LOAD_HOURS` and `EN` aliases. `__version__` holds the
 installed package version.
 
 ## Development

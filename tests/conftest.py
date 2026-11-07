@@ -18,6 +18,8 @@ from aioengiebelgium.const import AUTH_BASE_URL, REDIRECT_URI, MfaMethod
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
+LoadFixture = Callable[[str], dict[str, Any]]
+
 _AUTH_CODE = "test-authorization-code"
 _OAUTH_STATE = "test-oauth-state"
 _LOGIN_STATE = "test-login-state"
