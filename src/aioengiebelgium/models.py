@@ -184,7 +184,9 @@ class EanPrices:
         price period or schedule slot covers ``now``, or when no price slot
         matches the current schedule slot. ``next_transition`` is set even when
         no price slot matches the next code, in which case the ``next_*``
-        price fields stay ``None``.
+        price fields stay ``None``. When the current price period ends before
+        the next slot boundary, ``next_transition`` is the period end and the
+        ``next_*`` price fields resolve from the period that starts there.
         """
         _require_aware(now)
         direction_schedule = schedule.offtake if direction == "offtake" else schedule.injection
@@ -199,21 +201,34 @@ class EanPrices:
         if code is None or next_transition is None:
             return None
 
-        def _price_slot_for(slot_code: str) -> PriceSlot | None:
+        def _price_slot_for(slot_code: str, slots: tuple[PriceSlot, ...]) -> PriceSlot | None:
             return next(
-                (
-                    s
-                    for s in price_slots
-                    if canonicalise_slot_code(s.time_of_use_slot_code) == slot_code
-                ),
+                (s for s in slots if canonicalise_slot_code(s.time_of_use_slot_code) == slot_code),
                 None,
             )
 
-        slot = _price_slot_for(code)
+        slot = _price_slot_for(code, price_slots)
         if slot is None:
             return None
+        next_period = period
+        period_end = (
+            datetime.combine(period.valid_to, time.min, tzinfo=tz)
+            if period.valid_to is not None
+            else None
+        )
+        if period_end is not None and period_end <= next_transition:
+            next_transition = period_end
+            next_period = next(
+                (p for p in self.periods if p.contains(period.valid_to)),
+                None,
+            )
         next_slot_code, _ = direction_schedule.current_slot(next_transition, tz)
-        next_slot = _price_slot_for(next_slot_code) if next_slot_code is not None else None
+        next_slot = None
+        if next_period is not None and next_slot_code is not None:
+            next_price_slots = (
+                next_period.offtake if direction == "offtake" else next_period.injection
+            )
+            next_slot = _price_slot_for(next_slot_code, next_price_slots)
         return ActiveTouPrice(
             slot_code=code,
             price_value=slot.price_value,
