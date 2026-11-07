@@ -210,18 +210,14 @@ class EanPrices:
         slot = _price_slot_for(code, price_slots)
         if slot is None:
             return None
-        next_period = period
-        period_end = (
-            datetime.combine(period.valid_to, time.min, tzinfo=tz)
-            if period.valid_to is not None
-            else None
-        )
-        if period_end is not None and period_end <= next_transition:
-            next_transition = period_end
-            next_period = next(
-                (p for p in self.periods if p.contains(period.valid_to)),
-                None,
-            )
+        next_period: PricePeriod | None = period
+        valid_to = period.valid_to
+        if valid_to is not None:
+            period_end = datetime.combine(valid_to, time.min, tzinfo=tz)
+            if period_end <= next_transition:
+                next_transition = period_end
+                matches = [p for p in self.periods if p.contains(valid_to)]
+                next_period = matches[0] if matches else None
         next_slot_code, _ = direction_schedule.current_slot(next_transition, tz)
         next_slot = None
         if next_period is not None and next_slot_code is not None:
