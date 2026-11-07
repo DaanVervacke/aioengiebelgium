@@ -153,11 +153,15 @@ class PricePeriod:
 
 @dataclass(frozen=True, slots=True)
 class ActiveTouPrice:
-    """The price that applies right now on a supplier time-of-use schedule."""
+    """The price that applies right now on a supplier time-of-use schedule.
+
+    The price fields are ``None`` when no price slot matches the current
+    schedule slot.
+    """
 
     slot_code: str
-    price_value: float
-    price_value_excl_vat: float
+    price_value: float | None
+    price_value_excl_vat: float | None
     next_transition: datetime | None = None
     next_slot_code: str | None = None
     next_price_value: float | None = None
@@ -180,9 +184,11 @@ class EanPrices:
     ) -> ActiveTouPrice | None:
         """Return the price that applies at ``now`` on the given supplier schedule.
 
-        Returns ``None`` when the direction has no switching schedule, when no
-        price period or schedule slot covers ``now``, or when no price slot
-        matches the current schedule slot. ``next_transition`` is set even when
+        Returns ``None`` when the direction has no switching schedule or when
+        no price period or schedule slot covers ``now``. When no price slot
+        matches the current schedule slot, the current price fields are
+        ``None`` and ``next_transition`` still points at the next slot or
+        period boundary. ``next_transition`` is set even when
         no price slot matches the next code, in which case the ``next_*``
         price fields stay ``None``. When the current price period ends before
         the next slot boundary, ``next_transition`` is the period end and the
@@ -208,8 +214,6 @@ class EanPrices:
             )
 
         slot = _price_slot_for(code, price_slots)
-        if slot is None:
-            return None
         next_period: PricePeriod | None = period
         valid_to = period.valid_to
         if valid_to is not None:
@@ -227,8 +231,8 @@ class EanPrices:
             next_slot = _price_slot_for(next_slot_code, next_price_slots)
         return ActiveTouPrice(
             slot_code=code,
-            price_value=slot.price_value,
-            price_value_excl_vat=slot.price_value_excl_vat,
+            price_value=slot.price_value if slot is not None else None,
+            price_value_excl_vat=(slot.price_value_excl_vat if slot is not None else None),
             next_transition=next_transition,
             next_slot_code=next_slot_code,
             next_price_value=next_slot.price_value if next_slot is not None else None,
