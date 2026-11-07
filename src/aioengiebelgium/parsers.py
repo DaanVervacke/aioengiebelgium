@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import Counter
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -11,9 +11,13 @@ from types import MappingProxyType
 from typing import Any, Literal
 
 from .const import EPEX_MWH_TO_KWH
+from .exceptions import EngieBeInvalidResponseError
 from .models import (
     AccountBalance,
     AccountRelation,
+    AssetBrand,
+    AssetBrandsResponse,
+    AutoProducer,
     BillingDetails,
     BillingOverview,
     BillingPeriodUsage,
@@ -24,6 +28,8 @@ from .models import (
     BudgetBillingPlanProposal,
     BudgetBillingPlanProposalFactor,
     BusinessAgreement,
+    BusinessAgreementAddresses,
+    BusinessAgreementDetail,
     ChargeSettingValue,
     ChargingSession,
     ChargingSessionChargeSettings,
@@ -32,9 +38,16 @@ from .models import (
     ChargingSessionsPage,
     ChargingSessionsSummary,
     ChargingSessionsSummaryEntry,
+    CommunicationCategory,
+    CommunicationChannel,
+    CommunicationPreferenceItem,
+    CommunicationPreferences,
+    CommunicationPreferencesResponse,
     ConsumptionAddress,
+    ContactChannel,
     ContractInfo,
     CustomerAccount,
+    CustomerAccountDetail,
     CustomerAccountRelations,
     DataAvailability,
     DepartureTimes,
@@ -65,6 +78,10 @@ from .models import (
     HappyHourMonthReport,
     HappyHourServiceStatus,
     HappyHourWindow,
+    Invoice,
+    InvoiceBillingPeriod,
+    InvoiceDocument,
+    InvoicesPage,
     MeasuredDataWindow,
     MeteringConfiguration,
     MeteringDataSource,
@@ -81,7 +98,10 @@ from .models import (
     PricePeriod,
     PriceSlot,
     PricesResponse,
+    PrimaryContact,
     ProductConfiguration,
+    RewardBalanceDetails,
+    RewardsPayoutsResponse,
     ServicePoint,
     ServicePointInstallation,
     ServicePointMarketDetails,
@@ -109,6 +129,7 @@ from .models import (
     UsageItem,
     UsageTouCrossPart,
     UsageTouPart,
+    UserInvitationsResponse,
     VehicleCapabilities,
     VehicleChargeSettings,
     VehicleChargeState,
@@ -251,30 +272,31 @@ def _record_nested_skips(skipped: int) -> None:
         tally.count += skipped
 
 
+def _parse_raw_mappings(data: object) -> tuple[tuple[Mapping[str, Any], ...], int]:
+    """Keep a list of raw mappings as-is, counting non-mapping elements as skipped."""
+    if not isinstance(data, list):
+        return (), 0
+    items = tuple(entry for entry in data if isinstance(entry, dict))
+    return items, len(data) - len(items)
+
+
+def _parse_raw_items(data: dict[str, Any]) -> tuple[tuple[Mapping[str, Any], ...], int]:
+    """Parse a top-level ``items`` list of raw mappings, counting malformed entries."""
+    raw = data.get("items")
+    if raw is None:
+        return (), 0
+    items, skipped = _parse_raw_mappings(raw)
+    if not isinstance(raw, list):
+        skipped += 1
+    return items, skipped
+
+
 def _parse_business_agreement(ag: dict[str, Any]) -> BusinessAgreement | None:
     ban = ag.get("businessAgreementNumber")
     if not isinstance(ban, str) or not ban:
         return None
 
-    address_raw = ag.get("consumptionAddress")
-    address = (
-        ConsumptionAddress(
-            street=address_raw.get("street"),
-            house_number=address_raw.get("houseNumber"),
-            postal_code=address_raw.get("postalCode"),
-            city=address_raw.get("city"),
-            country=address_raw.get("country"),
-            country_code=address_raw.get("countryCode"),
-            premises_number=address_raw.get("premisesNumber"),
-            box_number=address_raw.get("boxNumber"),
-            floor=address_raw.get("floor"),
-            room_number=address_raw.get("roomNumber"),
-            supplement=address_raw.get("supplement"),
-            location_supplement=address_raw.get("locationSupplement"),
-        )
-        if isinstance(address_raw, dict)
-        else None
-    )
+    address = _parse_address(ag.get("consumptionAddress"))
 
     elec_raw = ag.get("electricityContract")
     elec = (
@@ -344,6 +366,14 @@ def _parse_price_slot(s: dict[str, Any]) -> PriceSlot:
         time_of_use_slot_code=_as_str(s.get("timeOfUseSlotCode")),
         price_value=_as_float(s.get("priceValue")),
         price_value_excl_vat=_as_float(s.get("priceValueExclVAT")),
+        price_value_in_euro_per_kwh=_as_float_or_none(s.get("priceValueInEuroPerKWH")),
+        price_value_in_eurocent_per_kwh=_as_float_or_none(s.get("priceValueInEurocentPerKWH")),
+        price_value_excl_vat_in_euro_per_kwh=_as_float_or_none(
+            s.get("priceValueExclVATInEuroPerKWH")
+        ),
+        price_value_excl_vat_in_eurocent_per_kwh=_as_float_or_none(
+            s.get("priceValueExclVATInEuroCentPerKWH")
+        ),
     )
 
 
@@ -378,30 +408,48 @@ def parse_prices(data: dict[str, Any]) -> PricesResponse:
 
 def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
     pc_raw = item.get("productConfiguration")
-    pc = (
-        ProductConfiguration(
+    pc = None
+    if isinstance(pc_raw, dict):
+        tou_raw = pc_raw.get("contractItemTimeOfUseConfigurationList")
+        pc = ProductConfiguration(
             energy_product=pc_raw.get("energyProduct"),
             type=pc_raw.get("type"),
             green_level=_as_str_or_none(pc_raw.get("greenLevel")),
             green_origin=_as_str_or_none(pc_raw.get("greenOrigin")),
+            care_level=_as_str_or_none(pc_raw.get("careLevel")),
+            duration=_as_str_or_none(pc_raw.get("duration")),
+            service_component=_as_str_or_none(pc_raw.get("serviceComponent")),
+            contract_item_time_of_use_configuration_list=_parse_raw_mappings(tou_raw)[0],
         )
-        if isinstance(pc_raw, dict)
-        else None
-    )
+        _record_nested_skips(_parse_raw_mappings(tou_raw)[1])
     return EnergyContract(
         business_agreement_number=_as_str(item.get("businessAgreementNumber")),
         service_point_number=_as_str(item.get("servicePointNumber")),
         division=_as_str(item.get("division")),
         status=_as_str(item.get("status")),
         product_configuration=pc,
+        contract_id=_as_str_or_none(item.get("contractId")),
+        contract_item_id=_as_str_or_none(item.get("contractItemId")),
+        contract_type=_as_str_or_none(item.get("contractType")),
+        billing_contract_number=_as_str_or_none(item.get("billingContractNumber")),
+        business_scenario=_as_str_or_none(item.get("businessScenario")),
+        start_date=_as_date(item.get("startDate")),
+        end_date=_as_date(item.get("endDate")),
+        commercialization_start_date=_as_date(item.get("commercializationStartDate")),
+        customer_agreement_date=_as_date(item.get("customerAgreementDate")),
+        desired_contract_start_date=_as_date(item.get("desiredContractStartDate")),
+        legal_contract_start_date=_as_date(item.get("legalContractStartDate")),
+        sales_closure=_as_str_or_none(item.get("salesClosure")),
+        action=_as_str_or_none(item.get("action")),
     )
 
 
 def parse_energy_contracts(data: dict[str, Any]) -> EnergyContractsResponse:
-    items, skipped = _parse_items_counted(
-        data.get("items"), _parse_energy_contract, "energy contract"
-    )
-    return EnergyContractsResponse(items=tuple(items), skipped_entries=skipped)
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(
+            data.get("items"), _parse_energy_contract, "energy contract"
+        )
+    return EnergyContractsResponse(items=tuple(items), skipped_entries=skipped + nested.count)
 
 
 def _parse_peak(data: dict[str, Any]) -> Peak | None:
@@ -468,10 +516,13 @@ def parse_account_balance(data: dict[str, Any]) -> AccountBalance:
             _parse_financial_transaction,
             "financial transaction",
         )
+        pending_raw = details_raw.get("pendingOnlinePayments")
         details = BillingDetails(
             financial_transactions=tuple(txns),
             invoice_structured_communication=details_raw.get("invoiceStructuredCommunication"),
+            pending_online_payments=_parse_raw_mappings(pending_raw)[0],
         )
+        skipped += _parse_raw_mappings(pending_raw)[1]
 
     refund_raw = data.get("refundBlocked")
     if isinstance(refund_raw, bool):
@@ -680,6 +731,8 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
     simulated_energy = None
     simulated_cost = None
     gas = None
+    month_energy = None
+    month_costs = None
     month_raw = data.get("month")
     if isinstance(month_raw, dict):
         hh = month_raw.get("happyHour")
@@ -688,6 +741,8 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
         simulated_energy = _parse_simulated_energy(month_raw.get("simulatedEnergy"))
         simulated_cost = _parse_simulated_cost(month_raw.get("simulatedCost"))
         gas = _parse_month_gas(month_raw.get("energy"), month_raw.get("cost"))
+        month_energy = _parse_usage_electricity_energy(month_raw.get("energy"))
+        month_costs = _parse_usage_electricity_costs(month_raw.get("cost"))
 
     history, skipped = _parse_items_counted(
         data.get("history"), _parse_month_report_history_entry, "month report history"
@@ -709,6 +764,8 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
         simulated_cost=simulated_cost,
         skipped_entries=skipped,
         gas=gas,
+        energy=month_energy,
+        costs=month_costs,
     )
 
 
@@ -944,7 +1001,14 @@ def _parse_usage_tou_parts(
         slot_code = _as_str_or_none(part.get(slot_code_key))
         if slot_code is None:
             return None
-        return UsageTouPart(slot_code=slot_code, value=_as_float(part.get(value_key)))
+        return UsageTouPart(
+            slot_code=slot_code,
+            value=_as_float(part.get(value_key)),
+            percentage_of_sum=_as_float_or_none(part.get("percentageOfSum")),
+            has_volume_simulation_percentage=_as_bool_or_none(
+                part.get("hasVolumeSimulationPercentage")
+            ),
+        )
 
     return tuple(_parse_items(data, _parse_one, "usage TOU part"))
 
@@ -961,6 +1025,7 @@ def _parse_usage_tou_cross_parts(data: Any, *, value_key: str) -> tuple[UsageTou
             supplier_slot_code=supplier_code,
             distribution_slot_code=distribution_code,
             value=_as_float(part.get(value_key)),
+            percentage_of_sum=_as_float_or_none(part.get("percentageOfSum")),
         )
 
     return tuple(_parse_items(data, _parse_one, "usage TOU cross part"))
@@ -1092,17 +1157,34 @@ def _parse_metering_configuration(sub: Any) -> MeteringConfiguration | None:
         register_type_configuration=_as_str_or_none(sub.get("registerTypeConfiguration")),
         smart_meter_regime=_as_str_or_none(sub.get("smartMeterRegime")),
         supplier_billing_frequency=_as_str_or_none(sub.get("supplierBillingFrequency")),
+        meter_regime=_as_str_or_none(sub.get("meterRegime")),
+    )
+
+
+def _parse_auto_producer(sub: Any) -> AutoProducer | None:
+    if not isinstance(sub, dict):
+        return None
+    return AutoProducer(
+        active=bool(sub.get("active")),
+        date_from=_as_date(sub.get("dateFrom")),
+        installation_year_before_2024=_as_bool_or_none(sub.get("installationYearBefore2024")),
+        kva=_as_float_or_none(sub.get("kva")),
     )
 
 
 def _parse_service_point_installation(sub: Any) -> ServicePointInstallation | None:
     if not isinstance(sub, dict):
         return None
+    sharing_raw = sub.get("energySharingList")
     return ServicePointInstallation(
         installation_id=_as_str_or_none(sub.get("installationId")),
         rtp_component_id=_as_str_or_none(sub.get("RTPComponentID")),
         budget_meter=bool(sub.get("budgetMeter")),
+        budget_meter_from_date=_as_date(sub.get("budgetMeterFromDate")),
         service_component=_as_str_or_none(sub.get("serviceComponent")),
+        auto_producer=_parse_auto_producer(sub.get("autoProducer")),
+        energy_sharing_list=_parse_raw_mappings(sharing_raw)[0],
+        gas_conversion_coefficient=_as_float_or_none(sub.get("gasConversionCoefficient")),
         metering_configuration=_parse_metering_configuration(sub.get("meteringConfiguration")),
     )
 
@@ -1128,6 +1210,7 @@ def parse_service_point(data: dict[str, Any], requested_ean: str) -> ServicePoin
         division=division,
         type=_as_str_or_none(data.get("type")),
         charging_station=bool(data.get("chargingStation")),
+        ean_blocked=_as_bool_or_none(data.get("eanBlocked")),
         premises_id=_as_str_or_none(data.get("premisesId")),
         market_details=_parse_service_point_market_details(data.get("marketDetails")),
     )
@@ -1746,4 +1829,278 @@ def parse_charging_sessions_summary(data: dict[str, Any]) -> ChargingSessionsSum
         oldest_session_reached=_as_bool_or_none(data.get("oldestSessionReached")),
         items=tuple(items),
         skipped_entries=skipped,
+    )
+
+
+def _parse_contact_channel(sub: Any) -> ContactChannel | None:
+    if not isinstance(sub, dict):
+        return None
+    return ContactChannel(
+        address=_as_str_or_none(sub.get("address")),
+        number=_as_str_or_none(sub.get("number")),
+        country_code=_as_str_or_none(sub.get("countryCode")),
+        standard=bool(sub.get("standard")),
+        do_not_use=bool(sub.get("doNotUse")),
+        index=_as_str_or_none(sub.get("index")),
+    )
+
+
+def _parse_address(sub: Any) -> ConsumptionAddress | None:
+    if not isinstance(sub, dict):
+        return None
+    return ConsumptionAddress(
+        street=_as_str_or_none(sub.get("street")),
+        house_number=_as_str_or_none(sub.get("houseNumber")),
+        postal_code=_as_str_or_none(sub.get("postalCode")),
+        city=_as_str_or_none(sub.get("city")),
+        country=_as_str_or_none(sub.get("country")),
+        country_code=_as_str_or_none(sub.get("countryCode")),
+        premises_number=_as_str_or_none(sub.get("premisesNumber")),
+        box_number=_as_str_or_none(sub.get("boxNumber")),
+        po_box=_as_str_or_none(sub.get("poBox")),
+        floor=_as_str_or_none(sub.get("floor")),
+        room_number=_as_str_or_none(sub.get("roomNumber")),
+        supplement=_as_str_or_none(sub.get("supplement")),
+        location_supplement=_as_str_or_none(sub.get("locationSupplement")),
+    )
+
+
+def _parse_primary_contact(sub: Any) -> PrimaryContact | None:
+    if not isinstance(sub, dict):
+        return None
+    return PrimaryContact(
+        address=_parse_address(sub.get("address")),
+        email_address=_parse_contact_channel(sub.get("emailAddress")),
+        mobile_number=_parse_contact_channel(sub.get("mobileNumber")),
+        phone_number=_parse_contact_channel(sub.get("phoneNumber")),
+    )
+
+
+def parse_customer_account_detail(data: dict[str, Any]) -> CustomerAccountDetail:
+    """Parse the customer-accounts/{can} response.
+
+    Raises ``EngieBeInvalidResponseError`` when customerAccountNumber is
+    missing, unlike the item-list parsers that skip and count.
+    """
+    can = _as_str_or_none(data.get("customerAccountNumber"))
+    if can is None:
+        msg = "customer account detail response has no customerAccountNumber"
+        raise EngieBeInvalidResponseError(msg)
+    return CustomerAccountDetail(
+        customer_account_number=can,
+        segment=_as_str_or_none(data.get("segment")),
+        language=_as_str_or_none(data.get("language")),
+        name=_as_str_or_none(data.get("name")),
+        type=_as_str_or_none(data.get("type")),
+        title=_as_str_or_none(data.get("title")),
+        first_name=_as_str_or_none(data.get("firstName")),
+        last_name=_as_str_or_none(data.get("lastName")),
+        nick_name=_as_str_or_none(data.get("nickName")),
+        partner_first_name=_as_str_or_none(data.get("partnerFirstName")),
+        partner_last_name=_as_str_or_none(data.get("partnerLastName")),
+        organisation_name1=_as_str_or_none(data.get("organisationName1")),
+        organisation_name2=_as_str_or_none(data.get("organisationName2")),
+        gender=_as_str_or_none(data.get("gender")),
+        nationality=_as_str_or_none(data.get("nationality")),
+        legal_form=_as_str_or_none(data.get("legalForm")),
+        birth_date=_as_date(data.get("birthDate")),
+        company_number=_as_str_or_none(data.get("companyNumber")),
+        vat_number=_as_str_or_none(data.get("vatNumber")),
+        vat_liable=bool(data.get("vatLiable")),
+        belgian_vat_co_contractor=bool(data.get("belgianVATCoContractor")),
+        relevant_for_injection_invoice_vat_rule=bool(
+            data.get("relevantForInjectionInvoiceVATRule")
+        ),
+        national_register_number=_as_str_or_none(data.get("nationalRegisterNumber")),
+        einvoice=_as_str_or_none(data.get("einvoice")),
+        primary_contact=_parse_primary_contact(data.get("primaryContact")),
+    )
+
+
+def parse_user_invitations(data: dict[str, Any]) -> UserInvitationsResponse:
+    """Parse a user-invitations response. Items are kept as raw mappings."""
+    items, skipped = _parse_raw_items(data)
+    return UserInvitationsResponse(items=items, skipped_entries=skipped)
+
+
+def _parse_invoice_document(raw: dict[str, Any]) -> InvoiceDocument | None:
+    document_id = _as_str_or_none(raw.get("documentId"))
+    if document_id is None:
+        return None
+    return InvoiceDocument(
+        document_id=document_id,
+        document_type=_as_str_or_none(raw.get("documentType")),
+    )
+
+
+def _parse_invoice_billing_period(raw: dict[str, Any]) -> InvoiceBillingPeriod | None:
+    if not raw.get("division"):
+        return None
+    return InvoiceBillingPeriod(division=_as_str_or_none(raw.get("division")))
+
+
+def _parse_invoice(raw: dict[str, Any]) -> Invoice | None:
+    invoice_id = _as_str_or_none(raw.get("invoiceId"))
+    if invoice_id is None:
+        return None
+    documents = _parse_items(raw.get("documents"), _parse_invoice_document, "invoice document")
+    periods = _parse_items(
+        raw.get("billingPeriodDetails"), _parse_invoice_billing_period, "invoice billing period"
+    )
+    payments, payments_skipped = _parse_raw_mappings(raw.get("onlinePayments"))
+    _record_nested_skips(payments_skipped)
+    return Invoice(
+        invoice_id=invoice_id,
+        business_agreement_number=_as_str_or_none(raw.get("businessAgreementNumber")),
+        creation_date=_as_date(raw.get("creationDate")),
+        type=_as_str_or_none(raw.get("type")),
+        type_group=_as_str_or_none(raw.get("typeGroup")),
+        status=_as_str_or_none(raw.get("status")),
+        status_group=_as_str_or_none(raw.get("statusGroup")),
+        amount=_as_float(raw.get("amount")),
+        open_amount=_as_float(raw.get("openAmount")),
+        due_date=_as_date(raw.get("dueDate")),
+        online_payment_status=_as_str_or_none(raw.get("onlinePaymentStatus")),
+        available_in_zoomit=bool(raw.get("availableInZoomit")),
+        documents=tuple(documents),
+        billing_period_details=tuple(periods),
+        online_payments=payments,
+        clearing_value_date=_as_date(raw.get("clearingValueDate")),
+        payment_reference=_as_str_or_none(raw.get("paymentReference")),
+        posting_date=_as_date(raw.get("postingDate")),
+    )
+
+
+def parse_invoices(data: dict[str, Any]) -> InvoicesPage:
+    """Parse one page of the customer-accounts/{can}/invoices response."""
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(data.get("items"), _parse_invoice, "invoice")
+    page_raw = data.get("page")
+    page = page_raw if isinstance(page_raw, dict) else {}
+    return InvoicesPage(
+        items=tuple(items),
+        page_size=_as_int_or_none(page.get("size")),
+        total_items=_as_int_or_none(page.get("totalItems")),
+        total_pages=_as_int_or_none(page.get("totalPages")),
+        page_number=_as_int_or_none(page.get("number")),
+        maximum_bulk_download_size=_as_int_or_none(data.get("maximumBulkDownloadSize")),
+        maximum_download_request_size=_as_int_or_none(data.get("maximumDownloadRequestSize")),
+        skipped_entries=skipped + nested.count,
+    )
+
+
+def _parse_asset_brand(raw: dict[str, Any]) -> AssetBrand | None:
+    brand_id = raw.get("brandId")
+    if isinstance(brand_id, bool) or not isinstance(brand_id, int):
+        return None
+    return AssetBrand(
+        brand_id=brand_id,
+        brand_name=_as_str_or_none(raw.get("brandName")),
+        connectable=bool(raw.get("connectable")),
+        connectivity=_as_str_or_none(raw.get("connectivity")),
+        asset_type=_as_str_or_none(raw.get("assetType")),
+        logo_url=_as_str_or_none(raw.get("logoUrl")),
+    )
+
+
+def parse_asset_brands(data: dict[str, Any]) -> AssetBrandsResponse:
+    """Parse the ev asset-brands response."""
+    items, skipped = _parse_items_counted(data.get("items"), _parse_asset_brand, "asset brand")
+    return AssetBrandsResponse(items=tuple(items), skipped_entries=skipped)
+
+
+def _parse_comm_channel(raw: dict[str, Any]) -> CommunicationChannel | None:
+    channel_type = _as_str_or_none(raw.get("type"))
+    if channel_type is None:
+        return None
+    return CommunicationChannel(enabled=bool(raw.get("enabled")), type=channel_type)
+
+
+def _parse_comm_item(raw: dict[str, Any]) -> CommunicationPreferenceItem | None:
+    item_id = raw.get("itemId")
+    if isinstance(item_id, bool) or not isinstance(item_id, int):
+        return None
+    channels = _parse_items(raw.get("channels"), _parse_comm_channel, "communication channel")
+    return CommunicationPreferenceItem(
+        item_id=item_id,
+        item_name=_as_str_or_none(raw.get("itemName")),
+        status=bool(raw.get("status")),
+        channels=tuple(channels),
+    )
+
+
+def _parse_comm_category(raw: dict[str, Any]) -> CommunicationCategory | None:
+    category_id = raw.get("categoryId")
+    if isinstance(category_id, bool) or not isinstance(category_id, int):
+        return None
+    items = _parse_items(raw.get("items"), _parse_comm_item, "communication preference item")
+    return CommunicationCategory(
+        category_id=category_id,
+        category_name=_as_str_or_none(raw.get("categoryName")),
+        status=bool(raw.get("status")),
+        items=tuple(items),
+    )
+
+
+def _parse_comm_preferences(raw: dict[str, Any]) -> CommunicationPreferences | None:
+    categories = _parse_items(raw.get("categories"), _parse_comm_category, "communication category")
+    if not categories:
+        return None
+    paused, paused_skipped = _parse_raw_mappings(raw.get("pausedChannels"))
+    _record_nested_skips(paused_skipped)
+    return CommunicationPreferences(
+        categories=tuple(categories),
+        all_communications_paused=bool(raw.get("allCommunicationsPaused")),
+        paused_channels=paused,
+    )
+
+
+def parse_communication_preferences(data: dict[str, Any]) -> CommunicationPreferencesResponse:
+    """Parse the communication-preferences response."""
+    with _tally_nested_skips() as nested:
+        items, skipped = _parse_items_counted(
+            data.get("items"), _parse_comm_preferences, "communication preferences"
+        )
+    return CommunicationPreferencesResponse(
+        items=tuple(items), skipped_entries=skipped + nested.count
+    )
+
+
+def parse_reward_balance(data: dict[str, Any]) -> RewardBalanceDetails:
+    """Parse the reward-balance-details response."""
+    return RewardBalanceDetails(
+        open_amount=_as_float(data.get("openAmount")),
+        payout_threshold=_as_float(data.get("payoutThreshold")),
+    )
+
+
+def parse_reward_payouts(data: dict[str, Any]) -> RewardsPayoutsResponse:
+    """Parse the rewards payouts response. Items are kept as raw mappings."""
+    items, skipped = _parse_raw_items(data)
+    return RewardsPayoutsResponse(items=items, skipped_entries=skipped)
+
+
+def _parse_ba_addresses(sub: Any) -> BusinessAgreementAddresses | None:
+    if not isinstance(sub, dict):
+        return None
+    return BusinessAgreementAddresses(
+        mrc_address_equal_to_consumption_address=bool(
+            sub.get("mrcAddressEqualToConsumptionAddress")
+        ),
+        correspondence_address_equal_to_consumption_address=bool(
+            sub.get("correspondenceAddressEqualToConsumptionAddress")
+        ),
+        correspondence_address=_parse_address(sub.get("correspondenceAddress")),
+        consumption_address=_parse_address(sub.get("consumptionAddress")),
+        meter_reading_card_address=_parse_address(sub.get("meterReadingCardAddress")),
+    )
+
+
+def parse_business_agreement_detail(data: dict[str, Any]) -> BusinessAgreementDetail:
+    """Parse the business-agreements/{ban} response."""
+    return BusinessAgreementDetail(
+        is_protected_customer=bool(data.get("isProtectedCustomer")),
+        language=_as_str_or_none(data.get("language")),
+        status=_as_str_or_none(data.get("status")),
+        addresses=_parse_ba_addresses(data.get("addresses")),
     )

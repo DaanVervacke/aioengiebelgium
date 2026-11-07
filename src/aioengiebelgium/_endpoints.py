@@ -17,6 +17,7 @@ from .const import (
     BILLING_V2_BASE_URL,
     BOOLEAN_FEATURE_FLAG_BASE_URL,
     BUSINESS_AGREEMENTS_BASE_URL,
+    COMMUNICATIONS_V2_BASE_URL,
     ENERGY_INSIGHTS_V2_BASE_URL,
     EPEX_BASE_URL,
     EV_BASE_URL,
@@ -27,6 +28,7 @@ from .const import (
     HAPPY_HOUR_BASE_URL,
     PEAKS_BASE_URL,
     PREMISES_BASE_URL,
+    REWARDS_BASE_URL,
     USER_AGENT_BROWSER,
     USER_AGENT_NATIVE,
     EpexGranularity,
@@ -39,12 +41,16 @@ from .exceptions import (
 )
 from .models import (
     AccountBalance,
+    AssetBrandsResponse,
     BillingPeriodUsage,
     BudgetBillingPlanDetails,
+    BusinessAgreementDetail,
     ChargingSessionChargeSettings,
     ChargingSessionDetails,
     ChargingSessionsPage,
     ChargingSessionsSummary,
+    CommunicationPreferencesResponse,
+    CustomerAccountDetail,
     CustomerAccountRelations,
     ElectricVehiclesResponse,
     EnergyContractsResponse,
@@ -56,26 +62,34 @@ from .models import (
     HappyHourEvent,
     HappyHourMonthReport,
     HappyHourServiceStatus,
+    InvoicesPage,
     MeterReadsResponse,
     MonthlyBilledBudget,
     MonthlyPeaks,
     PricesResponse,
+    RewardBalanceDetails,
+    RewardsPayoutsResponse,
     ServicePoint,
     ServicePointsResponse,
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
+    UserInvitationsResponse,
     VehicleChargeSettings,
     ean_with_delivery_point_suffix,
 )
 from .parsers import (
     parse_account_balance,
+    parse_asset_brands,
     parse_billing_period_usage,
     parse_budget_billing_plan_details,
+    parse_business_agreement_detail,
     parse_charging_session_charge_settings,
     parse_charging_session_details,
     parse_charging_sessions_page,
     parse_charging_sessions_summary,
+    parse_communication_preferences,
+    parse_customer_account_detail,
     parse_customer_account_relations,
     parse_electric_vehicles,
     parse_energy_contracts,
@@ -87,15 +101,19 @@ from .parsers import (
     parse_happy_hour_event,
     parse_happy_hour_month_report,
     parse_happy_hour_service_status,
+    parse_invoices,
     parse_meter_reads,
     parse_monthly_billed_budget,
     parse_monthly_peaks,
     parse_prices,
+    parse_reward_balance,
+    parse_reward_payouts,
     parse_service_point,
     parse_service_points,
     parse_solar_surplus_forecasts,
     parse_tou_schedules,
     parse_usage_details,
+    parse_user_invitations,
     parse_vehicle_charge_settings,
 )
 
@@ -110,6 +128,7 @@ class WireRequest:
     json_body: dict[str, Any] | None
     extra_headers: dict[str, str] | None
     expect_body: bool = True
+    accept: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -119,16 +138,21 @@ class Endpoint[ArgsT, ModelT]:
     name: str
     method: str
     url: str | Callable[[ArgsT], str]
-    parse: Callable[[dict[str, Any], ArgsT], ModelT]
+    parse: Callable[[Any, ArgsT], ModelT]
     user_agent: str = USER_AGENT_NATIVE
     params: dict[str, str] | Callable[[ArgsT], dict[str, str]] | None = None
     json_body: Callable[[ArgsT], dict[str, Any]] | None = None
     optional_auth: bool = False
     not_found_error: Callable[[ArgsT], EngieBeCommunicationError] | None = None
     expect_body: bool = True
+    accept: str | None = None
+    binary: bool = False
 
     def build(self, args: ArgsT) -> WireRequest:
         json_body = None if self.json_body is None else self.json_body(args)
+        extra_headers: dict[str, str] | None = None
+        if json_body is not None:
+            extra_headers = {"Content-Type": "application/json"}
         return WireRequest(
             method=self.method,
             url=self.url if isinstance(self.url, str) else self.url(args),
@@ -136,8 +160,9 @@ class Endpoint[ArgsT, ModelT]:
             optional_auth=self.optional_auth,
             params=self.params(args) if callable(self.params) else self.params,
             json_body=json_body,
-            extra_headers=None if json_body is None else {"Content-Type": "application/json"},
+            extra_headers=extra_headers,
             expect_body=self.expect_body,
+            accept=self.accept,
         )
 
     def raise_error(self, err: EngieBeCommunicationError, args: ArgsT) -> NoReturn:
@@ -377,6 +402,42 @@ class MeterReadsArgs:
             raise ValueError(msg)
         if self.start_date is not None and self.end_date is not None:
             _validate_date_range(self.start_date, self.end_date)
+
+
+@dataclass(frozen=True, slots=True)
+class InvoicesArgs:
+    can: str
+    page_number: int = 0
+    page_size: int = 20
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "can", _clean_can(self.can))
+        if self.page_number < 0:
+            msg = f"page_number must not be negative: {self.page_number}"
+            raise ValueError(msg)
+        if self.page_size < 1:
+            msg = f"page_size must be at least 1: {self.page_size}"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class InvoiceArgs:
+    invoice_id: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "invoice_id", _clean_digits("invoice id", self.invoice_id))
+
+
+@dataclass(frozen=True, slots=True)
+class ExportArgs:
+    can: str
+    start_date: date
+    end_date: date
+    csv: bool = False
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "can", _clean_can(self.can))
+        _validate_date_range(self.start_date, self.end_date)
 
 
 def _meter_reads_params(args: MeterReadsArgs) -> dict[str, str]:
@@ -705,6 +766,95 @@ EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     parse=lambda raw, a: parse_epex_prices(raw, granularity_minutes=a.granularity.value),
 )
 
+CUSTOMER_ACCOUNT_DETAIL: Endpoint[CanArgs, CustomerAccountDetail] = Endpoint(
+    name="customer_account_detail",
+    method="GET",
+    url=lambda a: f"{ACCOUNTS_BASE_URL}/customer-accounts/{a.can}",
+    parse=lambda raw, _a: parse_customer_account_detail(raw),
+)
+
+USER_INVITATIONS: Endpoint[NoArgs, UserInvitationsResponse] = Endpoint(
+    name="user_invitations",
+    method="GET",
+    url=f"{ACCOUNTS_BASE_URL}/user-invitations",
+    parse=lambda raw, _a: parse_user_invitations(raw),
+)
+
+CUSTOMER_ACCOUNT_USER_INVITATIONS: Endpoint[CanArgs, UserInvitationsResponse] = Endpoint(
+    name="customer_account_user_invitations",
+    method="GET",
+    url=lambda a: f"{ACCOUNTS_BASE_URL}/customer-accounts/{a.can}/user-invitations",
+    parse=lambda raw, _a: parse_user_invitations(raw),
+)
+
+INVOICES: Endpoint[InvoicesArgs, InvoicesPage] = Endpoint(
+    name="invoices",
+    method="GET",
+    url=lambda a: f"{BILLING_BASE_URL}/customer-accounts/{a.can}/invoices",
+    params=lambda a: {"pageSize": str(a.page_size), "pageNumber": str(a.page_number)},
+    parse=lambda raw, _a: parse_invoices(raw),
+)
+
+INVOICE_DOCUMENT: Endpoint[InvoiceArgs, bytes] = Endpoint(
+    name="invoice_document",
+    method="GET",
+    url=lambda a: f"{BILLING_BASE_URL}/invoice/{a.invoice_id}/document",
+    accept="application/pdf",
+    binary=True,
+    parse=lambda raw, _a: raw,
+)
+
+CHARGING_SESSIONS_EXPORT: Endpoint[ExportArgs, bytes] = Endpoint(
+    name="charging_sessions_export",
+    method="GET",
+    url=lambda a: f"{EV_BASE_URL}/customer-accounts/{a.can}/charging-sessions/export",
+    params=lambda a: {
+        "start": a.start_date.isoformat(),
+        "end": a.end_date.isoformat(),
+        **({"format": "CSV"} if a.csv else {}),
+    },
+    accept="*/*",
+    binary=True,
+    parse=lambda raw, _a: raw,
+)
+
+ASSET_BRANDS: Endpoint[NoArgs, AssetBrandsResponse] = Endpoint(
+    name="asset_brands",
+    method="GET",
+    url=f"{EV_V2_BASE_URL}/asset-brands",
+    parse=lambda raw, _a: parse_asset_brands(raw),
+)
+
+COMMUNICATION_PREFERENCES: Endpoint[CanArgs, CommunicationPreferencesResponse] = Endpoint(
+    name="communication_preferences",
+    method="GET",
+    url=lambda a: (
+        f"{COMMUNICATIONS_V2_BASE_URL}/customer-accounts/{a.can}/communication-preferences"
+    ),
+    parse=lambda raw, _a: parse_communication_preferences(raw),
+)
+
+REWARD_BALANCE: Endpoint[CanArgs, RewardBalanceDetails] = Endpoint(
+    name="reward_balance",
+    method="GET",
+    url=lambda a: f"{REWARDS_BASE_URL}/customer-accounts/{a.can}/reward-balance-details",
+    parse=lambda raw, _a: parse_reward_balance(raw),
+)
+
+REWARD_PAYOUTS: Endpoint[CanArgs, RewardsPayoutsResponse] = Endpoint(
+    name="reward_payouts",
+    method="GET",
+    url=lambda a: f"{REWARDS_BASE_URL}/customer-accounts/{a.can}/payouts",
+    parse=lambda raw, _a: parse_reward_payouts(raw),
+)
+
+BUSINESS_AGREEMENT_DETAIL: Endpoint[BanArgs, BusinessAgreementDetail] = Endpoint(
+    name="business_agreement_detail",
+    method="GET",
+    url=lambda a: f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{a.ban}",
+    parse=lambda raw, _a: parse_business_agreement_detail(raw),
+)
+
 CATALOG: tuple[Endpoint[Any, Any], ...] = (
     PRICES,
     ENERGY_CONTRACTS,
@@ -737,5 +887,16 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     CHARGING_SESSION,
     CHARGING_SESSIONS_SUMMARY,
     EPEX_PRICES,
+    CUSTOMER_ACCOUNT_DETAIL,
+    USER_INVITATIONS,
+    CUSTOMER_ACCOUNT_USER_INVITATIONS,
+    INVOICES,
+    INVOICE_DOCUMENT,
+    CHARGING_SESSIONS_EXPORT,
+    ASSET_BRANDS,
+    COMMUNICATION_PREFERENCES,
+    REWARD_BALANCE,
+    REWARD_PAYOUTS,
+    BUSINESS_AGREEMENT_DETAIL,
 )
 """Every endpoint descriptor. The wire-contract tests iterate this registry."""

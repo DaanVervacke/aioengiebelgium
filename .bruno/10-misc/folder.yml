@@ -1,0 +1,9 @@
+info:
+  name: 10 Misc
+  type: folder
+  seq: 10
+request:
+  auth: inherit
+docs: |-
+  Business agreement detail, notification communication preferences and
+  the rewards balance and payout history. All need ENGIE_BAN or ENGIE_CAN.

@@ -19,6 +19,7 @@ from aioengiebelgium.const import (
     VehicleChargeStatus,
     VehiclePolicyState,
 )
+from aioengiebelgium.exceptions import EngieBeInvalidResponseError
 from aioengiebelgium.models import (
     BillingPeriodUsage,
     ChargeSettingValue,
@@ -60,12 +61,16 @@ from aioengiebelgium.parsers import (
     _normalize_vocab,
     _parse_tou_grid_meter,
     parse_account_balance,
+    parse_asset_brands,
     parse_billing_period_usage,
     parse_budget_billing_plan_details,
+    parse_business_agreement_detail,
     parse_charging_session_charge_settings,
     parse_charging_session_details,
     parse_charging_sessions_page,
     parse_charging_sessions_summary,
+    parse_communication_preferences,
+    parse_customer_account_detail,
     parse_customer_account_relations,
     parse_electric_vehicles,
     parse_energy_contracts,
@@ -77,15 +82,19 @@ from aioengiebelgium.parsers import (
     parse_happy_hour_event,
     parse_happy_hour_month_report,
     parse_happy_hour_service_status,
+    parse_invoices,
     parse_meter_reads,
     parse_monthly_billed_budget,
     parse_monthly_peaks,
     parse_prices,
+    parse_reward_balance,
+    parse_reward_payouts,
     parse_service_point,
     parse_service_points,
     parse_solar_surplus_forecasts,
     parse_tou_schedules,
     parse_usage_details,
+    parse_user_invitations,
     parse_vehicle_charge_settings,
 )
 
@@ -3539,3 +3548,140 @@ def test_parse_charging_sessions_summary_fixture(load_fixture: LoadFixture) -> N
 def test_parse_charging_sessions_summary_empty_fixture(load_fixture: LoadFixture) -> None:
     result = parse_charging_sessions_summary(load_fixture("charging_sessions_summary_empty.json"))
     assert result == ChargingSessionsSummary(oldest_session_reached=True)
+
+
+def test_parse_customer_account_detail_requires_can() -> None:
+    with pytest.raises(EngieBeInvalidResponseError, match="customerAccountNumber"):
+        parse_customer_account_detail({})
+
+
+def test_parse_customer_account_detail_fixture(load_fixture: LoadFixture) -> None:
+    detail = parse_customer_account_detail(load_fixture("customer_account_detail.json"))
+    assert detail.customer_account_number == "1500000001"
+    assert detail.segment == "RESIDENTIAL"
+    assert detail.primary_contact is not None
+    assert detail.primary_contact.email_address is not None
+    assert detail.primary_contact.email_address.address == "user@example.com"
+    assert detail.primary_contact.address is not None
+    assert detail.primary_contact.address.city == "BRUSSELS"
+    assert detail.birth_date == date(1990, 1, 1)
+
+
+def test_parse_user_invitations_passthrough_and_skip() -> None:
+    assert parse_user_invitations({"items": [{"id": "x"}]}).items == ({"id": "x"},)
+    assert parse_user_invitations({"items": "nope"}).skipped_entries == 1
+    assert parse_user_invitations({}).items == ()
+
+
+def test_parse_invoices_counts_nested_skips(load_fixture: LoadFixture) -> None:
+    data = load_fixture("invoices_page.json")
+    data["items"].append({"documents": [{}]})
+    data["items"][0]["documents"].append({"documentType": "INVOICE"})
+    data["items"][0]["billingPeriodDetails"].append({})
+    page = parse_invoices(data)
+    assert len(page.items) == 2
+    assert page.skipped_entries == 3
+    invoice = page.items[0]
+    assert invoice.invoice_id == "700000000001"
+    assert invoice.amount == 102.07
+    assert invoice.documents[0].document_type == "INVOICE"
+    assert page.total_items == 46
+    assert page.maximum_bulk_download_size == 50
+
+
+def test_parse_asset_brands_skips_missing_id(load_fixture: LoadFixture) -> None:
+    data = load_fixture("asset_brands.json")
+    data["items"].append({"brandName": "NoId"})
+    result = parse_asset_brands(data)
+    assert len(result.items) == 8
+    assert result.skipped_entries == 1
+    assert result.items[0].brand_id == 1
+
+
+def test_parse_communication_preferences_skips(load_fixture: LoadFixture) -> None:
+    data = load_fixture("communication_preferences.json")
+    data["items"].append({"categories": [{"categoryName": "NO_ID"}]})
+    data["items"].append({"categories": []})
+    result = parse_communication_preferences(data)
+    assert len(result.items) == 1
+    assert result.skipped_entries == 4
+    entry = result.items[0]
+    category = entry.categories[0]
+    assert category.category_name == "REMINDER_MESSAGES"
+    item = category.items[0]
+    assert item.channels[0].type == "PUSH_NOTIFICATION"
+    assert item.channels[0].enabled is True
+
+
+def test_parse_reward_balance_and_payouts() -> None:
+    balance = parse_reward_balance({"openAmount": 0.5, "payoutThreshold": 5})
+    assert balance.open_amount == 0.5
+    assert balance.payout_threshold == 5.0
+    payouts = parse_reward_payouts({"items": [{"id": 1}]})
+    assert payouts.items == ({"id": 1},)
+    assert parse_reward_payouts({"items": "nope"}).skipped_entries == 1
+
+
+def test_parse_business_agreement_detail_fixture(load_fixture: LoadFixture) -> None:
+    detail = parse_business_agreement_detail(load_fixture("business_agreement_detail.json"))
+    assert detail.status == "ACTIVE"
+    assert detail.addresses is not None
+    assert detail.addresses.consumption_address is not None
+    assert detail.addresses.consumption_address.premises_number == "5100000001"
+    assert detail.addresses.mrc_address_equal_to_consumption_address is True
+
+
+def test_parse_energy_contract_live_fields(load_fixture: LoadFixture) -> None:
+    resp = parse_energy_contracts(load_fixture("energy_contracts_live.json"))
+    contract = resp.items[0]
+    assert contract.contract_id is not None
+    assert contract.billing_contract_number is not None
+    assert contract.business_scenario == "TACIT_EXTENSION"
+    assert contract.start_date == date(2024, 5, 1)
+    assert contract.end_date == date(2025, 4, 30)
+    pc = contract.product_configuration
+    assert pc is not None
+    assert pc.care_level == "BASIC_CARE"
+    assert pc.duration == "ONE_YEAR"
+
+
+def test_parse_prices_proportional_variants(load_fixture: LoadFixture) -> None:
+    resp = parse_prices(load_fixture("prices_proportional_variants.json"))
+    slot = resp.items[0].periods[0].offtake[0]
+    assert slot.price_value_in_euro_per_kwh == 0.062
+    assert slot.price_value_in_eurocent_per_kwh == 6.23
+    assert slot.price_value_excl_vat_in_euro_per_kwh == 0.059
+    assert slot.price_value_excl_vat_in_eurocent_per_kwh == 5.877
+
+
+def test_parse_service_point_installation_live(load_fixture: LoadFixture) -> None:
+    sp = parse_service_point(
+        load_fixture("service_point_installation_live.json"), "541448860000000001_ID1"
+    )
+    assert sp.ean_blocked is None
+    market_details = sp.market_details
+    assert market_details is not None
+    installation = market_details.installation
+    assert installation is not None
+    assert installation.auto_producer is not None
+    assert installation.auto_producer.active is True
+    assert installation.auto_producer.kva == 4.6
+    assert installation.auto_producer.date_from == date(2023, 5, 1)
+    assert installation.auto_producer.installation_year_before_2024 is False
+    assert installation.metering_configuration is not None
+
+
+def test_parse_usage_details_percentage_of_sum(load_fixture: LoadFixture) -> None:
+    resp = parse_usage_details(load_fixture("usage_details_daily.json"))
+    energy = resp.items[0].energy
+    assert energy is not None
+    offtake = energy.offtake
+    assert offtake is not None
+    assert offtake.parts[0].percentage_of_sum == 1.0
+    assert offtake.supplier_parts[0].percentage_of_sum == 1.0
+
+
+def test_parse_happy_hour_month_report_month_block(load_fixture: LoadFixture) -> None:
+    report = parse_happy_hour_month_report(load_fixture("happy_hour_month_report_dual_fuel.json"))
+    assert report.energy is not None
+    assert report.costs is not None

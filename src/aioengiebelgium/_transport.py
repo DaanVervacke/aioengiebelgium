@@ -163,3 +163,24 @@ async def request_text(
         timeout=timeout,
     ) as response:
         return await response.text(), response.headers
+
+
+async def request_bytes(
+    session: aiohttp.ClientSession,
+    *,
+    method: str,
+    url: str,
+    headers: dict[str, str] | None = None,
+    params: dict[str, str] | None = None,
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
+) -> bytes:
+    """Make a request and return the raw body bytes, for document and export endpoints."""
+    async with request(
+        session,
+        method=method,
+        url=url,
+        headers=headers,
+        params=params,
+        timeout=timeout,
+    ) as response:
+        return await response.read()

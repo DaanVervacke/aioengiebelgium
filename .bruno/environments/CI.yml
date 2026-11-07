@@ -38,3 +38,7 @@ variables:
   value: https://api.engie.be/engie/ms/ev/customer/v1
 - name: evV2BaseUrl
   value: https://api.engie.be/engie/ms/ev/customer/v2
+- name: communicationsV2BaseUrl
+  value: https://api.engie.be/engie/ms/communications/customer/v2
+- name: rewardsBaseUrl
+  value: https://api.engie.be/engie/ms/rewards/customer/v1

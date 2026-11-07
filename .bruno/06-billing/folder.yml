@@ -4,4 +4,4 @@ info:
   seq: 6
 request:
   auth: inherit
-docs: Account balance, outstanding invoices, the monthly billed budget and the budget billing plan.
+docs: Account balance, the invoice list and invoice PDF downloads, the monthly billed budget and the budget billing plan.

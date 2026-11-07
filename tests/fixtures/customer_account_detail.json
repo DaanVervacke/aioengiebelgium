@@ -1,0 +1,56 @@
+{
+ "customerAccountNumber": "1500000001",
+ "segment": "RESIDENTIAL",
+ "language": "NL",
+ "vatLiable": false,
+ "belgianVATCoContractor": false,
+ "relevantForInjectionInvoiceVATRule": false,
+ "primaryContact": {
+  "address": {
+   "postalCode": "1000",
+   "city": "BRUSSELS",
+   "country": "BELGIUM",
+   "boxNumber": null,
+   "countryCode": "BE",
+   "floor": null,
+   "houseNumber": "1",
+   "locationSupplement": null,
+   "poBox": null,
+   "roomNumber": null,
+   "street": "TESTSTRAAT",
+   "supplement": null
+  },
+  "emailAddress": {
+   "address": "user@example.com",
+   "standard": true,
+   "doNotUse": false,
+   "index": "001"
+  },
+  "mobileNumber": {
+   "countryCode": "BE",
+   "number": "32470000000",
+   "standard": true,
+   "doNotUse": false,
+   "index": "002"
+  },
+  "phoneNumber": null
+ },
+ "birthDate": "1990-01-01",
+ "companyNumber": null,
+ "einvoice": "EMAIL",
+ "firstName": "Test",
+ "gender": "MALE",
+ "lastName": "Customer",
+ "legalForm": null,
+ "name": "Test Customer",
+ "nationalRegisterNumber": null,
+ "nationality": null,
+ "nickName": null,
+ "organisationName1": null,
+ "organisationName2": null,
+ "partnerFirstName": null,
+ "partnerLastName": null,
+ "title": "MR_MS",
+ "type": "PERSON",
+ "vatNumber": null
+}

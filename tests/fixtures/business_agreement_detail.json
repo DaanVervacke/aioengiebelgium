@@ -1,0 +1,35 @@
+{
+ "isProtectedCustomer": false,
+ "language": "NL",
+ "addresses": {
+  "mrcAddressEqualToConsumptionAddress": true,
+  "correspondenceAddressEqualToConsumptionAddress": true,
+  "correspondenceAddress": {
+   "postalCode": "8790",
+   "city": "BRUSSELS",
+   "country": "BELGIUM",
+   "street": "TESTSTRAAT",
+   "houseNumber": "27",
+   "countryCode": "BE"
+  },
+  "consumptionAddress": {
+   "postalCode": "8790",
+   "city": "BRUSSELS",
+   "country": "BELGIUM",
+   "street": "TESTSTRAAT",
+   "houseNumber": "27",
+   "countryCode": "BE",
+   "premisesId": "5100000001",
+   "premisesNumber": "5100000001"
+  },
+  "meterReadingCardAddress": {
+   "postalCode": "8790",
+   "city": "BRUSSELS",
+   "country": "BELGIUM",
+   "street": "TESTSTRAAT",
+   "houseNumber": "27",
+   "countryCode": "BE"
+  }
+ },
+ "status": "ACTIVE"
+}

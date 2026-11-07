@@ -12,6 +12,8 @@
         ),
       ),
       invoice_structured_communication='000000000000',
+      pending_online_payments=tuple(
+      ),
     ),
     overview=BillingOverview(
       due_amount=0.0,
@@ -31,6 +33,8 @@
       financial_transactions=tuple(
       ),
       invoice_structured_communication=None,
+      pending_online_payments=tuple(
+      ),
     ),
     overview=BillingOverview(
       due_amount=0.0,
@@ -48,6 +52,77 @@
   HappyHourServiceStatus(
     status='ACTIVE',
     status_date=datetime.datetime(2024, 5, 1, 9, 15, tzinfo=datetime.timezone(datetime.timedelta(seconds=7200))),
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[asset_brands]
+  AssetBrandsResponse(
+    items=tuple(
+      AssetBrand(
+        asset_type='VEHICLE',
+        brand_id=1,
+        brand_name='Abarth',
+        connectable=False,
+        connectivity='NOT_COMPATIBLE',
+        logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/abarth.png',
+      ),
+      AssetBrand(
+        asset_type='CHARGER',
+        brand_id=66,
+        brand_name='ABB',
+        connectable=False,
+        connectivity='NOT_COMPATIBLE',
+        logo_url='https://www.engie.be/.resources/assets/images/ev/ABB.png',
+      ),
+      AssetBrand(
+        asset_type='VEHICLE',
+        brand_id=2,
+        brand_name='Aiways',
+        connectable=False,
+        connectivity='NOT_COMPATIBLE',
+        logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/aiways.png',
+      ),
+      AssetBrand(
+        asset_type='VEHICLE',
+        brand_id=3,
+        brand_name='Alfa Romeo',
+        connectable=False,
+        connectivity='NOT_COMPATIBLE',
+        logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/alfa-romeo.png',
+      ),
+      AssetBrand(
+        asset_type='CHARGER',
+        brand_id=67,
+        brand_name='Alfen',
+        connectable=False,
+        connectivity='NOT_COMPATIBLE',
+        logo_url='https://www.engie.be/.resources/assets/images/ev/Alfen.jpg',
+      ),
+      AssetBrand(
+        asset_type='VEHICLE',
+        brand_id=4,
+        brand_name='Audi',
+        connectable=True,
+        connectivity='COMPATIBLE_RELIABLE',
+        logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/audi.png',
+      ),
+      AssetBrand(
+        asset_type='VEHICLE',
+        brand_id=5,
+        brand_name='Bentley',
+        connectable=False,
+        connectivity='NOT_COMPATIBLE',
+        logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/bentley.png',
+      ),
+      AssetBrand(
+        asset_type='VEHICLE',
+        brand_id=6,
+        brand_name='BMW',
+        connectable=True,
+        connectivity='COMPATIBLE_RELIABLE',
+        logo_url='https://www.engie.be/dam/app/ev/vehicles-brands/bmw.png',
+      ),
+    ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[billing_period_usage]
@@ -294,6 +369,62 @@
     ),
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[business_agreement_detail]
+  BusinessAgreementDetail(
+    addresses=BusinessAgreementAddresses(
+      consumption_address=ConsumptionAddress(
+        box_number=None,
+        city='BRUSSELS',
+        country='BELGIUM',
+        country_code='BE',
+        floor=None,
+        house_number='27',
+        location_supplement=None,
+        po_box=None,
+        postal_code='8790',
+        premises_number='5100000001',
+        room_number=None,
+        street='TESTSTRAAT',
+        supplement=None,
+      ),
+      correspondence_address=ConsumptionAddress(
+        box_number=None,
+        city='BRUSSELS',
+        country='BELGIUM',
+        country_code='BE',
+        floor=None,
+        house_number='27',
+        location_supplement=None,
+        po_box=None,
+        postal_code='8790',
+        premises_number=None,
+        room_number=None,
+        street='TESTSTRAAT',
+        supplement=None,
+      ),
+      correspondence_address_equal_to_consumption_address=True,
+      meter_reading_card_address=ConsumptionAddress(
+        box_number=None,
+        city='BRUSSELS',
+        country='BELGIUM',
+        country_code='BE',
+        floor=None,
+        house_number='27',
+        location_supplement=None,
+        po_box=None,
+        postal_code='8790',
+        premises_number=None,
+        room_number=None,
+        street='TESTSTRAAT',
+        supplement=None,
+      ),
+      mrc_address_equal_to_consumption_address=True,
+    ),
+    is_protected_customer=False,
+    language='NL',
+    status='ACTIVE',
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[cancel_happy_hour_service]
   None
 # ---
@@ -537,6 +668,546 @@
     skipped_entries=0,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[communication_preferences]
+  CommunicationPreferencesResponse(
+    items=tuple(
+      CommunicationPreferences(
+        all_communications_paused=False,
+        categories=tuple(
+          CommunicationCategory(
+            category_id=5102,
+            category_name='REMINDER_MESSAGES',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=1803,
+                item_name='BILLING.SMARTAPP_INV_NOTIF',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=1804,
+                item_name='BILLING.SMARTAPP_INV_OVERDUE',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5702,
+                item_name='BILLING.SMARTAPP_INV_PAID',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=1752,
+                item_name='ENERGY_MANAGER_REMINDER_DEFAULT_OPT_IN',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=5152,
+            category_name='USAGE_INSIGHTS',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=1,
+                item_name='BUDGET_OPTIMIZER',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=4,
+                item_name='DASHBOARD_M1',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=3502,
+                item_name='ENERGY_SCORE_REMINDER',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=False,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=2,
+                item_name='MONTHLY_CONSUMPTION_COMPARISON',
+                status=False,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=False,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=7603,
+                item_name='SMART_APP_SEDUCTION_EMAIL_MID_BILLING_CYCLE_CUSTOMER',
+                status=False,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=False,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=7503,
+                item_name='SMART_APP_SEDUCTION_EMAIL_NEW_CUSTOMER',
+                status=False,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5806,
+                item_name='WEEKLY_CONSUMPTION_RECAP',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=1652,
+            category_name='EV',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5606,
+                item_name='EV_BLOCKING_INTERVENTION',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5752,
+                item_name='EV_ONBOARDING_ENODE',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=7502,
+                item_name='EV_ONBOARDING_ENODE_FOLLOWUP',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=False,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5609,
+                item_name='EV_UNABLE_TO_MEET_CHARGING_TARGET',
+                status=False,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5608,
+                item_name='EV_UNABLE_TO_START_CHARGING',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5607,
+                item_name='EV_UNABLE_TO_STOP_CHARGING',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=1602,
+            category_name='ENERGY_MANAGER_REMINDER',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=False,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=1754,
+                item_name='ENERGY_MANAGER_REMINDER_DEFAULT_OPT_OUT',
+                status=False,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=1752,
+            category_name='HAPPY_HOURS',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=1852,
+                item_name='HAPPY_HOURS_REWARD_EMAIL',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5152,
+                item_name='PS.HH_DEACTIVATION',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5153,
+                item_name='PS.HH_NO_LONGER_ELIGIBLE',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5203,
+                item_name='PS.HH_REQUESTED_15D',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5202,
+                item_name='PS.HH_ONBOARDING',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5204,
+                item_name='PS.HH_EVENT_1DAY',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5205,
+                item_name='PS.HH_EVENT_1HOUR',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5452,
+                item_name='PS.HH_NO_P4_ACTION_NEEDED',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5154,
+                item_name='PS.HH_REWARD',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=5206,
+                item_name='PS.HH_START_EVENT',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=3,
+            category_name='BILLING.BBP_PROTOCOL',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                  CommunicationChannel(
+                    enabled=True,
+                    type='LETTER',
+                  ),
+                ),
+                item_id=3,
+                item_name='BILLING.BBP_PROTOCOL',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=5202,
+            category_name='HOME_DATA_EV_INDICATORS',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5352,
+                item_name='HOME_DATA_EV_ACQUISITION_PP',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5252,
+                item_name='HOME_DATA_EV_SIMULATION_WEB',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=5253,
+            category_name='KOOPKRACHT',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5805,
+                item_name='SALES.WITHDRAWAL_NEW_CONTRACT',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+          CommunicationCategory(
+            category_id=5252,
+            category_name='SMARTBATTERY',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5802,
+                item_name='PS.SMARTBATTERY_DEACTIVATION',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5803,
+                item_name='PS.SMARTBATTERY_NO_LONGER_ELIGIBLE',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5804,
+                item_name='PS.SMARTBATTERY_ONBOARDING',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
+        ),
+        paused_channels=tuple(
+        ),
+      ),
+    ),
+    skipped_entries=1,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[customer_account_detail]
+  CustomerAccountDetail(
+    belgian_vat_co_contractor=False,
+    birth_date=datetime.date(1990, 1, 1),
+    company_number=None,
+    customer_account_number='1500000001',
+    einvoice='EMAIL',
+    first_name='Test',
+    gender='MALE',
+    language='NL',
+    last_name='Customer',
+    legal_form=None,
+    name='Test Customer',
+    national_register_number=None,
+    nationality=None,
+    nick_name=None,
+    organisation_name1=None,
+    organisation_name2=None,
+    partner_first_name=None,
+    partner_last_name=None,
+    primary_contact=PrimaryContact(
+      address=ConsumptionAddress(
+        box_number=None,
+        city='BRUSSELS',
+        country='BELGIUM',
+        country_code='BE',
+        floor=None,
+        house_number='1',
+        location_supplement=None,
+        po_box=None,
+        postal_code='1000',
+        premises_number=None,
+        room_number=None,
+        street='TESTSTRAAT',
+        supplement=None,
+      ),
+      email_address=ContactChannel(
+        address='user@example.com',
+        country_code=None,
+        do_not_use=False,
+        index='001',
+        number=None,
+        standard=True,
+      ),
+      mobile_number=ContactChannel(
+        address=None,
+        country_code='BE',
+        do_not_use=False,
+        index='002',
+        number='32470000000',
+        standard=True,
+      ),
+      phone_number=None,
+    ),
+    relevant_for_injection_invoice_vat_rule=False,
+    segment='RESIDENTIAL',
+    title='MR_MS',
+    type='PERSON',
+    vat_liable=False,
+    vat_number=None,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[customer_account_relations]
   CustomerAccountRelations(
     accounts=tuple(
@@ -555,6 +1226,7 @@
                 floor=None,
                 house_number='1',
                 location_supplement=None,
+                po_box=None,
                 postal_code='1000',
                 premises_number='5100000001',
                 room_number=None,
@@ -591,6 +1263,7 @@
                 floor=None,
                 house_number='2',
                 location_supplement=None,
+                po_box=None,
                 postal_code='2000',
                 premises_number='5100000002',
                 room_number=None,
@@ -638,6 +1311,7 @@
                 floor=None,
                 house_number='1',
                 location_supplement=None,
+                po_box=None,
                 postal_code='1000',
                 premises_number='5100005001',
                 room_number=None,
@@ -666,6 +1340,7 @@
                 floor=None,
                 house_number='2',
                 location_supplement=None,
+                po_box=None,
                 postal_code='2000',
                 premises_number='5100005002',
                 room_number=None,
@@ -690,6 +1365,7 @@
                 floor=None,
                 house_number='3',
                 location_supplement=None,
+                po_box=None,
                 postal_code='3000',
                 premises_number='5100005003',
                 room_number=None,
@@ -711,6 +1387,13 @@
         ),
         id='33333333-3333-3333-3333-333333333333',
       ),
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[customer_account_user_invitations]
+  UserInvitationsResponse(
+    items=tuple(
     ),
     skipped_entries=0,
   )
@@ -769,27 +1452,63 @@
   EnergyContractsResponse(
     items=tuple(
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='ELECTRICITY',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='DYNAMIC',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000001_ID1',
+        start_date=None,
         status='ACTIVE',
       ),
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='GAS',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='EASY',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000002_ID2',
+        start_date=None,
         status='ACTIVE',
       ),
     ),
@@ -800,15 +1519,33 @@
   EnergyContractsResponse(
     items=tuple(
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='ELECTRICITY',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='DYNAMIC',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000001_ID1',
+        start_date=None,
         status='ACTIVE',
       ),
     ),
@@ -826,27 +1563,63 @@
   EnergyContractsResponse(
     items=tuple(
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='ELECTRICITY',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='EASY',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000001_ID1',
+        start_date=None,
         status='ACTIVE',
       ),
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='GAS',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='EASY',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000002_ID2',
+        start_date=None,
         status='ACTIVE',
       ),
     ),
@@ -857,27 +1630,63 @@
   EnergyContractsResponse(
     items=tuple(
       EnergyContract(
+        action='PRODUCT_CHANGE',
+        billing_contract_number='2000000001',
         business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2023, 3, 1),
+        contract_id='1000000001',
+        contract_item_id='1',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2023, 3, 1),
+        desired_contract_start_date=datetime.date(2023, 3, 1),
         division='GAS',
+        end_date=None,
+        legal_contract_start_date=datetime.date(2023, 3, 1),
         product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
           energy_product='EASY',
           green_level='CLASSICAL',
           green_origin=None,
+          service_component='OFFTAKE',
           type='INDEXED',
         ),
+        sales_closure='BATCH_PROCESS',
         service_point_number='541448820000000001_ID1',
+        start_date=datetime.date(2023, 3, 1),
         status='ACTIVE',
       ),
       EnergyContract(
+        action='PRODUCT_CHANGE',
+        billing_contract_number='2000000002',
         business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2023, 3, 1),
+        contract_id='1000000002',
+        contract_item_id='1',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2023, 3, 1),
+        desired_contract_start_date=datetime.date(2023, 3, 1),
         division='ELECTRICITY',
+        end_date=None,
+        legal_contract_start_date=datetime.date(2023, 3, 1),
         product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
           energy_product='EASY',
           green_level='GREENFREE',
           green_origin='EUROPEAN',
+          service_component='CONSTRAINT_COMMERCIALIZATION_OF_INJECTION',
           type='INDEXED',
         ),
+        sales_closure='BATCH_PROCESS',
         service_point_number='541448820000000002_ID1',
+        start_date=datetime.date(2023, 3, 1),
         status='ACTIVE',
       ),
     ),
@@ -888,27 +1697,250 @@
   EnergyContractsResponse(
     items=tuple(
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='ELECTRICITY',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='DYNAMIC',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000001_ID1',
+        start_date=None,
         status='ACTIVE',
       ),
       EnergyContract(
+        action=None,
+        billing_contract_number=None,
         business_agreement_number='000000000001',
+        business_scenario=None,
+        commercialization_start_date=None,
+        contract_id=None,
+        contract_item_id=None,
+        contract_type=None,
+        customer_agreement_date=None,
+        desired_contract_start_date=None,
         division='GAS',
+        end_date=None,
+        legal_contract_start_date=None,
         product_configuration=ProductConfiguration(
+          care_level=None,
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration=None,
           energy_product='EASY',
           green_level=None,
           green_origin=None,
+          service_component=None,
           type='INDEXED',
         ),
+        sales_closure=None,
         service_point_number='541448820000000002_ID2',
+        start_date=None,
+        status='ACTIVE',
+      ),
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[energy_contracts_live_all]
+  EnergyContractsResponse(
+    items=tuple(
+      EnergyContract(
+        action=None,
+        billing_contract_number='8109078039',
+        business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2024, 3, 1),
+        contract_id='2211676160',
+        contract_item_id='30',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2024, 3, 1),
+        desired_contract_start_date=datetime.date(2024, 5, 1),
+        division='GAS',
+        end_date=datetime.date(2025, 4, 30),
+        legal_contract_start_date=datetime.date(2024, 5, 1),
+        product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
+          energy_product='EASY',
+          green_level='CLASSICAL',
+          green_origin=None,
+          service_component='OFFTAKE',
+          type='INDEXED',
+        ),
+        sales_closure='BATCH_PROCESS',
+        service_point_number='541448860000000002_ID1',
+        start_date=datetime.date(2024, 5, 1),
+        status='INACTIVE',
+      ),
+      EnergyContract(
+        action=None,
+        billing_contract_number='8109078038',
+        business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2024, 3, 1),
+        contract_id='2211676160',
+        contract_item_id='40',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2024, 3, 1),
+        desired_contract_start_date=datetime.date(2024, 5, 1),
+        division='ELECTRICITY',
+        end_date=datetime.date(2025, 4, 30),
+        legal_contract_start_date=datetime.date(2024, 5, 1),
+        product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
+          energy_product='EASY',
+          green_level='GREENFREE',
+          green_origin='EUROPEAN',
+          service_component='COMPENSATION',
+          type='INDEXED',
+        ),
+        sales_closure='BATCH_PROCESS',
+        service_point_number='541448860000000001_ID1',
+        start_date=datetime.date(2024, 5, 1),
+        status='INACTIVE',
+      ),
+      EnergyContract(
+        action=None,
+        billing_contract_number='8109078039',
+        business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2025, 3, 1),
+        contract_id='2211676160',
+        contract_item_id='50',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2025, 3, 1),
+        desired_contract_start_date=datetime.date(2025, 5, 1),
+        division='GAS',
+        end_date=datetime.date(2026, 4, 30),
+        legal_contract_start_date=datetime.date(2025, 5, 1),
+        product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
+          energy_product='EASY',
+          green_level='CLASSICAL',
+          green_origin=None,
+          service_component='OFFTAKE',
+          type='INDEXED',
+        ),
+        sales_closure='BATCH_PROCESS',
+        service_point_number='541448860000000002_ID1',
+        start_date=datetime.date(2025, 5, 1),
+        status='INACTIVE',
+      ),
+      EnergyContract(
+        action=None,
+        billing_contract_number='8109078038',
+        business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2025, 3, 1),
+        contract_id='2211676160',
+        contract_item_id='60',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2025, 3, 1),
+        desired_contract_start_date=datetime.date(2025, 5, 1),
+        division='ELECTRICITY',
+        end_date=datetime.date(2026, 4, 30),
+        legal_contract_start_date=datetime.date(2025, 5, 1),
+        product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
+          energy_product='EASY',
+          green_level='GREENFREE',
+          green_origin='EUROPEAN',
+          service_component='CONSTRAINT_COMMERCIALIZATION_OF_INJECTION',
+          type='INDEXED',
+        ),
+        sales_closure='BATCH_PROCESS',
+        service_point_number='541448860000000001_ID1',
+        start_date=datetime.date(2025, 5, 1),
+        status='INACTIVE',
+      ),
+      EnergyContract(
+        action='PRODUCT_CHANGE',
+        billing_contract_number='8109078039',
+        business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2026, 3, 1),
+        contract_id='2211676160',
+        contract_item_id='70',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2026, 3, 1),
+        desired_contract_start_date=datetime.date(2026, 5, 1),
+        division='GAS',
+        end_date=None,
+        legal_contract_start_date=datetime.date(2026, 5, 1),
+        product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
+          energy_product='EASY',
+          green_level='CLASSICAL',
+          green_origin=None,
+          service_component='OFFTAKE',
+          type='INDEXED',
+        ),
+        sales_closure='BATCH_PROCESS',
+        service_point_number='541448860000000002_ID1',
+        start_date=datetime.date(2026, 5, 1),
+        status='ACTIVE',
+      ),
+      EnergyContract(
+        action='PRODUCT_CHANGE',
+        billing_contract_number='8109078038',
+        business_agreement_number='',
+        business_scenario='TACIT_EXTENSION',
+        commercialization_start_date=datetime.date(2026, 3, 1),
+        contract_id='2211676160',
+        contract_item_id='80',
+        contract_type='CONTRACT',
+        customer_agreement_date=datetime.date(2026, 3, 1),
+        desired_contract_start_date=datetime.date(2026, 5, 1),
+        division='ELECTRICITY',
+        end_date=None,
+        legal_contract_start_date=datetime.date(2026, 5, 1),
+        product_configuration=ProductConfiguration(
+          care_level='BASIC_CARE',
+          contract_item_time_of_use_configuration_list=tuple(
+          ),
+          duration='ONE_YEAR',
+          energy_product='EASY',
+          green_level='GREENFREE',
+          green_origin='EUROPEAN',
+          service_component='CONSTRAINT_COMMERCIALIZATION_OF_INJECTION',
+          type='INDEXED',
+        ),
+        sales_closure='BATCH_PROCESS',
+        service_point_number='541448860000000001_ID1',
+        start_date=datetime.date(2026, 5, 1),
         status='ACTIVE',
       ),
     ),
@@ -1185,6 +2217,7 @@
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report]
   HappyHourMonthReport(
+    costs=None,
     current=HappyHourMonthData(
       comparison=HappyHourComparison(
         consumption_kwh_pct_change=10.0,
@@ -1196,6 +2229,7 @@
       is_calculation_ongoing=False,
       reward_euros=4.56,
     ),
+    energy=None,
     gas=None,
     history=tuple(
     ),
@@ -1209,7 +2243,17 @@
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_dual_fuel]
   HappyHourMonthReport(
+    costs=UsageElectricityBreakdown(
+      injection=None,
+      netto=None,
+      offtake=None,
+    ),
     current=None,
+    energy=UsageElectricityBreakdown(
+      injection=None,
+      netto=None,
+      offtake=None,
+    ),
     gas=EnergyCostPair(
       cost=25.015,
       kwh=202.286,
@@ -1471,7 +2515,13 @@
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_energy]
   HappyHourMonthReport(
+    costs=None,
     current=None,
+    energy=UsageElectricityBreakdown(
+      injection=None,
+      netto=None,
+      offtake=None,
+    ),
     gas=None,
     history=tuple(
       MonthReportHistoryEntry(
@@ -1673,6 +2723,164 @@
   HappyHourServiceStatus(
     status='NOT_ACTIVATED',
     status_date=None,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[invoices_custom_page]
+  InvoicesPage(
+    items=tuple(
+      Invoice(
+        amount=102.07,
+        available_in_zoomit=False,
+        billing_period_details=tuple(
+          InvoiceBillingPeriod(
+            division='ELECTRICITY',
+          ),
+          InvoiceBillingPeriod(
+            division='GAS',
+          ),
+        ),
+        business_agreement_number='000000000001',
+        clearing_value_date=datetime.date(2023, 6, 2),
+        creation_date=datetime.date(2023, 5, 18),
+        documents=tuple(
+          InvoiceDocument(
+            document_id='d0c000000000000000000000000000000000001',
+            document_type='INVOICE',
+          ),
+        ),
+        due_date=datetime.date(2023, 6, 5),
+        invoice_id='700000000001',
+        online_payment_status='CLOSED',
+        online_payments=tuple(
+        ),
+        open_amount=0.0,
+        payment_reference='400000000001',
+        posting_date=datetime.date(2023, 5, 18),
+        status='PAID',
+        status_group='PAID',
+        type='PARTIAL_INVOICE',
+        type_group='PREPAYMENT_BILL',
+      ),
+      Invoice(
+        amount=102.07,
+        available_in_zoomit=False,
+        billing_period_details=tuple(
+          InvoiceBillingPeriod(
+            division='ELECTRICITY',
+          ),
+          InvoiceBillingPeriod(
+            division='GAS',
+          ),
+        ),
+        business_agreement_number='000000000001',
+        clearing_value_date=datetime.date(2023, 7, 3),
+        creation_date=datetime.date(2023, 6, 15),
+        documents=tuple(
+          InvoiceDocument(
+            document_id='d0c000000000000000000000000000000000002',
+            document_type='INVOICE',
+          ),
+        ),
+        due_date=datetime.date(2023, 7, 3),
+        invoice_id='700000000002',
+        online_payment_status='CLOSED',
+        online_payments=tuple(
+        ),
+        open_amount=0.0,
+        payment_reference='400000000002',
+        posting_date=datetime.date(2023, 6, 15),
+        status='PAID',
+        status_group='PAID',
+        type='PARTIAL_INVOICE',
+        type_group='PREPAYMENT_BILL',
+      ),
+    ),
+    maximum_bulk_download_size=50,
+    maximum_download_request_size=2000,
+    page_number=0,
+    page_size=2,
+    skipped_entries=0,
+    total_items=46,
+    total_pages=23,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[invoices_default_page]
+  InvoicesPage(
+    items=tuple(
+      Invoice(
+        amount=102.07,
+        available_in_zoomit=False,
+        billing_period_details=tuple(
+          InvoiceBillingPeriod(
+            division='ELECTRICITY',
+          ),
+          InvoiceBillingPeriod(
+            division='GAS',
+          ),
+        ),
+        business_agreement_number='000000000001',
+        clearing_value_date=datetime.date(2023, 6, 2),
+        creation_date=datetime.date(2023, 5, 18),
+        documents=tuple(
+          InvoiceDocument(
+            document_id='d0c000000000000000000000000000000000001',
+            document_type='INVOICE',
+          ),
+        ),
+        due_date=datetime.date(2023, 6, 5),
+        invoice_id='700000000001',
+        online_payment_status='CLOSED',
+        online_payments=tuple(
+        ),
+        open_amount=0.0,
+        payment_reference='400000000001',
+        posting_date=datetime.date(2023, 5, 18),
+        status='PAID',
+        status_group='PAID',
+        type='PARTIAL_INVOICE',
+        type_group='PREPAYMENT_BILL',
+      ),
+      Invoice(
+        amount=102.07,
+        available_in_zoomit=False,
+        billing_period_details=tuple(
+          InvoiceBillingPeriod(
+            division='ELECTRICITY',
+          ),
+          InvoiceBillingPeriod(
+            division='GAS',
+          ),
+        ),
+        business_agreement_number='000000000001',
+        clearing_value_date=datetime.date(2023, 7, 3),
+        creation_date=datetime.date(2023, 6, 15),
+        documents=tuple(
+          InvoiceDocument(
+            document_id='d0c000000000000000000000000000000000002',
+            document_type='INVOICE',
+          ),
+        ),
+        due_date=datetime.date(2023, 7, 3),
+        invoice_id='700000000002',
+        online_payment_status='CLOSED',
+        online_payments=tuple(
+        ),
+        open_amount=0.0,
+        payment_reference='400000000002',
+        posting_date=datetime.date(2023, 6, 15),
+        status='PAID',
+        status_group='PAID',
+        type='PARTIAL_INVOICE',
+        type_group='PREPAYMENT_BILL',
+      ),
+    ),
+    maximum_bulk_download_size=50,
+    maximum_download_request_size=2000,
+    page_number=0,
+    page_size=2,
+    skipped_entries=0,
+    total_items=46,
+    total_pages=23,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[latest_charging_session]
@@ -2420,6 +3628,10 @@
               PriceSlot(
                 price_value=0.05,
                 price_value_excl_vat=0.04717,
+                price_value_excl_vat_in_euro_per_kwh=None,
+                price_value_excl_vat_in_eurocent_per_kwh=None,
+                price_value_in_euro_per_kwh=None,
+                price_value_in_eurocent_per_kwh=None,
                 time_of_use_slot_code='TOTAL_HOURS',
               ),
             ),
@@ -2427,21 +3639,37 @@
               PriceSlot(
                 price_value=0.123456,
                 price_value_excl_vat=0.116468,
+                price_value_excl_vat_in_euro_per_kwh=None,
+                price_value_excl_vat_in_eurocent_per_kwh=None,
+                price_value_in_euro_per_kwh=None,
+                price_value_in_eurocent_per_kwh=None,
                 time_of_use_slot_code='TOTAL_HOURS',
               ),
               PriceSlot(
                 price_value=0.18,
                 price_value_excl_vat=0.169811,
+                price_value_excl_vat_in_euro_per_kwh=None,
+                price_value_excl_vat_in_eurocent_per_kwh=None,
+                price_value_in_euro_per_kwh=None,
+                price_value_in_eurocent_per_kwh=None,
                 time_of_use_slot_code='S_TOU1_OFFTAKE_PEAK',
               ),
               PriceSlot(
                 price_value=0.09,
                 price_value_excl_vat=0.084906,
+                price_value_excl_vat_in_euro_per_kwh=None,
+                price_value_excl_vat_in_eurocent_per_kwh=None,
+                price_value_in_euro_per_kwh=None,
+                price_value_in_eurocent_per_kwh=None,
                 time_of_use_slot_code='S_TOU1_OFFTAKE_OFFPEAK',
               ),
               PriceSlot(
                 price_value=0.1,
                 price_value_excl_vat=0.09434,
+                price_value_excl_vat_in_euro_per_kwh=None,
+                price_value_excl_vat_in_eurocent_per_kwh=None,
+                price_value_in_euro_per_kwh=None,
+                price_value_in_eurocent_per_kwh=None,
                 time_of_use_slot_code='EN',
               ),
             ),
@@ -2461,6 +3689,10 @@
               PriceSlot(
                 price_value=0.045,
                 price_value_excl_vat=0.042453,
+                price_value_excl_vat_in_euro_per_kwh=None,
+                price_value_excl_vat_in_eurocent_per_kwh=None,
+                price_value_in_euro_per_kwh=None,
+                price_value_in_eurocent_per_kwh=None,
                 time_of_use_slot_code='TOTAL_HOURS',
               ),
             ),
@@ -2474,11 +3706,357 @@
     skipped_entries=0,
   )
 # ---
+# name: test_getter_parses_payload_and_sends_expected_request[prices_proportional_variants]
+  PricesResponse(
+    items=tuple(
+      EanPrices(
+        ean='541448860000000002_ID1',
+        periods=tuple(
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.0622963908,
+                price_value_excl_vat=0.05877018,
+                price_value_excl_vat_in_euro_per_kwh=0.059,
+                price_value_excl_vat_in_eurocent_per_kwh=5.877,
+                price_value_in_euro_per_kwh=0.062,
+                price_value_in_eurocent_per_kwh=6.23,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 5, 1),
+            valid_to=datetime.date(2026, 6, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.0649053264,
+                price_value_excl_vat=0.06123144,
+                price_value_excl_vat_in_euro_per_kwh=0.061,
+                price_value_excl_vat_in_eurocent_per_kwh=6.123,
+                price_value_in_euro_per_kwh=0.065,
+                price_value_in_eurocent_per_kwh=6.491,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 6, 1),
+            valid_to=datetime.date(2026, 7, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.0624261348,
+                price_value_excl_vat=0.05889258,
+                price_value_excl_vat_in_euro_per_kwh=0.059,
+                price_value_excl_vat_in_eurocent_per_kwh=5.889,
+                price_value_in_euro_per_kwh=0.062,
+                price_value_in_eurocent_per_kwh=6.243,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 7, 1),
+            valid_to=datetime.date(2026, 8, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.072347226,
+                price_value_excl_vat=0.0682521,
+                price_value_excl_vat_in_euro_per_kwh=0.068,
+                price_value_excl_vat_in_eurocent_per_kwh=6.825,
+                price_value_in_euro_per_kwh=0.072,
+                price_value_in_eurocent_per_kwh=7.235,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 8, 1),
+            valid_to=datetime.date(2026, 9, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.0811730616,
+                price_value_excl_vat=0.07657836,
+                price_value_excl_vat_in_euro_per_kwh=0.077,
+                price_value_excl_vat_in_eurocent_per_kwh=7.658,
+                price_value_in_euro_per_kwh=0.081,
+                price_value_in_eurocent_per_kwh=8.117,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 9, 1),
+            valid_to=datetime.date(2026, 10, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.0957152016,
+                price_value_excl_vat=0.09029736,
+                price_value_excl_vat_in_euro_per_kwh=0.09,
+                price_value_excl_vat_in_eurocent_per_kwh=9.03,
+                price_value_in_euro_per_kwh=0.096,
+                price_value_in_eurocent_per_kwh=9.572,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 10, 1),
+            valid_to=datetime.date(2026, 11, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.0936014556,
+                price_value_excl_vat=0.08830326,
+                price_value_excl_vat_in_euro_per_kwh=0.088,
+                price_value_excl_vat_in_eurocent_per_kwh=8.83,
+                price_value_in_euro_per_kwh=0.094,
+                price_value_in_eurocent_per_kwh=9.36,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 11, 1),
+            valid_to=datetime.date(2026, 11, 9),
+            vat_tariff=0.06,
+          ),
+        ),
+      ),
+      EanPrices(
+        ean='541448860000000001_ID1',
+        periods=tuple(
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.0341058,
+                price_value_excl_vat=0.0341058,
+                price_value_excl_vat_in_euro_per_kwh=0.034,
+                price_value_excl_vat_in_eurocent_per_kwh=3.411,
+                price_value_in_euro_per_kwh=0.034,
+                price_value_in_eurocent_per_kwh=3.411,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.13826004,
+                price_value_excl_vat=0.130434,
+                price_value_excl_vat_in_euro_per_kwh=0.13,
+                price_value_excl_vat_in_eurocent_per_kwh=13.043,
+                price_value_in_euro_per_kwh=0.138,
+                price_value_in_eurocent_per_kwh=13.826,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 5, 1),
+            valid_to=datetime.date(2026, 6, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.0380174,
+                price_value_excl_vat=0.0380174,
+                price_value_excl_vat_in_euro_per_kwh=0.038,
+                price_value_excl_vat_in_eurocent_per_kwh=3.802,
+                price_value_in_euro_per_kwh=0.038,
+                price_value_in_eurocent_per_kwh=3.802,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.1478912,
+                price_value_excl_vat=0.13952,
+                price_value_excl_vat_in_euro_per_kwh=0.14,
+                price_value_excl_vat_in_eurocent_per_kwh=13.952,
+                price_value_in_euro_per_kwh=0.148,
+                price_value_in_eurocent_per_kwh=14.789,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 6, 1),
+            valid_to=datetime.date(2026, 7, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.04112636,
+                price_value_excl_vat=0.04112636,
+                price_value_excl_vat_in_euro_per_kwh=0.041,
+                price_value_excl_vat_in_eurocent_per_kwh=4.113,
+                price_value_in_euro_per_kwh=0.041,
+                price_value_in_eurocent_per_kwh=4.113,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.155546096,
+                price_value_excl_vat=0.1467416,
+                price_value_excl_vat_in_euro_per_kwh=0.147,
+                price_value_excl_vat_in_eurocent_per_kwh=14.674,
+                price_value_in_euro_per_kwh=0.156,
+                price_value_in_eurocent_per_kwh=15.555,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 7, 1),
+            valid_to=datetime.date(2026, 8, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.05151496,
+                price_value_excl_vat=0.05151496,
+                price_value_excl_vat_in_euro_per_kwh=0.052,
+                price_value_excl_vat_in_eurocent_per_kwh=5.151,
+                price_value_in_euro_per_kwh=0.052,
+                price_value_in_eurocent_per_kwh=5.151,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.181124956,
+                price_value_excl_vat=0.1708726,
+                price_value_excl_vat_in_euro_per_kwh=0.171,
+                price_value_excl_vat_in_eurocent_per_kwh=17.087,
+                price_value_in_euro_per_kwh=0.181,
+                price_value_in_eurocent_per_kwh=18.112,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 8, 1),
+            valid_to=datetime.date(2026, 9, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.05984108,
+                price_value_excl_vat=0.05984108,
+                price_value_excl_vat_in_euro_per_kwh=0.06,
+                price_value_excl_vat_in_eurocent_per_kwh=5.984,
+                price_value_in_euro_per_kwh=0.06,
+                price_value_in_eurocent_per_kwh=5.984,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.201625568,
+                price_value_excl_vat=0.1902128,
+                price_value_excl_vat_in_euro_per_kwh=0.19,
+                price_value_excl_vat_in_eurocent_per_kwh=19.021,
+                price_value_in_euro_per_kwh=0.202,
+                price_value_in_eurocent_per_kwh=20.163,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 9, 1),
+            valid_to=datetime.date(2026, 10, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.07630536,
+                price_value_excl_vat=0.07630536,
+                price_value_excl_vat_in_euro_per_kwh=0.076,
+                price_value_excl_vat_in_eurocent_per_kwh=7.631,
+                price_value_in_euro_per_kwh=0.076,
+                price_value_in_eurocent_per_kwh=7.631,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.242163996,
+                price_value_excl_vat=0.2284566,
+                price_value_excl_vat_in_euro_per_kwh=0.228,
+                price_value_excl_vat_in_eurocent_per_kwh=22.846,
+                price_value_in_euro_per_kwh=0.242,
+                price_value_in_eurocent_per_kwh=24.216,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 10, 1),
+            valid_to=datetime.date(2026, 11, 1),
+            vat_tariff=0.06,
+          ),
+          PricePeriod(
+            injection=tuple(
+              PriceSlot(
+                price_value=0.07984104,
+                price_value_excl_vat=0.07984104,
+                price_value_excl_vat_in_euro_per_kwh=0.08,
+                price_value_excl_vat_in_eurocent_per_kwh=7.984,
+                price_value_in_euro_per_kwh=0.08,
+                price_value_in_eurocent_per_kwh=7.984,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            offtake=tuple(
+              PriceSlot(
+                price_value=0.250869564,
+                price_value_excl_vat=0.2366694,
+                price_value_excl_vat_in_euro_per_kwh=0.237,
+                price_value_excl_vat_in_eurocent_per_kwh=23.667,
+                price_value_in_euro_per_kwh=0.251,
+                price_value_in_eurocent_per_kwh=25.087,
+                time_of_use_slot_code='TOTAL_HOURS',
+              ),
+            ),
+            valid_from=datetime.date(2026, 11, 1),
+            valid_to=datetime.date(2026, 11, 9),
+            vat_tariff=0.06,
+          ),
+        ),
+      ),
+    ),
+    skipped_entries=0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[reward_balance]
+  RewardBalanceDetails(
+    open_amount=0.5,
+    payout_threshold=5.0,
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[reward_payouts_empty]
+  RewardsPayoutsResponse(
+    items=tuple(
+    ),
+    skipped_entries=0,
+  )
+# ---
 # name: test_getter_parses_payload_and_sends_expected_request[service_point]
   ServicePoint(
     charging_station=False,
     division='ELECTRICITY',
     ean='541448860000000001_ID1',
+    ean_blocked=None,
     ean_energy_types=mappingproxy({
       '541448860000000001': 'ELECTRICITY',
     }),
@@ -2486,9 +4064,15 @@
       dgo='FLUVIUS',
       grid='FLUVIUS_WEST',
       installation=ServicePointInstallation(
+        auto_producer=None,
         budget_meter=False,
+        budget_meter_from_date=None,
+        energy_sharing_list=tuple(
+        ),
+        gas_conversion_coefficient=None,
         installation_id='4100000001',
         metering_configuration=MeteringConfiguration(
+          meter_regime=None,
           metering_method_frequency='MONTHLY',
           metering_method_type='SMART_READING',
           metering_reads_for_information='NOT_APPLICABLE',
@@ -2497,6 +4081,48 @@
           supplier_billing_frequency='MONTHLY',
         ),
         rtp_component_id='RTP0000001',
+        service_component='CONSTRAINT_COMMERCIALIZATION_OF_INJECTION',
+      ),
+    ),
+    premises_id='5100000001',
+    type='DEREGULATED',
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[service_point_installation_live]
+  ServicePoint(
+    charging_station=False,
+    division='ELECTRICITY',
+    ean='541448860000000001_ID1',
+    ean_blocked=None,
+    ean_energy_types=mappingproxy({
+      '541448860000000001': 'ELECTRICITY',
+    }),
+    market_details=ServicePointMarketDetails(
+      dgo='FLUVIUS',
+      grid='FLUVIUS_WEST',
+      installation=ServicePointInstallation(
+        auto_producer=AutoProducer(
+          active=True,
+          date_from=datetime.date(2023, 5, 1),
+          installation_year_before_2024=False,
+          kva=4.6,
+        ),
+        budget_meter=False,
+        budget_meter_from_date=None,
+        energy_sharing_list=tuple(
+        ),
+        gas_conversion_coefficient=None,
+        installation_id='4100000001',
+        metering_configuration=MeteringConfiguration(
+          meter_regime=None,
+          metering_method_frequency='MONTHLY',
+          metering_method_type='SMART_READING',
+          metering_reads_for_information='NOT_APPLICABLE',
+          register_type_configuration='TOTAL_HOURS',
+          smart_meter_regime='THREE',
+          supplier_billing_frequency='MONTHLY',
+        ),
+        rtp_component_id='RTPCMP_000',
         service_component='CONSTRAINT_COMMERCIALIZATION_OF_INJECTION',
       ),
     ),
@@ -4031,6 +5657,8 @@
             amount_sum=0.44,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.44,
               ),
@@ -4039,12 +5667,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=0.44,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.44,
               ),
@@ -4055,6 +5686,8 @@
             amount_sum=1.69,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1.69,
               ),
@@ -4063,12 +5696,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1.69,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1.69,
               ),
@@ -4086,6 +5722,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.753,
               ),
@@ -4094,12 +5732,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.753,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.753,
               ),
@@ -4110,6 +5751,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2.32,
               ),
@@ -4118,12 +5761,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=2.32,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2.32,
               ),
@@ -4148,6 +5794,8 @@
             amount_sum=0.19,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.19,
               ),
@@ -4156,12 +5804,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=0.19,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.19,
               ),
@@ -4172,6 +5823,8 @@
             amount_sum=1.27,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1.27,
               ),
@@ -4180,12 +5833,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1.27,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1.27,
               ),
@@ -4203,6 +5859,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=4.725,
               ),
@@ -4211,12 +5869,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=4.725,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=4.725,
               ),
@@ -4227,6 +5888,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.859,
               ),
@@ -4235,12 +5898,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=0.859,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.859,
               ),
@@ -4265,6 +5931,8 @@
             amount_sum=0.79,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.79,
               ),
@@ -4273,12 +5941,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=0.79,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.79,
               ),
@@ -4289,6 +5960,8 @@
             amount_sum=1.08,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1.08,
               ),
@@ -4297,12 +5970,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1.08,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1.08,
               ),
@@ -4320,6 +5996,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=19.289,
               ),
@@ -4328,12 +6006,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=19.289,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=19.289,
               ),
@@ -4344,6 +6025,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.232,
               ),
@@ -4352,12 +6035,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=0.232,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=0.232,
               ),
@@ -4384,6 +6070,8 @@
           amount_sum=8.71,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=8.71,
             ),
@@ -4392,12 +6080,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=8.71,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=8.71,
             ),
@@ -4408,6 +6099,8 @@
           amount_sum=57.33,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=57.33,
             ),
@@ -4416,12 +6109,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=57.33,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=57.33,
             ),
@@ -4439,6 +6135,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=211.867,
             ),
@@ -4447,12 +6145,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=211.867,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=211.867,
             ),
@@ -4463,6 +6164,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=92.252,
             ),
@@ -4471,12 +6174,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=92.252,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=92.252,
             ),
@@ -4728,6 +6434,8 @@
             amount_sum=8.71,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=8.71,
               ),
@@ -4736,12 +6444,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=8.71,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=8.71,
               ),
@@ -4752,6 +6463,8 @@
             amount_sum=57.33,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=57.33,
               ),
@@ -4760,12 +6473,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=57.33,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=57.33,
               ),
@@ -4783,6 +6499,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=211.867,
               ),
@@ -4791,12 +6509,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=211.867,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=211.867,
               ),
@@ -4807,6 +6528,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=92.252,
               ),
@@ -4815,12 +6538,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=92.252,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=92.252,
               ),
@@ -4847,6 +6573,8 @@
           amount_sum=8.71,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=8.71,
             ),
@@ -4855,12 +6583,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=8.71,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=8.71,
             ),
@@ -4871,6 +6602,8 @@
           amount_sum=57.33,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=57.33,
             ),
@@ -4879,12 +6612,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=57.33,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=57.33,
             ),
@@ -4902,6 +6638,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=211.867,
             ),
@@ -4910,12 +6648,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=211.867,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=211.867,
             ),
@@ -4926,6 +6667,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=92.252,
             ),
@@ -4934,12 +6677,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=92.252,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=92.252,
             ),
@@ -4969,6 +6715,8 @@
             amount_sum=49.72,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -4977,12 +6725,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -4993,6 +6744,8 @@
             amount_sum=28.88,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5001,12 +6754,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5024,6 +6780,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=452.279,
               ),
@@ -5032,12 +6790,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=452.279,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=452.279,
               ),
@@ -5048,6 +6809,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=9.746,
               ),
@@ -5056,12 +6819,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=9.746,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=9.746,
               ),
@@ -5076,6 +6842,8 @@
             amount_sum=62.01,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5084,12 +6852,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5100,6 +6871,8 @@
             amount_sum=55.65,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5108,12 +6881,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5125,6 +6901,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=769.59,
               ),
@@ -5133,12 +6911,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=769.59,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=769.59,
               ),
@@ -5149,6 +6930,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=119.171,
               ),
@@ -5157,12 +6940,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=119.171,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=119.171,
               ),
@@ -5179,6 +6965,8 @@
             amount_sum=48.88,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5187,12 +6975,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5203,6 +6994,8 @@
             amount_sum=31.19,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5211,12 +7004,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5234,6 +7030,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=552.147,
               ),
@@ -5242,12 +7040,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=552.147,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=552.147,
               ),
@@ -5258,6 +7059,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=8.066,
               ),
@@ -5266,12 +7069,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=8.066,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=8.066,
               ),
@@ -5286,6 +7092,8 @@
             amount_sum=67.1,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5294,12 +7102,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5310,6 +7121,8 @@
             amount_sum=61.05,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5318,12 +7131,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5335,6 +7151,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=811.393,
               ),
@@ -5343,12 +7161,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=811.393,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=811.393,
               ),
@@ -5359,6 +7180,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=128.479,
               ),
@@ -5367,12 +7190,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=128.479,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=128.479,
               ),
@@ -5396,6 +7222,8 @@
             amount_sum=2.15,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5404,12 +7232,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5420,6 +7251,8 @@
             amount_sum=1.99,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5428,12 +7261,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=10.0,
               ),
@@ -5445,6 +7281,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=24.78,
               ),
@@ -5453,12 +7291,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=24.78,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=24.78,
               ),
@@ -5469,6 +7310,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=4.139,
               ),
@@ -5477,12 +7320,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=4.139,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=4.139,
               ),
@@ -5501,6 +7347,8 @@
           amount_sum=98.6,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5509,12 +7357,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=10.0,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5525,6 +7376,8 @@
           amount_sum=60.07,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5533,12 +7386,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=10.0,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5556,6 +7412,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1004.426,
             ),
@@ -5564,12 +7422,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1004.426,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1004.426,
             ),
@@ -5580,6 +7441,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=17.812,
             ),
@@ -5588,12 +7451,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=17.812,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=17.812,
             ),
@@ -5608,6 +7474,8 @@
           amount_sum=131.26,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5616,12 +7484,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=10.0,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5632,6 +7503,8 @@
           amount_sum=118.69,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5640,12 +7513,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=10.0,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=10.0,
             ),
@@ -5657,6 +7533,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1605.763,
             ),
@@ -5665,12 +7543,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1605.763,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1605.763,
             ),
@@ -5681,6 +7562,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=251.789,
             ),
@@ -5689,12 +7572,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=251.789,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=251.789,
             ),
@@ -5718,6 +7604,8 @@
             amount_sum=2266.96,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2266.96,
               ),
@@ -5726,12 +7614,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=2266.96,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2266.96,
               ),
@@ -5751,6 +7642,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1580.05,
               ),
@@ -5759,12 +7652,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1580.05,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1580.05,
               ),
@@ -5789,6 +7685,8 @@
             amount_sum=21.19,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=21.19,
               ),
@@ -5797,12 +7695,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=21.19,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=21.19,
               ),
@@ -5813,6 +7714,8 @@
             amount_sum=1965.62,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1965.62,
               ),
@@ -5821,12 +7724,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1965.62,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1965.62,
               ),
@@ -5844,6 +7750,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=753.39,
               ),
@@ -5852,12 +7760,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=753.39,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=753.39,
               ),
@@ -5868,6 +7779,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2025.35,
               ),
@@ -5876,12 +7789,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=2025.35,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2025.35,
               ),
@@ -5899,6 +7815,8 @@
             amount_sum=35.43,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=35.43,
               ),
@@ -5907,12 +7825,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=35.43,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=35.43,
               ),
@@ -5923,6 +7844,8 @@
             amount_sum=2636.39,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2636.39,
               ),
@@ -5931,12 +7854,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=2636.39,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2636.39,
               ),
@@ -5948,6 +7874,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=299.68,
               ),
@@ -5956,12 +7884,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=299.68,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=299.68,
               ),
@@ -5972,6 +7903,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1046.7,
               ),
@@ -5980,12 +7913,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1046.7,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1046.7,
               ),
@@ -6005,6 +7941,8 @@
             amount_sum=176.08,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=176.08,
               ),
@@ -6013,12 +7951,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=176.08,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=176.08,
               ),
@@ -6029,6 +7970,8 @@
             amount_sum=1733.03,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1733.03,
               ),
@@ -6037,12 +7980,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1733.03,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1733.03,
               ),
@@ -6060,6 +8006,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1713.72,
               ),
@@ -6068,12 +8016,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1713.72,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1713.72,
               ),
@@ -6084,6 +8035,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2217.61,
               ),
@@ -6092,12 +8045,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=2217.61,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2217.61,
               ),
@@ -6115,6 +8071,8 @@
             amount_sum=65.9,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=65.9,
               ),
@@ -6123,12 +8081,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=65.9,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=65.9,
               ),
@@ -6139,6 +8100,8 @@
             amount_sum=1147.36,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1147.36,
               ),
@@ -6147,12 +8110,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=1147.36,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=1147.36,
               ),
@@ -6164,6 +8130,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=627.86,
               ),
@@ -6172,12 +8140,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=627.86,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=627.86,
               ),
@@ -6188,6 +8159,8 @@
             amount_sum=None,
             distribution_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2702.78,
               ),
@@ -6196,12 +8169,15 @@
             parts=tuple(
               UsageTouCrossPart(
                 distribution_slot_code='TOTAL_HOURS',
+                percentage_of_sum=1.0,
                 supplier_slot_code='TOTAL_HOURS',
                 value=2702.78,
               ),
             ),
             supplier_parts=tuple(
               UsageTouPart(
+                has_volume_simulation_percentage=None,
+                percentage_of_sum=1.0,
                 slot_code='TOTAL_HOURS',
                 value=2702.78,
               ),
@@ -6223,6 +8199,8 @@
           amount_sum=105.38,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=105.38,
             ),
@@ -6231,12 +8209,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=105.38,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=105.38,
             ),
@@ -6247,6 +8228,8 @@
           amount_sum=1682.03,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1682.03,
             ),
@@ -6255,12 +8238,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1682.03,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1682.03,
             ),
@@ -6278,6 +8264,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1109.64,
             ),
@@ -6286,12 +8274,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1109.64,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1109.64,
             ),
@@ -6302,6 +8293,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1279.53,
             ),
@@ -6310,12 +8303,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1279.53,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1279.53,
             ),
@@ -6333,6 +8329,8 @@
           amount_sum=66.83,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=66.83,
             ),
@@ -6341,12 +8339,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=66.83,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=66.83,
             ),
@@ -6357,6 +8358,8 @@
           amount_sum=1797.94,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1797.94,
             ),
@@ -6365,12 +8368,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1797.94,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1797.94,
             ),
@@ -6382,6 +8388,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=489.83,
             ),
@@ -6390,12 +8398,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=489.83,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=489.83,
             ),
@@ -6406,6 +8417,8 @@
           amount_sum=None,
           distribution_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1025.16,
             ),
@@ -6414,12 +8427,15 @@
           parts=tuple(
             UsageTouCrossPart(
               distribution_slot_code='TOTAL_HOURS',
+              percentage_of_sum=1.0,
               supplier_slot_code='TOTAL_HOURS',
               value=1025.16,
             ),
           ),
           supplier_parts=tuple(
             UsageTouPart(
+              has_volume_simulation_percentage=None,
+              percentage_of_sum=1.0,
               slot_code='TOTAL_HOURS',
               value=1025.16,
             ),
@@ -6433,6 +8449,13 @@
       simulated_gas_and_electricity_cost=3385.12,
       start=datetime.datetime(2022, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))),
     ),
+  )
+# ---
+# name: test_getter_parses_payload_and_sends_expected_request[user_invitations]
+  UserInvitationsResponse(
+    items=tuple(
+    ),
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[vehicle_charge_settings]

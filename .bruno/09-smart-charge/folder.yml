@@ -11,4 +11,5 @@ docs: |-
   accounts and only some of them have Smart Charge. Electric vehicles
   seeds evVehicleId for the requests that address one vehicle, and
   Charging sessions seeds evSessionId. Date windows are computed by the
-  pre-request scripts.
+  pre-request scripts. Also the EV asset brand catalog and the charging
+  sessions file export.

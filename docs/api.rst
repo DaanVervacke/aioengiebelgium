@@ -62,6 +62,15 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.AccountRelation
    :members:
 
+.. autoclass:: aioengiebelgium.AssetBrand
+   :members:
+
+.. autoclass:: aioengiebelgium.AssetBrandsResponse
+   :members:
+
+.. autoclass:: aioengiebelgium.AutoProducer
+   :members:
+
 .. autoclass:: aioengiebelgium.BillingDetails
    :members:
 
@@ -92,6 +101,12 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.BusinessAgreement
    :members:
 
+.. autoclass:: aioengiebelgium.BusinessAgreementAddresses
+   :members:
+
+.. autoclass:: aioengiebelgium.BusinessAgreementDetail
+   :members:
+
 .. autoclass:: aioengiebelgium.ChargeSettingValue
    :members:
 
@@ -116,13 +131,34 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.ChargingSessionsSummaryEntry
    :members:
 
+.. autoclass:: aioengiebelgium.CommunicationCategory
+   :members:
+
+.. autoclass:: aioengiebelgium.CommunicationChannel
+   :members:
+
+.. autoclass:: aioengiebelgium.CommunicationPreferenceItem
+   :members:
+
+.. autoclass:: aioengiebelgium.CommunicationPreferences
+   :members:
+
+.. autoclass:: aioengiebelgium.CommunicationPreferencesResponse
+   :members:
+
 .. autoclass:: aioengiebelgium.ConsumptionAddress
+   :members:
+
+.. autoclass:: aioengiebelgium.ContactChannel
    :members:
 
 .. autoclass:: aioengiebelgium.ContractInfo
    :members:
 
 .. autoclass:: aioengiebelgium.CustomerAccount
+   :members:
+
+.. autoclass:: aioengiebelgium.CustomerAccountDetail
    :members:
 
 .. autoclass:: aioengiebelgium.CustomerAccountRelations
@@ -137,13 +173,13 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.EanPrices
    :members:
 
+.. autoclass:: aioengiebelgium.ElectricityUsage
+   :members:
+
 .. autoclass:: aioengiebelgium.ElectricVehicle
    :members:
 
 .. autoclass:: aioengiebelgium.ElectricVehiclesResponse
-   :members:
-
-.. autoclass:: aioengiebelgium.ElectricityUsage
    :members:
 
 .. autoclass:: aioengiebelgium.EnergyContract
@@ -215,6 +251,18 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.HappyHourWindow
    :members:
 
+.. autoclass:: aioengiebelgium.Invoice
+   :members:
+
+.. autoclass:: aioengiebelgium.InvoiceBillingPeriod
+   :members:
+
+.. autoclass:: aioengiebelgium.InvoiceDocument
+   :members:
+
+.. autoclass:: aioengiebelgium.InvoicesPage
+   :members:
+
 .. autoclass:: aioengiebelgium.MeasuredDataWindow
    :members:
 
@@ -239,13 +287,13 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.MeterRegisterRead
    :members:
 
-.. autoclass:: aioengiebelgium.MonthReportHistoryEntry
-   :members:
-
 .. autoclass:: aioengiebelgium.MonthlyBilledBudget
    :members:
 
 .. autoclass:: aioengiebelgium.MonthlyPeaks
+   :members:
+
+.. autoclass:: aioengiebelgium.MonthReportHistoryEntry
    :members:
 
 .. autoclass:: aioengiebelgium.PaymentSlice
@@ -263,7 +311,16 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.PricesResponse
    :members:
 
+.. autoclass:: aioengiebelgium.PrimaryContact
+   :members:
+
 .. autoclass:: aioengiebelgium.ProductConfiguration
+   :members:
+
+.. autoclass:: aioengiebelgium.RewardBalanceDetails
+   :members:
+
+.. autoclass:: aioengiebelgium.RewardsPayoutsResponse
    :members:
 
 .. autoclass:: aioengiebelgium.ServicePoint
@@ -345,6 +402,9 @@ and counts once. A non-zero count means the response is incomplete.
    :members:
 
 .. autoclass:: aioengiebelgium.UsageTouPart
+   :members:
+
+.. autoclass:: aioengiebelgium.UserInvitationsResponse
    :members:
 
 .. autoclass:: aioengiebelgium.VehicleCapabilities

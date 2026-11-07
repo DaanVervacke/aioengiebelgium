@@ -1,0 +1,68 @@
+{
+ "items": [
+  {
+   "brandId": 1,
+   "brandName": "Abarth",
+   "connectable": false,
+   "connectivity": "NOT_COMPATIBLE",
+   "assetType": "VEHICLE",
+   "logoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/abarth.png"
+  },
+  {
+   "brandId": 66,
+   "brandName": "ABB",
+   "connectable": false,
+   "connectivity": "NOT_COMPATIBLE",
+   "assetType": "CHARGER",
+   "logoUrl": "https://www.engie.be/.resources/assets/images/ev/ABB.png"
+  },
+  {
+   "brandId": 2,
+   "brandName": "Aiways",
+   "connectable": false,
+   "connectivity": "NOT_COMPATIBLE",
+   "assetType": "VEHICLE",
+   "logoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/aiways.png"
+  },
+  {
+   "brandId": 3,
+   "brandName": "Alfa Romeo",
+   "connectable": false,
+   "connectivity": "NOT_COMPATIBLE",
+   "assetType": "VEHICLE",
+   "logoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/alfa-romeo.png"
+  },
+  {
+   "brandId": 67,
+   "brandName": "Alfen",
+   "connectable": false,
+   "connectivity": "NOT_COMPATIBLE",
+   "assetType": "CHARGER",
+   "logoUrl": "https://www.engie.be/.resources/assets/images/ev/Alfen.jpg"
+  },
+  {
+   "brandId": 4,
+   "brandName": "Audi",
+   "connectable": true,
+   "connectivity": "COMPATIBLE_RELIABLE",
+   "assetType": "VEHICLE",
+   "logoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/audi.png"
+  },
+  {
+   "brandId": 5,
+   "brandName": "Bentley",
+   "connectable": false,
+   "connectivity": "NOT_COMPATIBLE",
+   "assetType": "VEHICLE",
+   "logoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/bentley.png"
+  },
+  {
+   "brandId": 6,
+   "brandName": "BMW",
+   "connectable": true,
+   "connectivity": "COMPATIBLE_RELIABLE",
+   "assetType": "VEHICLE",
+   "logoUrl": "https://www.engie.be/dam/app/ev/vehicles-brands/bmw.png"
+  }
+ ]
+}

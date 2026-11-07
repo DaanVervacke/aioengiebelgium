@@ -28,7 +28,10 @@ from aioengiebelgium._endpoints import (
     EanArgs,
     Endpoint,
     EpexArgs,
+    ExportArgs,
     FlagArgs,
+    InvoiceArgs,
+    InvoicesArgs,
     MeterReadsArgs,
     MonthArgs,
     PeaksArgs,
@@ -44,6 +47,7 @@ from aioengiebelgium.const import (
     BILLING_V2_BASE_URL,
     BOOLEAN_FEATURE_FLAG_BASE_URL,
     BUSINESS_AGREEMENTS_BASE_URL,
+    COMMUNICATIONS_V2_BASE_URL,
     ENERGY_INSIGHTS_V2_BASE_URL,
     EPEX_BASE_URL,
     EV_BASE_URL,
@@ -54,6 +58,7 @@ from aioengiebelgium.const import (
     HAPPY_HOUR_BASE_URL,
     PEAKS_BASE_URL,
     PREMISES_BASE_URL,
+    REWARDS_BASE_URL,
     USER_AGENT_BROWSER,
     USER_AGENT_NATIVE,
     EpexGranularity,
@@ -130,6 +135,9 @@ class _WireCase:
     expected_params: dict[str, str]
     expected_user_agent: str
     expected_json: dict[str, Any] | None = None
+    body_bytes: bytes | None = None
+    content_type: str | None = None
+    expected_bytes: bytes | None = None
 
 
 _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
@@ -925,11 +933,209 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             expected_user_agent=USER_AGENT_BROWSER,
         ),
     ),
+    "customer_account_detail": (
+        _WireCase(
+            id="customer_account_detail",
+            fixture_name="customer_account_detail.json",
+            call=lambda c: c.async_get_customer_account(_CAN),
+            request_method="GET",
+            url=f"{ACCOUNTS_BASE_URL}/customer-accounts/{_CAN}",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "user_invitations": (
+        _WireCase(
+            id="user_invitations",
+            fixture_name="user_invitations_empty.json",
+            call=lambda c: c.async_get_user_invitations(),
+            request_method="GET",
+            url=f"{ACCOUNTS_BASE_URL}/user-invitations",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "customer_account_user_invitations": (
+        _WireCase(
+            id="customer_account_user_invitations",
+            fixture_name="user_invitations_empty.json",
+            call=lambda c: c.async_get_customer_account_user_invitations(_CAN),
+            request_method="GET",
+            url=f"{ACCOUNTS_BASE_URL}/customer-accounts/{_CAN}/user-invitations",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "invoices": (
+        _WireCase(
+            id="invoices_default_page",
+            fixture_name="invoices_page.json",
+            call=lambda c: c.async_get_invoices(_CAN),
+            request_method="GET",
+            url=f"{BILLING_BASE_URL}/customer-accounts/{_CAN}/invoices",
+            expected_params={"pageSize": "20", "pageNumber": "0"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+        _WireCase(
+            id="invoices_custom_page",
+            fixture_name="invoices_page.json",
+            call=lambda c: c.async_get_invoices(_CAN, page_number=2, page_size=5),
+            request_method="GET",
+            url=f"{BILLING_BASE_URL}/customer-accounts/{_CAN}/invoices",
+            expected_params={"pageSize": "5", "pageNumber": "2"},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "invoice_document": (
+        _WireCase(
+            id="invoice_document_pdf",
+            fixture_name=None,
+            call=lambda c: c.async_get_invoice_document("700000000001"),
+            request_method="GET",
+            url=f"{BILLING_BASE_URL}/invoice/700000000001/document",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+            body_bytes=b"%PDF-1.4 fake invoice bytes",
+            content_type="application/pdf",
+            expected_bytes=b"%PDF-1.4 fake invoice bytes",
+        ),
+    ),
+    "charging_sessions_export": (
+        _WireCase(
+            id="charging_sessions_export_xlsx",
+            fixture_name=None,
+            call=lambda c: c.async_export_charging_sessions(
+                _CAN, date(2026, 10, 1), date(2026, 11, 7)
+            ),
+            request_method="GET",
+            url=f"{EV_BASE_URL}/customer-accounts/{_CAN}/charging-sessions/export",
+            expected_params={"start": "2026-10-01", "end": "2026-11-07"},
+            expected_user_agent=USER_AGENT_NATIVE,
+            body_bytes=b"PK\x03\x04 fake xlsx bytes",
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            expected_bytes=b"PK\x03\x04 fake xlsx bytes",
+        ),
+        _WireCase(
+            id="charging_sessions_export_csv",
+            fixture_name=None,
+            call=lambda c: c.async_export_charging_sessions(
+                _CAN, date(2026, 10, 1), date(2026, 11, 7), csv=True
+            ),
+            request_method="GET",
+            url=f"{EV_BASE_URL}/customer-accounts/{_CAN}/charging-sessions/export",
+            expected_params={"start": "2026-10-01", "end": "2026-11-07", "format": "CSV"},
+            expected_user_agent=USER_AGENT_NATIVE,
+            body_bytes=b"Start;End;Total (kWh)\n",
+            content_type="text/csv",
+            expected_bytes=b"Start;End;Total (kWh)\n",
+        ),
+    ),
+    "asset_brands": (
+        _WireCase(
+            id="asset_brands",
+            fixture_name="asset_brands.json",
+            call=lambda c: c.async_get_asset_brands(),
+            request_method="GET",
+            url=f"{EV_V2_BASE_URL}/asset-brands",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "communication_preferences": (
+        _WireCase(
+            id="communication_preferences",
+            fixture_name="communication_preferences.json",
+            call=lambda c: c.async_get_communication_preferences(_CAN),
+            request_method="GET",
+            url=f"{COMMUNICATIONS_V2_BASE_URL}/customer-accounts/{_CAN}/communication-preferences",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "reward_balance": (
+        _WireCase(
+            id="reward_balance",
+            fixture_name="reward_balance.json",
+            call=lambda c: c.async_get_reward_balance(_CAN),
+            request_method="GET",
+            url=f"{REWARDS_BASE_URL}/customer-accounts/{_CAN}/reward-balance-details",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "reward_payouts": (
+        _WireCase(
+            id="reward_payouts_empty",
+            fixture_name="reward_payouts_empty.json",
+            call=lambda c: c.async_get_reward_payouts(_CAN),
+            request_method="GET",
+            url=f"{REWARDS_BASE_URL}/customer-accounts/{_CAN}/payouts",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "business_agreement_detail": (
+        _WireCase(
+            id="business_agreement_detail",
+            fixture_name="business_agreement_detail.json",
+            call=lambda c: c.async_get_business_agreement(_BAN),
+            request_method="GET",
+            url=f"{BUSINESS_AGREEMENTS_BASE_URL}/business-agreements/{_BAN}",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
 }
+
+_WIRE_CASES["energy_contracts"] += (
+    _WireCase(
+        id="energy_contracts_live_all",
+        fixture_name="energy_contracts_live.json",
+        call=lambda c: c.async_get_energy_contracts(_BAN, include_inactive=True),
+        request_method="GET",
+        url=_ENERGY_CONTRACTS_URL,
+        expected_params={
+            "filter": "ALL_ENERGY_CONTRACTS",
+            "includeActions": "true",
+            "includeSapData": "true",
+        },
+        expected_user_agent=USER_AGENT_BROWSER,
+    ),
+)
+_WIRE_CASES["prices"] += (
+    _WireCase(
+        id="prices_proportional_variants",
+        fixture_name="prices_proportional_variants.json",
+        call=lambda c: c.async_get_prices(_BAN),
+        request_method="GET",
+        url=_PRICES_URL,
+        expected_params={"maxGranularity": "MONTHLY"},
+        expected_user_agent=USER_AGENT_BROWSER,
+    ),
+)
+_WIRE_CASES["service_point"] += (
+    _WireCase(
+        id="service_point_installation_live",
+        fixture_name="service_point_installation_live.json",
+        call=lambda c: c.async_get_service_point("541448860000000001"),
+        request_method="GET",
+        url=f"{PREMISES_BASE_URL}/service-points/541448860000000001_ID1",
+        expected_params={},
+        expected_user_agent=USER_AGENT_BROWSER,
+    ),
+)
 
 
 def _register_wire_response(m: aioresponses, case: _WireCase, load_fixture: LoadFixture) -> None:
-    """Mock the case's endpoint with its fixture, or with 204 No Content when it has none."""
+    """Mock the case's endpoint with its fixture, raw bytes, or 204 No Content when it has none."""
+    if case.body_bytes is not None:
+        m.add(
+            _any_query(case.url),
+            method=case.request_method,
+            body=case.body_bytes,
+            content_type=case.content_type or "application/octet-stream",
+        )
+        return
     if case.fixture_name is None:
         m.add(_any_query(case.url), method=case.request_method, status=HTTPStatus.NO_CONTENT)
         return
@@ -980,7 +1186,10 @@ async def test_getter_parses_payload_and_sends_expected_request(
     assert request.kwargs["headers"]["User-Agent"] == case.expected_user_agent
     if not endpoint.optional_auth:
         assert request.kwargs["headers"]["authorization"] == f"Bearer {_TOKEN}"
-    assert result == snapshot
+    if isinstance(result, bytes):
+        assert result == case.expected_bytes
+    else:
+        assert result == snapshot
 
 
 @pytest.mark.parametrize(
@@ -1619,3 +1828,51 @@ async def test_opaque_token_is_not_proactively_refreshed(load_fixture: LoadFixtu
         (request,) = m.requests["GET", URL(f"{_PRICES_URL}?maxGranularity=MONTHLY")]
     assert ("POST", URL(_TOKEN_URL)) not in m.requests
     assert request.kwargs["headers"]["authorization"] == "Bearer opaque-token"
+
+
+def test_invoices_args_validate() -> None:
+    """InvoicesArgs validates paging and strips the CAN like the other args."""
+    with pytest.raises(ValueError, match="page_number must not be negative"):
+        InvoicesArgs(can="123", page_number=-1)
+    with pytest.raises(ValueError, match="page_size must be at least 1"):
+        InvoicesArgs(can="123", page_size=0)
+    assert InvoicesArgs(can="150 000 000 1").can == "1500000001"
+
+
+def test_invoice_args_reject_non_digit_id() -> None:
+    with pytest.raises(ValueError, match="invoice id must be digits"):
+        InvoiceArgs(invoice_id="abc")
+    assert InvoiceArgs(invoice_id="700 000 000 001").invoice_id == "700000000001"
+
+
+def test_export_args_reject_reversed_range() -> None:
+    with pytest.raises(ValueError, match="is after"):
+        ExportArgs(can="123", start_date=date(2026, 11, 7), end_date=date(2026, 11, 1))
+    args = ExportArgs(can="150 000 000 1", start_date=date(2026, 11, 1), end_date=date(2026, 11, 7))
+    assert args.can == "1500000001"
+    assert args.csv is False
+
+
+async def test_invoice_document_401_retry_returns_bytes() -> None:
+    """A 401 on a binary endpoint refreshes the token and retries once with the PDF accept."""
+    with aioresponses() as m:
+        m.post(
+            _TOKEN_URL,
+            payload={
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "token_type": "Bearer",
+            },
+        )
+        url = f"{BILLING_BASE_URL}/invoice/700000000001/document"
+        m.get(_any_query(url), status=HTTPStatus.UNAUTHORIZED)
+        m.get(_any_query(url), body=b"%PDF-1.4 retried", content_type="application/pdf")
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN, refresh_token="stored-refresh")
+            result = await client.async_get_invoice_document("700000000001")
+    assert result == b"%PDF-1.4 retried"
+    gets = m.requests["GET", URL(url)]
+    assert len(gets) == 2
+    assert gets[0].kwargs["headers"]["authorization"] == f"Bearer {_TOKEN}"
+    assert gets[0].kwargs["headers"]["Accept"] == "application/pdf"
+    assert gets[1].kwargs["headers"]["authorization"] == "Bearer new-access"

@@ -1,0 +1,67 @@
+info:
+  name: Asset brands
+  type: http
+  seq: 9
+  tags:
+  - data
+  - live
+http:
+  method: GET
+  url: '{{evV2BaseUrl}}/asset-brands'
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  auth: inherit
+runtime:
+  scripts:
+  - type: tests
+    code: |-
+      // Assertions compare derived facts (types, counts, status), never response
+      // values: this repo is public and Chai prints both sides of a failure.
+
+      test("responds 200", function () {
+        expect(res.getStatus()).to.equal(200);
+      });
+
+      test("path variables all resolved", function () {
+        const raw = req.getUrl();
+        const path = raw.replace(/^https?:\/\//, '');
+        let problem = 'none';
+        if (path.indexOf('//') !== -1) { problem = 'empty path segment'; }
+        else if (raw.indexOf('{{') !== -1 || raw.indexOf('%7B%7B') !== -1) {
+          problem = 'unresolved variable';
+        }
+        expect(problem).to.equal('none');
+      });
+
+      test("responds with JSON", function () {
+        expect(String(res.getHeader('content-type') || '')).to.contain('json');
+      });
+      test("returns an items array", function () {
+        const value = res.getBody().items;
+        expect(Array.isArray(value) ? 'array' : typeof value).to.equal('array');
+      });
+
+      test("brands carry an id and a name", function () {
+        const rows = res.getBody().items || [];
+        const malformed = rows.filter(function (b) {
+          return !(typeof b.brandId === 'number' && typeof b.brandName === 'string');
+        });
+        expect(malformed.length).to.equal(0);
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  EV catalog of vehicle and charger brands.
+
+  Mirrors EngieBeClient::async_get_asset_brands.
+
+  Each item has brandId, brandName, connectable, connectivity
+  (COMPATIBLE / NOT_COMPATIBLE / ...), assetType (VEHICLE or CHARGER) and
+  logoUrl. Parsed by parsers.py.
+

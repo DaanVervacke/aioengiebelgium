@@ -7,4 +7,5 @@ request:
 docs: |-
   Where the config flow learns which business agreements a login can
   see. Run this folder first: it is the only one that needs no BAN,
-  and it seeds ENGIE_BAN for everything else.
+  and it seeds ENGIE_BAN for everything else. Also the customer account
+  detail and the user invitations.

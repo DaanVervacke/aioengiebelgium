@@ -1,0 +1,76 @@
+{
+ "page": {
+  "size": 2,
+  "totalItems": 46,
+  "totalPages": 23,
+  "number": 0
+ },
+ "maximumBulkDownloadSize": 50,
+ "maximumDownloadRequestSize": 2000,
+ "items": [
+  {
+   "invoiceId": "700000000001",
+   "businessAgreementNumber": "000000000001",
+   "creationDate": "2023-05-18",
+   "type": "PARTIAL_INVOICE",
+   "typeGroup": "PREPAYMENT_BILL",
+   "status": "PAID",
+   "statusGroup": "PAID",
+   "amount": 102.07,
+   "openAmount": 0.0,
+   "dueDate": "2023-06-05",
+   "onlinePaymentStatus": "CLOSED",
+   "availableInZoomit": false,
+   "documents": [
+    {
+     "documentId": "d0c000000000000000000000000000000000001",
+     "documentType": "INVOICE"
+    }
+   ],
+   "billingPeriodDetails": [
+    {
+     "division": "ELECTRICITY"
+    },
+    {
+     "division": "GAS"
+    }
+   ],
+   "onlinePayments": [],
+   "clearingValueDate": "2023-06-02",
+   "paymentReference": "400000000001",
+   "postingDate": "2023-05-18"
+  },
+  {
+   "invoiceId": "700000000002",
+   "businessAgreementNumber": "000000000001",
+   "creationDate": "2023-06-15",
+   "type": "PARTIAL_INVOICE",
+   "typeGroup": "PREPAYMENT_BILL",
+   "status": "PAID",
+   "statusGroup": "PAID",
+   "amount": 102.07,
+   "openAmount": 0.0,
+   "dueDate": "2023-07-03",
+   "onlinePaymentStatus": "CLOSED",
+   "availableInZoomit": false,
+   "documents": [
+    {
+     "documentId": "d0c000000000000000000000000000000000002",
+     "documentType": "INVOICE"
+    }
+   ],
+   "billingPeriodDetails": [
+    {
+     "division": "ELECTRICITY"
+    },
+    {
+     "division": "GAS"
+    }
+   ],
+   "onlinePayments": [],
+   "clearingValueDate": "2023-07-03",
+   "paymentReference": "400000000002",
+   "postingDate": "2023-06-15"
+  }
+ ]
+}

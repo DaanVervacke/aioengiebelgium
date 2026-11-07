@@ -12,13 +12,19 @@ from ._auth import AuthFlow, start_auth_flow
 from ._endpoints import (
     ACCOUNT_BALANCE,
     ACTIVATE_HAPPY_HOUR_SERVICE,
+    ASSET_BRANDS,
     BILLING_PERIOD_USAGE,
     BUDGET_BILLING_PLAN,
+    BUSINESS_AGREEMENT_DETAIL,
     CANCEL_HAPPY_HOUR_SERVICE,
     CHARGING_SESSION,
     CHARGING_SESSIONS,
+    CHARGING_SESSIONS_EXPORT,
     CHARGING_SESSIONS_SUMMARY,
+    COMMUNICATION_PREFERENCES,
+    CUSTOMER_ACCOUNT_DETAIL,
     CUSTOMER_ACCOUNT_RELATIONS,
+    CUSTOMER_ACCOUNT_USER_INVITATIONS,
     ELECTRIC_VEHICLES,
     ENERGY_CONTRACTS,
     ENERGY_SCORE,
@@ -28,18 +34,23 @@ from ._endpoints import (
     HAPPY_HOUR_EVENT,
     HAPPY_HOUR_MONTH_REPORT,
     HAPPY_HOUR_SERVICE_STATUS,
+    INVOICE_DOCUMENT,
+    INVOICES,
     LATEST_CHARGING_SESSION,
     LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
     METER_READS,
     MONTHLY_BILLED_BUDGET,
     MONTHLY_PEAKS,
     PRICES,
+    REWARD_BALANCE,
+    REWARD_PAYOUTS,
     SERVICE_POINT,
     SERVICE_POINTS,
     SMART_CHARGE_SERVICES,
     SOLAR_SURPLUS_FORECASTS,
     TOU_SCHEDULES,
     USAGE_DETAILS,
+    USER_INVITATIONS,
     VEHICLE_CHARGE_SETTINGS,
     BanArgs,
     CanArgs,
@@ -50,7 +61,10 @@ from ._endpoints import (
     EanArgs,
     Endpoint,
     EpexArgs,
+    ExportArgs,
     FlagArgs,
+    InvoiceArgs,
+    InvoicesArgs,
     MeterReadsArgs,
     MonthArgs,
     NoArgs,
@@ -77,12 +91,16 @@ from .exceptions import (
 )
 from .models import (
     AccountBalance,
+    AssetBrandsResponse,
     BillingPeriodUsage,
     BudgetBillingPlanDetails,
+    BusinessAgreementDetail,
     ChargingSessionChargeSettings,
     ChargingSessionDetails,
     ChargingSessionsPage,
     ChargingSessionsSummary,
+    CommunicationPreferencesResponse,
+    CustomerAccountDetail,
     CustomerAccountRelations,
     ElectricVehiclesResponse,
     EnergyContractsResponse,
@@ -94,15 +112,19 @@ from .models import (
     HappyHourEvent,
     HappyHourMonthReport,
     HappyHourServiceStatus,
+    InvoicesPage,
     MeterReadsResponse,
     MonthlyBilledBudget,
     MonthlyPeaks,
     PricesResponse,
+    RewardBalanceDetails,
+    RewardsPayoutsResponse,
     ServicePoint,
     ServicePointsResponse,
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
+    UserInvitationsResponse,
     VehicleChargeSettings,
 )
 
@@ -470,6 +492,99 @@ class EngieBeClient:
         args = EpexArgs(from_dt=from_dt, to_dt=to_dt, granularity=granularity)
         return await self._call(EPEX_PRICES, args)
 
+    async def async_get_customer_account(
+        self,
+        customer_account_number: str,
+    ) -> CustomerAccountDetail:
+        """Fetch the profile and contact details of a customer account."""
+        return await self._call(CUSTOMER_ACCOUNT_DETAIL, CanArgs(can=customer_account_number))
+
+    async def async_get_user_invitations(self) -> UserInvitationsResponse:
+        """Fetch the user invitations of the authenticated user."""
+        return await self._call(USER_INVITATIONS, NoArgs())
+
+    async def async_get_customer_account_user_invitations(
+        self,
+        customer_account_number: str,
+    ) -> UserInvitationsResponse:
+        """Fetch the user invitations of a customer account."""
+        args = CanArgs(can=customer_account_number)
+        return await self._call(CUSTOMER_ACCOUNT_USER_INVITATIONS, args)
+
+    async def async_get_invoices(
+        self,
+        customer_account_number: str,
+        *,
+        page_number: int = 0,
+        page_size: int = 20,
+    ) -> InvoicesPage:
+        """Fetch one page of the invoices of a customer account, oldest first.
+
+        ``page_number`` is 0-based. The page metadata holds the total number
+        of invoices and pages.
+        """
+        args = InvoicesArgs(
+            can=customer_account_number, page_number=page_number, page_size=page_size
+        )
+        return await self._call(INVOICES, args)
+
+    async def async_get_invoice_document(self, invoice_id: str) -> bytes:
+        """Download the PDF document of an invoice. Returns the raw PDF bytes."""
+        return await self._call(INVOICE_DOCUMENT, InvoiceArgs(invoice_id=invoice_id))
+
+    async def async_export_charging_sessions(
+        self,
+        customer_account_number: str,
+        start_date: date,
+        end_date: date,
+        *,
+        csv: bool = False,
+    ) -> bytes:
+        """Export the charging sessions of a customer account in a date range.
+
+        Returns XLSX bytes by default, CSV bytes when ``csv`` is true.
+        """
+        args = ExportArgs(
+            can=customer_account_number,
+            start_date=start_date,
+            end_date=end_date,
+            csv=csv,
+        )
+        return await self._call(CHARGING_SESSIONS_EXPORT, args)
+
+    async def async_get_asset_brands(self) -> AssetBrandsResponse:
+        """Fetch the EV catalog of vehicle and charger brands."""
+        return await self._call(ASSET_BRANDS, NoArgs())
+
+    async def async_get_communication_preferences(
+        self,
+        customer_account_number: str,
+    ) -> CommunicationPreferencesResponse:
+        """Fetch the notification communication preferences of a customer account."""
+        args = CanArgs(can=customer_account_number)
+        return await self._call(COMMUNICATION_PREFERENCES, args)
+
+    async def async_get_reward_balance(
+        self,
+        customer_account_number: str,
+    ) -> RewardBalanceDetails:
+        """Fetch the open reward balance and payout threshold of a customer account."""
+        return await self._call(REWARD_BALANCE, CanArgs(can=customer_account_number))
+
+    async def async_get_reward_payouts(
+        self,
+        customer_account_number: str,
+    ) -> RewardsPayoutsResponse:
+        """Fetch the reward payout history of a customer account."""
+        return await self._call(REWARD_PAYOUTS, CanArgs(can=customer_account_number))
+
+    async def async_get_business_agreement(
+        self,
+        business_agreement_number: str,
+    ) -> BusinessAgreementDetail:
+        """Fetch the detail record of a business agreement, with its addresses."""
+        return await self._call(BUSINESS_AGREEMENT_DETAIL, BanArgs(ban=business_agreement_number))
+
     def _raise_if_closed(self) -> None:
         if self._closed:
             msg = "Client is closed. Create a new EngieBeClient"
@@ -485,12 +600,13 @@ class EngieBeClient:
         self,
         user_agent: str,
         extra: dict[str, str] | None,
+        accept: str | None,
         *,
         with_auth: bool,
     ) -> dict[str, str]:
         headers = {
             "User-Agent": user_agent,
-            "Accept": "application/json, application/problem+json",
+            "Accept": accept or "application/json, application/problem+json",
         }
         if with_auth:
             headers["authorization"] = self._tokens.bearer()
@@ -502,7 +618,11 @@ class EngieBeClient:
         def raise_error(err: EngieBeCommunicationError) -> NoReturn:
             endpoint.raise_error(err, args)
 
-        raw = await self._request_json_authenticated(endpoint.build(args), raise_error)
+        wire = endpoint.build(args)
+        if endpoint.binary:
+            raw_bytes = await self._request_bytes_authenticated(wire, raise_error)
+            return endpoint.parse(raw_bytes, args)
+        raw = await self._request_json_authenticated(wire, raise_error)
         return endpoint.parse(raw, args)
 
     async def _request_json_authenticated(
@@ -520,7 +640,9 @@ class EngieBeClient:
             await self._tokens.ensure_fresh()
         for attempt in range(2):
             with_auth = not wire.optional_auth or self._tokens.access_token is not None
-            headers = self._build_headers(wire.user_agent, wire.extra_headers, with_auth=with_auth)
+            headers = self._build_headers(
+                wire.user_agent, wire.extra_headers, wire.accept, with_auth=with_auth
+            )
             try:
                 return await _transport.request_json(
                     self._ensure_session(),
@@ -531,6 +653,41 @@ class EngieBeClient:
                     json_body=wire.json_body,
                     timeout=self._request_timeout,
                     expect_body=wire.expect_body,
+                )
+            except EngieBeCommunicationError as err:
+                raise_error(err)
+            except EngieBeAuthenticationError as err:
+                if attempt or not with_auth:
+                    raise
+                _LOGGER.debug("request unauthorized (401): refreshing tokens and retrying")
+                try:
+                    await self.async_refresh_token()
+                except EngieBeError as refresh_err:
+                    raise refresh_err from err
+        raise AssertionError  # pragma: no cover
+
+    async def _request_bytes_authenticated(
+        self,
+        wire: WireRequest,
+        raise_error: Callable[[EngieBeCommunicationError], NoReturn],
+    ) -> bytes:
+        """Make a binary request, refreshing on 401 like the JSON path."""
+        self._raise_if_closed()
+        if not wire.optional_auth:
+            await self._tokens.ensure_fresh()
+        for attempt in range(2):
+            with_auth = not wire.optional_auth or self._tokens.access_token is not None
+            headers = self._build_headers(
+                wire.user_agent, wire.extra_headers, wire.accept, with_auth=with_auth
+            )
+            try:
+                return await _transport.request_bytes(
+                    self._ensure_session(),
+                    method=wire.method,
+                    url=wire.url,
+                    headers=headers,
+                    params=wire.params,
+                    timeout=self._request_timeout,
                 )
             except EngieBeCommunicationError as err:
                 raise_error(err)

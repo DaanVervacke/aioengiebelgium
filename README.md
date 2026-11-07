@@ -196,6 +196,17 @@ A non-zero count means the response is incomplete.
 | `async_get_charging_session(session_id)` | `ChargingSessionDetails` | One charging session with the energy charged per interval. Smart Charge sessions also carry whether they reached their target. |
 | `async_get_charging_sessions_summary(customer_account_number, start_date, end_date)` | `ChargingSessionsSummary` | Charging totals per calendar month: session count, energy of `smart_charging` sessions and of `public` sessions, cost and reward. |
 | `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
+| `async_get_customer_account(customer_account_number)` | `CustomerAccountDetail` | Profile and contact details of a customer account. The customer account number comes from `CustomerAccount.customer_account_number`. |
+| `async_get_user_invitations()` | `UserInvitationsResponse` | User invitations of the authenticated user. |
+| `async_get_customer_account_user_invitations(customer_account_number)` | `UserInvitationsResponse` | User invitations scoped to one customer account. |
+| `async_get_invoices(customer_account_number, *, page_number=0, page_size=20)` | `InvoicesPage` | One page of the invoices of a customer account, oldest first, with amounts, status, documents, billing periods and payment references. `page_number` is 0-based. |
+| `async_get_invoice_document(invoice_id)` | `bytes` | The PDF document of an invoice as raw bytes. `invoice_id` is `Invoice.invoice_id`. |
+| `async_export_charging_sessions(customer_account_number, start_date, end_date, *, csv=False)` | `bytes` | Charging sessions in a date range as a file: XLSX bytes by default, CSV bytes with `csv=True`. |
+| `async_get_asset_brands()` | `AssetBrandsResponse` | The EV catalog of vehicle and charger brands with their connectivity. |
+| `async_get_communication_preferences(customer_account_number)` | `CommunicationPreferencesResponse` | Notification communication preferences as a tree of categories, items and channels. |
+| `async_get_reward_balance(customer_account_number)` | `RewardBalanceDetails` | The open reward balance and the payout threshold. |
+| `async_get_reward_payouts(customer_account_number)` | `RewardsPayoutsResponse` | The reward payout history of a customer account. |
+| `async_get_business_agreement(business_agreement_number)` | `BusinessAgreementDetail` | The detail record of a business agreement: status, protected-customer flag and address block. |
 
 ### Service actions
 

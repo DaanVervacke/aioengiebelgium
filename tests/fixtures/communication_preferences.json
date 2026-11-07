@@ -1,0 +1,524 @@
+{
+ "items": [
+  {
+   "categories": [
+    {
+     "categoryId": 5102,
+     "categoryName": "REMINDER_MESSAGES",
+     "status": true,
+     "items": [
+      {
+       "itemId": 1803,
+       "itemName": "BILLING.SMARTAPP_INV_NOTIF",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 1804,
+       "itemName": "BILLING.SMARTAPP_INV_OVERDUE",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5702,
+       "itemName": "BILLING.SMARTAPP_INV_PAID",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 1752,
+       "itemName": "ENERGY_MANAGER_REMINDER_DEFAULT_OPT_IN",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        },
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 5152,
+     "categoryName": "USAGE_INSIGHTS",
+     "status": true,
+     "items": [
+      {
+       "itemId": 1,
+       "itemName": "BUDGET_OPTIMIZER",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 4,
+       "itemName": "DASHBOARD_M1",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 3502,
+       "itemName": "ENERGY_SCORE_REMINDER",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 2,
+       "itemName": "MONTHLY_CONSUMPTION_COMPARISON",
+       "status": false,
+       "channels": [
+        {
+         "enabled": false,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 7603,
+       "itemName": "SMART_APP_SEDUCTION_EMAIL_MID_BILLING_CYCLE_CUSTOMER",
+       "status": false,
+       "channels": [
+        {
+         "enabled": false,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 7503,
+       "itemName": "SMART_APP_SEDUCTION_EMAIL_NEW_CUSTOMER",
+       "status": false,
+       "channels": [
+        {
+         "enabled": false,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5806,
+       "itemName": "WEEKLY_CONSUMPTION_RECAP",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 1652,
+     "categoryName": "EV",
+     "status": true,
+     "items": [
+      {
+       "itemId": 5606,
+       "itemName": "EV_BLOCKING_INTERVENTION",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5752,
+       "itemName": "EV_ONBOARDING_ENODE",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 7502,
+       "itemName": "EV_ONBOARDING_ENODE_FOLLOWUP",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5609,
+       "itemName": "EV_UNABLE_TO_MEET_CHARGING_TARGET",
+       "status": false,
+       "channels": [
+        {
+         "enabled": false,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5608,
+       "itemName": "EV_UNABLE_TO_START_CHARGING",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5607,
+       "itemName": "EV_UNABLE_TO_STOP_CHARGING",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 1602,
+     "categoryName": "ENERGY_MANAGER_REMINDER",
+     "status": true,
+     "items": [
+      {
+       "itemId": 1754,
+       "itemName": "ENERGY_MANAGER_REMINDER_DEFAULT_OPT_OUT",
+       "status": false,
+       "channels": [
+        {
+         "enabled": false,
+         "type": "EMAIL"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 1752,
+     "categoryName": "HAPPY_HOURS",
+     "status": true,
+     "items": [
+      {
+       "itemId": 1852,
+       "itemName": "HAPPY_HOURS_REWARD_EMAIL",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5152,
+       "itemName": "PS.HH_DEACTIVATION",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5153,
+       "itemName": "PS.HH_NO_LONGER_ELIGIBLE",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5203,
+       "itemName": "PS.HH_REQUESTED_15D",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5202,
+       "itemName": "PS.HH_ONBOARDING",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5204,
+       "itemName": "PS.HH_EVENT_1DAY",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        },
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5205,
+       "itemName": "PS.HH_EVENT_1HOUR",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5452,
+       "itemName": "PS.HH_NO_P4_ACTION_NEEDED",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5154,
+       "itemName": "PS.HH_REWARD",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        },
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5206,
+       "itemName": "PS.HH_START_EVENT",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 3,
+     "categoryName": "BILLING.BBP_PROTOCOL",
+     "status": true,
+     "items": [
+      {
+       "itemId": 3,
+       "itemName": "BILLING.BBP_PROTOCOL",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        },
+        {
+         "enabled": true,
+         "type": "LETTER"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 5202,
+     "categoryName": "HOME_DATA_EV_INDICATORS",
+     "status": true,
+     "items": [
+      {
+       "itemId": 5352,
+       "itemName": "HOME_DATA_EV_ACQUISITION_PP",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5252,
+       "itemName": "HOME_DATA_EV_SIMULATION_WEB",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 5253,
+     "categoryName": "KOOPKRACHT",
+     "status": true,
+     "items": [
+      {
+       "itemId": 5805,
+       "itemName": "SALES.WITHDRAWAL_NEW_CONTRACT",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryId": 5252,
+     "categoryName": "SMARTBATTERY",
+     "status": true,
+     "items": [
+      {
+       "itemId": 5802,
+       "itemName": "PS.SMARTBATTERY_DEACTIVATION",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5803,
+       "itemName": "PS.SMARTBATTERY_NO_LONGER_ELIGIBLE",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 5804,
+       "itemName": "PS.SMARTBATTERY_ONBOARDING",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "categoryName": "Uncategorized",
+     "status": true,
+     "items": [
+      {
+       "itemId": 1702,
+       "itemName": "EV_DOUBLE_CONFIRMATION_MAIL",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      },
+      {
+       "itemId": 7553,
+       "itemName": "CAPTAR.PEAK_WEEK1",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 7554,
+       "itemName": "CAPTAR.PEAK_WEEK2TO4",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "PUSH_NOTIFICATION"
+        }
+       ]
+      },
+      {
+       "itemId": 5852,
+       "itemName": "PS.SMARTBATTERY_REWARD",
+       "status": true,
+       "channels": [
+        {
+         "enabled": true,
+         "type": "EMAIL"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "allCommunicationsPaused": false,
+   "pausedChannels": []
+  }
+ ]
+}

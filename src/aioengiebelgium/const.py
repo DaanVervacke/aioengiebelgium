@@ -13,9 +13,11 @@ BOOLEAN_FEATURE_FLAG_BASE_URL = (
 BILLING_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v1"
 BILLING_V2_BASE_URL = "https://api.engie.be/engie/ms/billing/customer/v2"
 BUSINESS_AGREEMENTS_BASE_URL = "https://api.engie.be/engie/ms/business-agreements/customer/v1"
+COMMUNICATIONS_V2_BASE_URL = "https://api.engie.be/engie/ms/communications/customer/v2"
 EPEX_BASE_URL = "https://api.engie.be/engie/ms/pricing/v1/public/prices/epex"
 EV_BASE_URL = "https://api.engie.be/engie/ms/ev/customer/v1"
 EV_V2_BASE_URL = "https://api.engie.be/engie/ms/ev/customer/v2"
+REWARDS_BASE_URL = "https://api.engie.be/engie/ms/rewards/customer/v1"
 
 DEFAULT_CLIENT_ID = "R0PQyUdjO5B2tBaRnltgitVnnUmjGyld"
 REDIRECT_URI = "be.engie.smart://login-callback/nl"
@@ -30,7 +32,7 @@ DYNAMIC_ENERGY_PRODUCTS: frozenset[str] = frozenset({"DYNAMIC"})
 
 FEATURE_FLAG_PLATFORM = "android"
 FEATURE_FLAG_PLATFORM_VERSION = "16"
-FEATURE_FLAG_APP_VERSION = "5.0.0.1168"
+FEATURE_FLAG_APP_VERSION = "5.1.0.1288"
 
 _LIB_VERSION = _pkg_version("aioengiebelgium")
 

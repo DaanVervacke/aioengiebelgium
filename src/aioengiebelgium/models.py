@@ -2,7 +2,7 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
-from typing import Literal
+from typing import Any, Literal
 from zoneinfo import ZoneInfo
 
 from .const import DELIVERY_POINT_SUFFIX, DYNAMIC_ENERGY_PRODUCTS, SolarSurplusLevel
@@ -50,6 +50,7 @@ class ConsumptionAddress:
     country_code: str | None = None
     premises_number: str | None = None
     box_number: str | None = None
+    po_box: str | None = None
     floor: str | None = None
     room_number: str | None = None
     supplement: str | None = None
@@ -122,6 +123,10 @@ class PriceSlot:
     time_of_use_slot_code: str
     price_value: float
     price_value_excl_vat: float
+    price_value_in_euro_per_kwh: float | None = None
+    price_value_in_eurocent_per_kwh: float | None = None
+    price_value_excl_vat_in_euro_per_kwh: float | None = None
+    price_value_excl_vat_in_eurocent_per_kwh: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -165,6 +170,10 @@ class ProductConfiguration:
     type: str | None = None
     green_level: str | None = None
     green_origin: str | None = None
+    care_level: str | None = None
+    duration: str | None = None
+    service_component: str | None = None
+    contract_item_time_of_use_configuration_list: tuple[Mapping[str, Any], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +185,19 @@ class EnergyContract:
     division: str
     status: str
     product_configuration: ProductConfiguration | None = None
+    contract_id: str | None = None
+    contract_item_id: str | None = None
+    contract_type: str | None = None
+    billing_contract_number: str | None = None
+    business_scenario: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    commercialization_start_date: date | None = None
+    customer_agreement_date: date | None = None
+    desired_contract_start_date: date | None = None
+    legal_contract_start_date: date | None = None
+    sales_closure: str | None = None
+    action: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -268,6 +290,7 @@ class BillingDetails:
 
     financial_transactions: tuple[FinancialTransaction, ...] = ()
     invoice_structured_communication: str | None = None
+    pending_online_payments: tuple[Mapping[str, Any], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -439,6 +462,12 @@ class HappyHourMonthReport:
     skipped_entries: int = 0
     gas: EnergyCostPair | None = None
     """Gas energy and cost for the reported month."""
+
+    energy: UsageElectricityBreakdown | None = None
+    """Electricity energy breakdown of the reported month, per TOU slot."""
+
+    costs: UsageElectricityBreakdown | None = None
+    """Electricity cost breakdown of the reported month, per TOU slot."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -730,6 +759,8 @@ class UsageTouPart:
 
     slot_code: str
     value: float = 0.0
+    percentage_of_sum: float | None = None
+    has_volume_simulation_percentage: bool | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -743,6 +774,7 @@ class UsageTouCrossPart:
     supplier_slot_code: str
     distribution_slot_code: str
     value: float = 0.0
+    percentage_of_sum: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -802,6 +834,17 @@ class MeteringConfiguration:
     register_type_configuration: str | None = None
     smart_meter_regime: str | None = None
     supplier_billing_frequency: str | None = None
+    meter_regime: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AutoProducer:
+    """Auto-producer (solar injection) installation details."""
+
+    active: bool = False
+    date_from: date | None = None
+    installation_year_before_2024: bool | None = None
+    kva: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -811,7 +854,11 @@ class ServicePointInstallation:
     installation_id: str | None = None
     rtp_component_id: str | None = None
     budget_meter: bool = False
+    budget_meter_from_date: date | None = None
     service_component: str | None = None
+    auto_producer: AutoProducer | None = None
+    energy_sharing_list: tuple[Mapping[str, Any], ...] = ()
+    gas_conversion_coefficient: float | None = None
     metering_configuration: MeteringConfiguration | None = None
 
 
@@ -833,6 +880,7 @@ class ServicePoint:
     division: str | None = None
     type: str | None = None
     charging_station: bool = False
+    ean_blocked: bool | None = None
     premises_id: str | None = None
     market_details: ServicePointMarketDetails | None = None
 
@@ -1395,3 +1443,219 @@ class ChargingSessionsSummary:
     oldest_session_reached: bool | None = None
     items: tuple[ChargingSessionsSummaryEntry, ...] = ()
     skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class ContactChannel:
+    """An email or phone contact channel of a customer account."""
+
+    address: str | None = None
+    number: str | None = None
+    country_code: str | None = None
+    standard: bool = False
+    do_not_use: bool = False
+    index: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PrimaryContact:
+    """Primary contact block of a customer account."""
+
+    address: ConsumptionAddress | None = None
+    email_address: ContactChannel | None = None
+    mobile_number: ContactChannel | None = None
+    phone_number: ContactChannel | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CustomerAccountDetail:
+    """Response from the customer-accounts/{can} endpoint."""
+
+    customer_account_number: str
+    segment: str | None = None
+    language: str | None = None
+    name: str | None = None
+    type: str | None = None
+    title: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    nick_name: str | None = None
+    partner_first_name: str | None = None
+    partner_last_name: str | None = None
+    organisation_name1: str | None = None
+    organisation_name2: str | None = None
+    gender: str | None = None
+    nationality: str | None = None
+    legal_form: str | None = None
+    birth_date: date | None = None
+    company_number: str | None = None
+    vat_number: str | None = None
+    vat_liable: bool = False
+    belgian_vat_co_contractor: bool = False
+    relevant_for_injection_invoice_vat_rule: bool = False
+    national_register_number: str | None = None
+    einvoice: str | None = None
+    primary_contact: PrimaryContact | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class UserInvitationsResponse:
+    """Response from the user-invitations endpoints. Items are raw mappings."""
+
+    items: tuple[Mapping[str, Any], ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class InvoiceDocument:
+    """A downloadable document attached to an invoice."""
+
+    document_id: str | None = None
+    document_type: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class InvoiceBillingPeriod:
+    """One division covered by an invoice's billing period."""
+
+    division: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Invoice:
+    """A single invoice of a customer account."""
+
+    invoice_id: str
+    business_agreement_number: str | None = None
+    creation_date: date | None = None
+    type: str | None = None
+    type_group: str | None = None
+    status: str | None = None
+    status_group: str | None = None
+    amount: float = 0.0
+    open_amount: float = 0.0
+    due_date: date | None = None
+    online_payment_status: str | None = None
+    available_in_zoomit: bool = False
+    documents: tuple[InvoiceDocument, ...] = ()
+    billing_period_details: tuple[InvoiceBillingPeriod, ...] = ()
+    online_payments: tuple[Mapping[str, Any], ...] = ()
+    clearing_value_date: date | None = None
+    payment_reference: str | None = None
+    posting_date: date | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class InvoicesPage:
+    """One page of the invoices endpoint."""
+
+    items: tuple[Invoice, ...] = ()
+    page_size: int | None = None
+    total_items: int | None = None
+    total_pages: int | None = None
+    page_number: int | None = None
+    maximum_bulk_download_size: int | None = None
+    maximum_download_request_size: int | None = None
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class AssetBrand:
+    """A vehicle or charger brand of the EV catalog."""
+
+    brand_id: int
+    brand_name: str | None = None
+    connectable: bool = False
+    connectivity: str | None = None
+    asset_type: str | None = None
+    logo_url: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AssetBrandsResponse:
+    """Response from the ev asset-brands endpoint."""
+
+    items: tuple[AssetBrand, ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class CommunicationChannel:
+    """One channel of a communication preference item."""
+
+    enabled: bool = False
+    type: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CommunicationPreferenceItem:
+    """A single toggleable communication preference."""
+
+    item_id: int | None = None
+    item_name: str | None = None
+    status: bool = False
+    channels: tuple[CommunicationChannel, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class CommunicationCategory:
+    """A category of communication preferences."""
+
+    category_id: int | None = None
+    category_name: str | None = None
+    status: bool = False
+    items: tuple[CommunicationPreferenceItem, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class CommunicationPreferences:
+    """One entry of the communication-preferences response."""
+
+    categories: tuple[CommunicationCategory, ...] = ()
+    all_communications_paused: bool = False
+    paused_channels: tuple[Mapping[str, Any], ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class CommunicationPreferencesResponse:
+    """Response from the communication-preferences endpoint."""
+
+    items: tuple[CommunicationPreferences, ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class RewardBalanceDetails:
+    """Response from the reward-balance-details endpoint."""
+
+    open_amount: float = 0.0
+    payout_threshold: float = 0.0
+
+
+@dataclass(frozen=True, slots=True)
+class RewardsPayoutsResponse:
+    """Response from the rewards payouts endpoint. Items are raw mappings."""
+
+    items: tuple[Mapping[str, Any], ...] = ()
+    skipped_entries: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class BusinessAgreementAddresses:
+    """Address block of the business-agreement detail endpoint."""
+
+    mrc_address_equal_to_consumption_address: bool = False
+    correspondence_address_equal_to_consumption_address: bool = False
+    correspondence_address: ConsumptionAddress | None = None
+    consumption_address: ConsumptionAddress | None = None
+    meter_reading_card_address: ConsumptionAddress | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BusinessAgreementDetail:
+    """Response from the business-agreements/{ban} endpoint."""
+
+    is_protected_customer: bool = False
+    language: str | None = None
+    status: str | None = None
+    addresses: BusinessAgreementAddresses | None = None
