@@ -824,7 +824,7 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
     "update_latest_charging_session_charge_settings": (
         _WireCase(
             id="update_latest_charging_session_charge_settings",
-            fixture_name="latest_charging_session_charge_settings.json",
+            fixture_name="update_latest_charging_session_charge_settings.json",
             call=lambda c: c.async_update_latest_charging_session_charge_settings(
                 _VEHICLE_ID,
                 departure_time_override=_DEPARTURE,
@@ -1910,7 +1910,9 @@ async def test_update_session_charge_settings_converts_to_utc_and_sends_json(
     brussels = timezone(timedelta(hours=1))
     departure = (datetime.now(UTC) + timedelta(days=1)).replace(microsecond=0)
     with aioresponses() as m:
-        m.put(_UPDATE_URL, payload=load_fixture("latest_charging_session_charge_settings.json"))
+        m.put(
+            _UPDATE_URL, payload=load_fixture("update_latest_charging_session_charge_settings.json")
+        )
         async with aiohttp.ClientSession() as session:
             client = EngieBeClient(session, access_token=_TOKEN)
             await client.async_update_latest_charging_session_charge_settings(
@@ -1942,7 +1944,9 @@ async def test_update_session_charge_settings_401_retry_preserves_body(
                 "token_type": "Bearer",
             },
         )
-        m.put(_UPDATE_URL, payload=load_fixture("latest_charging_session_charge_settings.json"))
+        m.put(
+            _UPDATE_URL, payload=load_fixture("update_latest_charging_session_charge_settings.json")
+        )
         async with aiohttp.ClientSession() as session:
             client = EngieBeClient(
                 session, access_token="expired-token", refresh_token="valid-refresh"
@@ -2017,7 +2021,9 @@ async def test_update_session_charge_settings_accepts_just_under_seven_days(
     """A departure a few minutes inside the 7-day limit is accepted."""
     departure = datetime.now(UTC) + timedelta(days=7) - timedelta(minutes=5)
     with aioresponses() as m:
-        m.put(_UPDATE_URL, payload=load_fixture("latest_charging_session_charge_settings.json"))
+        m.put(
+            _UPDATE_URL, payload=load_fixture("update_latest_charging_session_charge_settings.json")
+        )
         async with aiohttp.ClientSession() as session:
             client = EngieBeClient(session, access_token=_TOKEN)
             result = await client.async_update_latest_charging_session_charge_settings(
