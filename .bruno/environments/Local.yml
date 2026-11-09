@@ -15,6 +15,12 @@ variables:
   - name: MFA_CODE
     value: ""
     description: ""
+  - name: ENGIE_DEPARTURE_OVERRIDE
+    value: ""
+    description: ""
+  - name: ENGIE_TARGET_BATTERY_LEVEL
+    value: ""
+    description: ""
   - name: ENGIE_CLIENT_ID
     value: R0PQyUdjO5B2tBaRnltgitVnnUmjGyld
     description: ""

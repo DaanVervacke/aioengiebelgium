@@ -1,0 +1,69 @@
+info:
+  name: Latest charging session charge settings update (mutating)
+  type: http
+  seq: 3
+  tags:
+  - data
+  - mutating
+http:
+  method: PUT
+  url: '{{evV2BaseUrl}}/vehicles/{{evVehicleId}}/charging-sessions/latest/charge-settings'
+  headers:
+  - name: User-Agent
+    value: Dalvik/2.1.0 (Linux; U; Android 16; Pixel 6 Build/BP4A.251205.006)
+  - name: Accept
+    value: application/json, application/problem+json
+  - name: Content-Type
+    value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "departureTimeOverride": "{{ENGIE_DEPARTURE_OVERRIDE}}",
+        "targetBatteryLevel": {{ENGIE_TARGET_BATTERY_LEVEL}},
+        "direct": false
+      }
+  auth: inherit
+runtime:
+  scripts:
+  - type: before-request
+    code: |-
+      if (bru.getEnvVar('ENGIE_ALLOW_MUTATING') !== '1') {
+        if (req.getExecutionMode() === 'runner') { bru.runner.skipRequest(); }
+        else { throw new Error('Set ENGIE_ALLOW_MUTATING to 1 to send this request.'); }
+      }
+  - type: tests
+    code: |-
+      test("responds 200", function () {
+        expect(res.getStatus()).to.equal(200);
+      });
+
+      test("echoes the departure override", function () {
+        expect(typeof res.getBody().departureTimeOverride).to.equal('string');
+      });
+
+      test("echoes the direct flag", function () {
+        expect(typeof res.getBody().direct).to.equal('boolean');
+      });
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+docs: |-
+  MUTATING. Sets the departure time, the target battery level and the direct
+  flag of the latest charging session of one vehicle. Running this request
+  changes the customer's ENGIE Smart Charge settings.
+
+  Mirrors EngieBeClient::async_update_latest_charging_session_charge_settings.
+
+  Needs evVehicleId, which Electric vehicles seeds. Set ENGIE_DEPARTURE_OVERRIDE
+  to an ISO-8601 UTC time such as 2026-11-10T07:00:00Z, at most 7 days ahead:
+  ENGIE answers HTTP 500 to a later one. Set ENGIE_TARGET_BATTERY_LEVEL to a
+  percentage. The three fields are sent together, so read the current values
+  with Latest charging session charge settings first to keep one unchanged.
+
+  The pre-request script skips it unless ENGIE_ALLOW_MUTATING is 1, and it
+  carries no live tag. The response has the same shape as the GET.
+
+  Parsed by parsers.py into ChargingSessionChargeSettings in models.py.

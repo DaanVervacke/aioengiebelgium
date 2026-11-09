@@ -7,7 +7,7 @@ import calendar
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from http import HTTPStatus
 from typing import Any, NoReturn
 
@@ -176,6 +176,10 @@ _DIGITS_RE = re.compile(r"[0-9]+")
 _EAN_RE = re.compile(r"[0-9]+(?:_ID[0-9]+)?")
 _DELIVERY_POINT_ID_RE = re.compile(r"[0-9]+_ID[0-9]+")
 _MIN_MONTH = 1
+_MIN_BATTERY_LEVEL = 0
+_MAX_BATTERY_LEVEL = 100
+# ENGIE answers HTTP 500 to a departure override more than 7 days ahead.
+_MAX_DEPARTURE_OVERRIDE_AHEAD = timedelta(days=7)
 _MAX_MONTH = 12
 _MIN_YEAR = 2000
 _MAX_YEAR = 2100
@@ -258,6 +262,40 @@ class VehicleArgs:
 
     def __post_init__(self) -> None:
         _validate_positive_id("vehicle id", self.vehicle_id)
+
+
+@dataclass(frozen=True, slots=True)
+class UpdateSessionChargeSettingsArgs:
+    vehicle_id: int
+    departure_time_override: datetime
+    target_battery_level: int
+    direct: bool
+
+    def __post_init__(self) -> None:
+        _validate_positive_id("vehicle id", self.vehicle_id)
+        if self.departure_time_override.tzinfo is None:
+            msg = "departure_time_override must be timezone-aware"
+            raise ValueError(msg)
+        if self.departure_time_override > datetime.now(UTC) + _MAX_DEPARTURE_OVERRIDE_AHEAD:
+            msg = (
+                "departure_time_override can be at most "
+                f"{_MAX_DEPARTURE_OVERRIDE_AHEAD.days} days ahead: {self.departure_time_override}"
+            )
+            raise ValueError(msg)
+        level = self.target_battery_level
+        if (
+            isinstance(level, bool)
+            or not isinstance(level, int)
+            or not _MIN_BATTERY_LEVEL <= level <= _MAX_BATTERY_LEVEL
+        ):
+            msg = (
+                f"target_battery_level must be an integer between {_MIN_BATTERY_LEVEL} "
+                f"and {_MAX_BATTERY_LEVEL}: {level!r}"
+            )
+            raise ValueError(msg)
+        if not isinstance(self.direct, bool):
+            msg = f"direct must be a bool: {self.direct!r}"
+            raise ValueError(msg)  # noqa: TRY004
 
 
 @dataclass(frozen=True, slots=True)
@@ -493,6 +531,16 @@ def _feature_flag_body(args: FlagArgs) -> dict[str, Any]:
     }
 
 
+def _update_session_charge_settings_body(args: UpdateSessionChargeSettingsArgs) -> dict[str, Any]:
+    return {
+        "departureTimeOverride": args.departure_time_override.astimezone(UTC).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        ),
+        "targetBatteryLevel": args.target_battery_level,
+        "direct": args.direct,
+    }
+
+
 PRICES: Endpoint[BanArgs, PricesResponse] = Endpoint(
     name="prices",
     method="GET",
@@ -723,6 +771,18 @@ LATEST_CHARGING_SESSION_CHARGE_SETTINGS: Endpoint[VehicleArgs, ChargingSessionCh
     )
 )
 
+UPDATE_LATEST_CHARGING_SESSION_CHARGE_SETTINGS: Endpoint[
+    UpdateSessionChargeSettingsArgs, ChargingSessionChargeSettings
+] = Endpoint(
+    name="update_latest_charging_session_charge_settings",
+    method="PUT",
+    url=lambda a: (
+        f"{EV_V2_BASE_URL}/vehicles/{a.vehicle_id}/charging-sessions/latest/charge-settings"
+    ),
+    json_body=_update_session_charge_settings_body,
+    parse=lambda raw, _a: parse_charging_session_charge_settings(raw),
+)
+
 CHARGING_SESSIONS: Endpoint[ChargingSessionsArgs, ChargingSessionsPage] = Endpoint(
     name="charging_sessions",
     method="GET",
@@ -883,6 +943,7 @@ CATALOG: tuple[Endpoint[Any, Any], ...] = (
     VEHICLE_CHARGE_SETTINGS,
     LATEST_CHARGING_SESSION,
     LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
+    UPDATE_LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
     CHARGING_SESSIONS,
     CHARGING_SESSION,
     CHARGING_SESSIONS_SUMMARY,
