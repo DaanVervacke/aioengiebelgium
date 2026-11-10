@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Before 1.0, breaking changes ship as minor bumps.
 
+## [0.14.0] - 2026-11-10
+
+### Bug Fixes
+
+- Set asyncio_default_fixture_loop_scope to function
+
+### Documentation
+
+- Drop semicolon from charge settings table cell
+
+### Features
+
+- Add async_update_latest_charging_session_charge_settings (#27)
+
+### Maintenance
+
+- Bump astral-sh/setup-uv (#23)
+- Bump the dev-dependencies group with 3 updates
+- Bump pytest-asyncio from 1.4.1 to 1.4.1.post1
+- Bump types-pyyaml
+- Bump the dev-dependencies group with 3 updates (#24)
+- Verify pr labels on fork pull requests (#28)
+
 ## [0.13.0] - 2026-11-07
 
 ### Bug Fixes
@@ -287,7 +310,8 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Initial release.
 
-[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/DaanVervacke/aioengiebelgium/compare/v0.10.0...v0.11.0
