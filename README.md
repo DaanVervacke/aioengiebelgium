@@ -216,7 +216,7 @@ These calls change the customer's ENGIE service. They were built from the ENGIE 
 | --- | --- | --- |
 | `async_activate_happy_hour_service(business_agreement_number)` | `HappyHourServiceStatus` | Activates the happy hour service and returns its new status. Check `async_get_happy_hour_eligibility` first. An `EngieBeInvalidResponseError` after activation can still mean the activation worked, so confirm with `async_get_happy_hour_service_status`. |
 | `async_cancel_happy_hour_service(business_agreement_number)` | `None` | Cancels the happy hour service. ENGIE returns no body. |
-| `async_update_latest_charging_session_charge_settings(vehicle_id, *, departure_time_override, target_battery_level, direct=False)` | `ChargingSessionChargeSettings` | Set the departure time, target battery level and direct-charging flag of the latest charging session. Changes the customer's Smart Charge settings. The departure must be timezone-aware and at most 7 days ahead (ENGIE answers HTTP 500 beyond that); the three values are always sent together. |
+| `async_update_latest_charging_session_charge_settings(vehicle_id, *, departure_time_override, target_battery_level, direct=False)` | `ChargingSessionChargeSettings` | Set the departure time, target battery level and direct-charging flag of the latest charging session. Changes the customer's Smart Charge settings. The departure must be timezone-aware and at most 7 days ahead (ENGIE answers HTTP 500 beyond that). The three values are always sent together. |
 
 ### Exceptions
 
