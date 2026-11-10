@@ -178,7 +178,6 @@ _DELIVERY_POINT_ID_RE = re.compile(r"[0-9]+_ID[0-9]+")
 _MIN_MONTH = 1
 _MIN_BATTERY_LEVEL = 0
 _MAX_BATTERY_LEVEL = 100
-# ENGIE answers HTTP 500 to a departure override more than 7 days ahead.
 _MAX_DEPARTURE_OVERRIDE_AHEAD = timedelta(days=7)
 _MAX_MONTH = 12
 _MIN_YEAR = 2000
