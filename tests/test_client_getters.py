@@ -6,7 +6,7 @@ import json
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import Any
 
@@ -77,6 +77,7 @@ _ClientCall = Callable[[EngieBeClient], Awaitable[object]]
 _BAN = "000000000001"
 _CAN = "1500000001"
 _VEHICLE_ID = 10001
+_DEPARTURE = (datetime.now(UTC) + timedelta(days=2)).replace(microsecond=0)
 _SESSION_ID = 200001
 _EAN = "541448860000000001_ID1"
 _DELIVERY_POINT_ID = "541448860000000001_ID1"
@@ -818,6 +819,27 @@ _WIRE_CASES: dict[str, tuple[_WireCase, ...]] = {
             url=f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charging-sessions/latest/charge-settings",
             expected_params={},
             expected_user_agent=USER_AGENT_NATIVE,
+        ),
+    ),
+    "update_latest_charging_session_charge_settings": (
+        _WireCase(
+            id="update_latest_charging_session_charge_settings",
+            fixture_name="update_latest_charging_session_charge_settings.json",
+            call=lambda c: c.async_update_latest_charging_session_charge_settings(
+                _VEHICLE_ID,
+                departure_time_override=_DEPARTURE,
+                target_battery_level=80,
+                direct=False,
+            ),
+            request_method="PUT",
+            url=f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charging-sessions/latest/charge-settings",
+            expected_params={},
+            expected_user_agent=USER_AGENT_NATIVE,
+            expected_json={
+                "departureTimeOverride": _DEPARTURE.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "targetBatteryLevel": 80,
+                "direct": False,
+            },
         ),
     ),
     "charging_sessions": (
@@ -1876,3 +1898,135 @@ async def test_invoice_document_401_retry_returns_bytes() -> None:
     assert gets[0].kwargs["headers"]["authorization"] == f"Bearer {_TOKEN}"
     assert gets[0].kwargs["headers"]["Accept"] == "application/pdf"
     assert gets[1].kwargs["headers"]["authorization"] == "Bearer new-access"
+
+
+_UPDATE_URL = f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charging-sessions/latest/charge-settings"
+
+
+async def test_update_session_charge_settings_converts_to_utc_and_sends_json(
+    load_fixture: LoadFixture,
+) -> None:
+    """A non-UTC departure is sent as UTC with a Z suffix, with a JSON content type."""
+    brussels = timezone(timedelta(hours=1))
+    departure = (datetime.now(UTC) + timedelta(days=1)).replace(microsecond=0)
+    with aioresponses() as m:
+        m.put(
+            _UPDATE_URL, payload=load_fixture("update_latest_charging_session_charge_settings.json")
+        )
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            await client.async_update_latest_charging_session_charge_settings(
+                _VEHICLE_ID,
+                departure_time_override=departure.astimezone(brussels),
+                target_battery_level=100,
+                direct=True,
+            )
+        ((_, (request,)),) = m.requests.items()
+    assert request.kwargs["json"] == {
+        "departureTimeOverride": departure.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "targetBatteryLevel": 100,
+        "direct": True,
+    }
+    assert request.kwargs["headers"]["Content-Type"] == "application/json"
+
+
+async def test_update_session_charge_settings_401_retry_preserves_body(
+    load_fixture: LoadFixture,
+) -> None:
+    """The write retries once with the rotated token and the very same JSON body."""
+    with aioresponses() as m:
+        m.put(_UPDATE_URL, status=401)
+        m.post(
+            _TOKEN_URL,
+            payload={
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "token_type": "Bearer",
+            },
+        )
+        m.put(
+            _UPDATE_URL, payload=load_fixture("update_latest_charging_session_charge_settings.json")
+        )
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(
+                session, access_token="expired-token", refresh_token="valid-refresh"
+            )
+            await client.async_update_latest_charging_session_charge_settings(
+                _VEHICLE_ID, departure_time_override=_DEPARTURE, target_battery_level=80
+            )
+        first, retry = m.requests["PUT", URL(_UPDATE_URL)]
+    assert retry.kwargs["json"] == first.kwargs["json"]
+    assert retry.kwargs["headers"]["authorization"] == "Bearer new-access"
+
+
+async def test_update_session_charge_settings_raises_on_error_status() -> None:
+    """The HTTP 500 ENGIE answers for an out-of-range request surfaces with its status."""
+    with aioresponses() as m:
+        m.put(_UPDATE_URL, status=500)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            with pytest.raises(EngieBeCommunicationError) as excinfo:
+                await client.async_update_latest_charging_session_charge_settings(
+                    _VEHICLE_ID, departure_time_override=_DEPARTURE, target_battery_level=80
+                )
+    assert excinfo.value.status == HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        pytest.param({"vehicle_id": 0}, "vehicle id", id="vehicle-id-zero"),
+        pytest.param(
+            {"departure_time_override": datetime(2030, 1, 1, 7, 0)},  # noqa: DTZ001
+            "timezone-aware",
+            id="naive-datetime",
+        ),
+        pytest.param(
+            {"departure_time_override": datetime.now(UTC) + timedelta(days=7, hours=1)},
+            "at most 7 days",
+            id="more-than-seven-days",
+        ),
+        pytest.param({"target_battery_level": -1}, "between 0 and 100", id="level-below-range"),
+        pytest.param({"target_battery_level": 101}, "between 0 and 100", id="level-above-range"),
+        pytest.param({"target_battery_level": True}, "integer", id="level-bool"),
+        pytest.param({"target_battery_level": 80.5}, "integer", id="level-float"),
+        pytest.param({"direct": "yes"}, "direct must be a bool", id="direct-not-bool"),
+    ],
+)
+async def test_update_session_charge_settings_rejects_invalid_args_before_request(
+    kwargs: dict[str, Any], match: str
+) -> None:
+    """Invalid input raises ValueError and no request is sent."""
+    call: dict[str, Any] = {
+        "vehicle_id": _VEHICLE_ID,
+        "departure_time_override": _DEPARTURE,
+        "target_battery_level": 80,
+        "direct": False,
+    }
+    call.update(kwargs)
+    vehicle_id = call.pop("vehicle_id")
+    with aioresponses() as m:
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            with pytest.raises(ValueError, match=match):
+                await client.async_update_latest_charging_session_charge_settings(
+                    vehicle_id, **call
+                )
+        assert not m.requests
+
+
+async def test_update_session_charge_settings_accepts_just_under_seven_days(
+    load_fixture: LoadFixture,
+) -> None:
+    """A departure a few minutes inside the 7-day limit is accepted."""
+    departure = datetime.now(UTC) + timedelta(days=7) - timedelta(minutes=5)
+    with aioresponses() as m:
+        m.put(
+            _UPDATE_URL, payload=load_fixture("update_latest_charging_session_charge_settings.json")
+        )
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token=_TOKEN)
+            result = await client.async_update_latest_charging_session_charge_settings(
+                _VEHICLE_ID, departure_time_override=departure, target_battery_level=80
+            )
+    assert result.target_battery_level == 80

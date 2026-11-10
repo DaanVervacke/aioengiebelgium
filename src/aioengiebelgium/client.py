@@ -49,6 +49,7 @@ from ._endpoints import (
     SMART_CHARGE_SERVICES,
     SOLAR_SURPLUS_FORECASTS,
     TOU_SCHEDULES,
+    UPDATE_LATEST_CHARGING_SESSION_CHARGE_SETTINGS,
     USAGE_DETAILS,
     USER_INVITATIONS,
     VEHICLE_CHARGE_SETTINGS,
@@ -70,6 +71,7 @@ from ._endpoints import (
     NoArgs,
     PeaksArgs,
     SolarArgs,
+    UpdateSessionChargeSettingsArgs,
     UsageArgs,
     VehicleArgs,
     WireRequest,
@@ -441,6 +443,30 @@ class EngieBeClient:
         """Fetch the target battery level and departure time of the latest charging session."""
         args = VehicleArgs(vehicle_id=vehicle_id)
         return await self._call(LATEST_CHARGING_SESSION_CHARGE_SETTINGS, args)
+
+    async def async_update_latest_charging_session_charge_settings(
+        self,
+        vehicle_id: int,
+        *,
+        departure_time_override: datetime,
+        target_battery_level: int,
+        direct: bool = False,
+    ) -> ChargingSessionChargeSettings:
+        """Set the departure time, target battery level and direct flag of the latest session.
+
+        This changes the customer's ENGIE Smart Charge settings. ``departure_time_override``
+        must be timezone-aware and at most 7 days ahead, as ENGIE rejects anything later
+        with an HTTP 500. ``target_battery_level`` is a percentage from 0 to 100. The
+        three values are always sent together, so read the current settings first to
+        keep one of them unchanged.
+        """
+        args = UpdateSessionChargeSettingsArgs(
+            vehicle_id=vehicle_id,
+            departure_time_override=departure_time_override,
+            target_battery_level=target_battery_level,
+            direct=direct,
+        )
+        return await self._call(UPDATE_LATEST_CHARGING_SESSION_CHARGE_SETTINGS, args)
 
     async def async_get_charging_sessions(
         self,

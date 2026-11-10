@@ -30,6 +30,12 @@ App's API contract and have not been run against a live account. An
 still mean the activation worked, so confirm with
 ``async_get_happy_hour_service_status``.
 
+``async_update_latest_charging_session_charge_settings`` also changes the
+customer's ENGIE service (the departure time and target battery level of the
+latest Smart Charge session). It has been run against a live account. ENGIE
+accepts a departure at most 7 days ahead and answers HTTP 500 beyond that, so
+the client rejects a later one with a :class:`ValueError` before sending.
+
 .. autoclass:: aioengiebelgium.EngieBeClient
    :members:
    :special-members: __init__
