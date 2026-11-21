@@ -137,11 +137,13 @@ async def request_text(
     headers: dict[str, str] | None = None,
     data: dict[str, str] | None = None,
     params: dict[str, str] | None = None,
-    allow_redirects: bool = False,
-    raise_on_error: bool = True,
     timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, Mapping[str, str]]:
-    """Make a request and return (text, response_headers)."""
+    """Make a request and return (text, response_headers).
+
+    Redirects are not followed and error statuses raise. Call the raw
+    ``request`` for anything else.
+    """
     async with request(
         session,
         method=method,
@@ -149,8 +151,8 @@ async def request_text(
         headers=headers,
         data=data,
         params=params,
-        allow_redirects=allow_redirects,
-        raise_on_error=raise_on_error,
+        allow_redirects=False,
+        raise_on_error=True,
         timeout=timeout,
     ) as response:
         return await response.text(), response.headers

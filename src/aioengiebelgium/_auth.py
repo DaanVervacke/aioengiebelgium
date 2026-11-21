@@ -134,7 +134,6 @@ async def _auth_request(
     state: str,
     *,
     data: dict[str, str] | None = None,
-    raise_on_error: bool = True,
     timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> tuple[str, Mapping[str, str]]:
     return await request_text(
@@ -144,8 +143,6 @@ async def _auth_request(
         params={"state": state, "ui_locales": "nl"},
         headers=_BROWSER_HEADERS,
         data=data,
-        allow_redirects=False,
-        raise_on_error=raise_on_error,
         timeout=timeout,
     )
 
@@ -189,7 +186,6 @@ async def _resume_authorization(
         url=f"{AUTH_BASE_URL}/authorize/resume",
         params={"state": login_state},
         headers=_BROWSER_HEADERS,
-        allow_redirects=False,
         timeout=timeout,
     )
 
@@ -358,7 +354,6 @@ async def start_auth_flow(
         url=f"{AUTH_BASE_URL}/authorize",
         params=authorize_params,
         headers=_BROWSER_HEADERS,
-        allow_redirects=False,
         timeout=timeout,
     )
     authorize_state = _state_from_redirect(body, authorize_headers)
