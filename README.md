@@ -173,7 +173,7 @@ A non-zero count means the response is incomplete.
 | `async_get_customer_account_relations()` | `CustomerAccountRelations` | Customer account relations for the authenticated user. |
 | `async_get_monthly_peaks(business_agreement_number, year, month, *, day=None)` | `MonthlyPeaks` | Capacity tariff peaks for a given month, with the peak of the month and the earlier, lower peak of the same month that it replaced. Pass `day` to get only that day's daily peak. |
 | `async_get_happy_hour_event(business_agreement_number)` | `HappyHourEvent` | Today's and tomorrow's happy hour windows. |
-| `async_get_happy_hour_month_report(business_agreement_number, year, month)` | `HappyHourMonthReport` | The happy hour month report. |
+| `async_get_happy_hour_month_report(business_agreement_number, year, month)` | `HappyHourMonthReport` | The happy hour month report with its electricity and gas usage, cost breakdowns and the month total. |
 | `async_get_usage_details(business_agreement_number, start_date, end_date, granularity=UsageGranularity.HOURLY, *, include_simulation=False)` | `UsageDetailsResponse` | Energy usage and costs for a date range, per hour, day, month or year. Gas energy (kWh) and cost come back next to electricity when the business agreement has a gas contract. |
 | `async_get_solar_surplus_forecasts(business_agreement_number, delivery_point_id)` | `SolarSurplusForecasts` | Solar surplus forecasts for a delivery point, given as the EAN with its `_ID<n>` suffix. Raises `ValueError` for any other shape. |
 | `async_get_feature_flag(business_agreement_number, flag)` | `FeatureFlag` | Query a boolean feature flag for a business agreement. |

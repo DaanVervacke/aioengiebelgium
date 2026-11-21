@@ -726,6 +726,24 @@ def _parse_month_gas(energy: Any, cost: Any) -> EnergyCostPair | None:
     )
 
 
+def _parse_month_electricity_energy(block: Any) -> UsageElectricityBreakdown | None:
+    if not isinstance(block, dict):
+        return None
+    return UsageElectricityBreakdown(
+        offtake=_parse_usage_energy_direction(block.get("electricityOfftake")),
+        injection=_parse_usage_energy_direction(block.get("electricityInjection")),
+    )
+
+
+def _parse_month_electricity_costs(block: Any) -> UsageElectricityBreakdown | None:
+    if not isinstance(block, dict):
+        return None
+    return UsageElectricityBreakdown(
+        offtake=_parse_usage_cost_direction(block.get("electricityOfftake")),
+        injection=_parse_usage_cost_direction(block.get("electricityInjection")),
+    )
+
+
 def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
     current = None
     simulated_energy = None
@@ -733,6 +751,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
     gas = None
     month_energy = None
     month_costs = None
+    costs_total = None
     month_raw = data.get("month")
     if isinstance(month_raw, dict):
         hh = month_raw.get("happyHour")
@@ -740,9 +759,12 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
             current = _parse_happy_hour_data(hh)
         simulated_energy = _parse_simulated_energy(month_raw.get("simulatedEnergy"))
         simulated_cost = _parse_simulated_cost(month_raw.get("simulatedCost"))
-        gas = _parse_month_gas(month_raw.get("energy"), month_raw.get("cost"))
-        month_energy = _parse_usage_electricity_energy(month_raw.get("energy"))
-        month_costs = _parse_usage_electricity_costs(month_raw.get("cost"))
+        energy_raw = month_raw.get("energy")
+        cost_raw = month_raw.get("cost")
+        gas = _parse_month_gas(energy_raw, cost_raw)
+        month_energy = _parse_month_electricity_energy(energy_raw)
+        month_costs = _parse_month_electricity_costs(cost_raw)
+        costs_total = _usage_cost_value(cost_raw, "total")
 
     history, skipped = _parse_items_counted(
         data.get("history"), _parse_month_report_history_entry, "month report history"
@@ -766,6 +788,7 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
         gas=gas,
         energy=month_energy,
         costs=month_costs,
+        costs_total=costs_total,
     )
 
 

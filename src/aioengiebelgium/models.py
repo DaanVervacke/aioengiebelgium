@@ -567,6 +567,9 @@ class HappyHourMonthReport:
     costs: UsageElectricityBreakdown | None = None
     """Electricity cost breakdown of the reported month, per TOU slot."""
 
+    costs_total: float | None = None
+    """Total cost of the reported month. It is not the sum of the costs."""
+
 
 @dataclass(frozen=True, slots=True)
 class FeatureFlag:

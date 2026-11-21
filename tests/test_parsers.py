@@ -52,6 +52,7 @@ from aioengiebelgium.models import (
     SimulatedEnergyFlow,
     SmartChargeOutcome,
     TouCombinedSlot,
+    UsageElectricityBreakdown,
     VehicleCapabilities,
     VehicleChargeSettings,
     VehicleChargeState,
@@ -486,11 +487,46 @@ def test_parse_happy_hour_month_report_dual_fuel_gas(load_fixture: LoadFixture) 
     assert result.simulated_energy.gas == SimulatedEnergyFlow(kwh=314.934)
     assert result.simulated_cost is not None
     assert result.simulated_cost.gas == SimulatedCostFlow(amount=32.521)
+    assert result.energy is not None
+    assert result.energy.offtake is not None
+    assert result.energy.offtake.kwh_sum == 228.792
+    assert result.energy.injection is not None
+    assert result.energy.injection.kwh_sum == 155.217
+    assert result.costs is not None
+    assert result.costs.offtake is not None
+    assert result.costs.offtake.amount_sum == 59.492
+    assert result.costs.injection is not None
+    assert result.costs.injection.amount_sum == 11.364
+    assert result.costs.netto is None
+    assert result.costs_total == 73.143
     assert len(result.history) == 13
     first = result.history[0]
     assert first.year_month == date(2023, 9, 1)
     assert first.gas == EnergyCostPair(kwh=1192.578, cost=65.224)
     assert result.skipped_entries == 0
+
+
+def test_parse_happy_hour_month_report_malformed_electricity_blocks() -> None:
+    result = parse_happy_hour_month_report(
+        {
+            "month": {
+                "energy": "bogus",
+                "cost": "bogus",
+            },
+        }
+    )
+
+    assert result.energy is None
+    assert result.costs is None
+    assert result.costs_total is None
+
+
+def test_parse_happy_hour_month_report_empty_electricity_blocks() -> None:
+    result = parse_happy_hour_month_report({"month": {"energy": {}, "cost": {}}})
+
+    assert result.energy == UsageElectricityBreakdown()
+    assert result.costs == UsageElectricityBreakdown()
+    assert result.costs_total is None
 
 
 def test_parse_happy_hour_month_report_gas_from_one_block_only() -> None:
