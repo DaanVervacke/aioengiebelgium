@@ -891,7 +891,21 @@ def test_parse_usage_details_keeps_raw_supplier_tariff_slot_codes() -> None:
             {"541448820000000001": "ELECTRICITY"},
             id="electricity",
         ),
-        pytest.param({"division": "GAS"}, {"541448820000000001": "GAS"}, id="gas"),
+        pytest.param(
+            {"division": "GAS"},
+            {"541448820000000001": "GAS"},
+            id="requested_ean_fallback",
+        ),
+        pytest.param(
+            {"division": "GAS", "ean": ""},
+            {"541448820000000001": "GAS"},
+            id="empty_payload_ean_falls_back",
+        ),
+        pytest.param(
+            {"division": "GAS", "ean": "541448860000000002_ID2"},
+            {"541448860000000002": "GAS"},
+            id="payload_ean_wins",
+        ),
         pytest.param(
             {"ean": "541448820000000001_ID1", "type": "DEREGULATED"},
             {},
@@ -900,7 +914,7 @@ def test_parse_usage_details_keeps_raw_supplier_tariff_slot_codes() -> None:
         pytest.param({"division": 7}, {}, id="non_string_division"),
     ],
 )
-def test_parse_service_point_keys_division_by_bare_requested_ean(
+def test_parse_service_point_keys_division_by_payload_ean(
     payload: dict[str, Any],
     expected: dict[str, str],
 ) -> None:
@@ -984,11 +998,13 @@ def test_parse_service_point_partial_market_details() -> None:
     assert no_installation.market_details.installation is None
 
 
-def test_parse_service_point_logs_missing_division(caplog: pytest.LogCaptureFixture) -> None:
+def test_parse_service_point_missing_division_writes_no_map_log(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     with caplog.at_level(logging.DEBUG, logger="aioengiebelgium.parsers"):
         result = parse_service_point({"ean": "541448820000000001_ID1"}, "541448820000000001_ID1")
     assert dict(result.ean_energy_types) == {}
-    assert "missing division" in caplog.text
+    assert all("energy-type" not in record.getMessage() for record in caplog.records)
 
 
 def test_parse_customer_account_relations_null_consumption_address() -> None:

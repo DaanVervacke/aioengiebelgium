@@ -1216,13 +1216,17 @@ def _parse_service_point_market_details(sub: Any) -> ServicePointMarketDetails |
 
 
 def parse_service_point(data: dict[str, Any], requested_ean: str) -> ServicePoint:
+    """Parse a service-point response.
+
+    ean_energy_types is keyed by the bare payload EAN, falling back to the
+    bare requested EAN when the payload omits it or sends an empty string.
+    """
     division = _as_str_or_none(data.get("division"))
-    if division is None:
-        _LOGGER.debug("service point: missing division, energy-type mapping left empty")
-    ean_map = {} if division is None else {bare_ean(requested_ean): division}
+    ean = _as_str_or_none(data.get("ean"))
+    ean_map = {} if division is None else {bare_ean(ean or requested_ean): division}
     return ServicePoint(
         ean_energy_types=MappingProxyType(ean_map),
-        ean=_as_str_or_none(data.get("ean")),
+        ean=ean,
         division=division,
         type=_as_str_or_none(data.get("type")),
         charging_station=bool(data.get("chargingStation")),
