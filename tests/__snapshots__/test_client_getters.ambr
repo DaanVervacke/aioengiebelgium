@@ -4194,7 +4194,7 @@
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[service_points_dual_fuel]
-  ServicePointsResponse(
+  MeteringServicePointsResponse(
     items=tuple(
       MeteringServicePoint(
         data_availability=DataAvailability(
@@ -4337,7 +4337,7 @@
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[service_points_single_electricity]
-  ServicePointsResponse(
+  MeteringServicePointsResponse(
     items=tuple(
       MeteringServicePoint(
         data_availability=DataAvailability(

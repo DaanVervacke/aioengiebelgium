@@ -69,6 +69,6 @@ docs: |-
   loadMeteringSourcesStatus is sent as the app sends it. Captures with
   true, false and without the parameter returned identical bodies.
 
-  Parsed by parsers.py into ServicePointsResponse in models.py. Each
+  Parsed by parsers.py into MeteringServicePointsResponse in models.py. Each
   source's dongleStatus, mandateStatus or status lands in
   MeteringDataSource.status.
