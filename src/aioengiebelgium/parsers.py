@@ -606,7 +606,7 @@ def parse_epex_prices(data: dict[str, Any], *, granularity_minutes: int = 60) ->
         publication_time=pub_time,
         market_date=_as_date(data.get("marketDate")),
         slot_duration=observed,
-        skipped_entries=skipped,
+        skipped_entries=skipped + dropped,
     )
 
 
