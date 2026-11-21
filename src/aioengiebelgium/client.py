@@ -209,7 +209,7 @@ class EngieBeClient:
         *,
         auth_session: aiohttp.ClientSession | None = None,
     ) -> AuthFlow:
-        """Run login steps 1-7 and return an AuthFlow awaiting the MFA code."""
+        """Run the credentials phase of the login and return an AuthFlow awaiting the MFA code."""
         self._raise_if_closed()
         auth = _transport.OwnedSession(
             auth_session if auth_session is not None else aiohttp.ClientSession(),

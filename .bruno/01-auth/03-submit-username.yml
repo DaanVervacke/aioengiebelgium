@@ -56,5 +56,5 @@ settings:
 docs: |-
   Auth step 3. Submits the username.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 3. The webauthn / passkey
+  Mirrors the credentials phase in _auth.py (script step 3). The webauthn / passkey
   form fields are sent verbatim as the Smart App sends them.

@@ -35,6 +35,6 @@ settings:
 docs: |-
   Auth step 2. Loads the identifier (username) page.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 2. The response is
+  Mirrors the credentials phase in _auth.py (script step 2). The response is
   discarded. The request exists because Auth0 expects the page load
   before the POST.

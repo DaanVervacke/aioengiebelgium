@@ -22,7 +22,7 @@ from tests.conftest import (
     _TOKEN_URL,
     _USERNAME,
     _q,
-    _register_auth_steps_1_to_7,
+    _register_credentials_phase,
     _register_submit_shortcircuit,
 )
 
@@ -39,7 +39,7 @@ async def test_debug_logs_never_contain_secrets(
 
     prices_url = f"{BILLING_BASE_URL}/business-agreements/123/supplier-energy-prices"
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await client.async_start_authentication(_USERNAME, _PASSWORD)
         code_verifier = flow._code_verifier

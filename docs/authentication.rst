@@ -2,7 +2,7 @@ Authentication
 ==============
 
 The login is a stateful two-step flow. ``async_start_authentication`` runs
-the credential steps and returns an :class:`~aioengiebelgium.AuthFlow`
+the credentials phase and returns an :class:`~aioengiebelgium.AuthFlow`
 object that awaits your MFA code. Call ``async_submit_mfa`` on that flow
 once you receive the code.
 

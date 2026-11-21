@@ -128,7 +128,7 @@ settings:
 docs: |-
   Auth step 1. Starts the PKCE flow and returns the Auth0 login page.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 1.
+  Mirrors the credentials phase in _auth.py (script step 1).
 
   The pre-request script generates state, nonce, code_verifier and
   code_challenge exactly as the PKCE derivation in _auth.py does. code_verifier

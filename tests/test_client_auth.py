@@ -68,7 +68,7 @@ from tests.conftest import (
     _password_body,
     _q,
     _redirect_body,
-    _register_auth_steps_1_to_7,
+    _register_credentials_phase,
     _register_submit_shortcircuit,
 )
 
@@ -465,7 +465,7 @@ async def test_concurrent_401_refresh_is_single_flight(
 @pytest.mark.parametrize("mfa", MfaMethod)
 async def test_start_authentication_happy_path(mfa: MfaMethod) -> None:
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m, mfa=mfa)
+        _register_credentials_phase(m, mfa=mfa)
         client = EngieBeClient()
         flow = await _start_flow(client, mfa)
 
@@ -476,7 +476,7 @@ async def test_start_authentication_happy_path(mfa: MfaMethod) -> None:
 async def test_authorize_request_carries_pkce_and_oauth_params() -> None:
     """The /authorize GET pins the PKCE challenge and OAuth wire parameters."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         (authorize,) = _recorded(m, "GET", "/authorize")
@@ -502,7 +502,7 @@ async def test_authorize_request_carries_pkce_and_oauth_params() -> None:
 async def test_login_posts_carry_credentials_and_form_fields() -> None:
     """The identifier and password POSTs pin the exact form fields sent."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         (identifier_post,) = _recorded(m, "POST", "/u/login/identifier")
@@ -531,7 +531,7 @@ async def test_entity_encoded_hidden_input_is_decoded_and_reposted() -> None:
             _q(_LOGIN_IDENTIFIER_URL),
             body=_html_fixture("auth_page_identifier_entity_encoded.html"),
         )
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         (identifier_post,) = _recorded(m, "POST", "/u/login/identifier")
@@ -583,7 +583,7 @@ async def test_auth_flow_context_exit_closes_created_session(
 ) -> None:
     """Leaving the flow's ``async with`` block without a code aborts the flow."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         async with await _start_flow(client):
             assert not created_sessions[0].closed
@@ -596,7 +596,7 @@ async def test_auth_flow_context_exit_after_submit_keeps_tokens(
 ) -> None:
     """Exiting the block after a successful submit is harmless."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         async with await _start_flow(client) as flow:
             _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -609,7 +609,7 @@ async def test_auth_flow_context_exit_after_submit_keeps_tokens(
 
 async def test_auth_flow_context_exit_keeps_injected_session_open() -> None:
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         async with aiohttp.ClientSession() as injected:
             client = EngieBeClient()
             async with await _start_flow(client, auth_session=injected):
@@ -836,7 +836,7 @@ async def test_submit_mfa_server_error_is_communication_error(
 ) -> None:
     """A server error on the MFA POST is a communication error, not an authentication error."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(_q(_mfa_submit_url(MfaMethod.SMS)), status=503, body="<html>down</html>")
@@ -867,7 +867,7 @@ async def test_submit_mfa_callback_shortcircuit(
 ) -> None:
     """Outcome A: the resume Location is the callback URI, skips passkey."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m, mfa=mfa)
+        _register_credentials_phase(m, mfa=mfa)
         client = EngieBeClient()
         flow = await _start_flow(client, mfa)
         _register_submit_shortcircuit(m, state=flow._expected_state, mfa=mfa)
@@ -882,7 +882,7 @@ async def test_submit_mfa_callback_shortcircuit(
 async def test_token_exchange_carries_code_and_verifier_matching_challenge() -> None:
     """The code exchange pins its form fields, and the verifier matches the sent challenge."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -906,7 +906,7 @@ async def test_token_exchange_carries_code_and_verifier_matching_challenge() -> 
 async def test_custom_client_id_reaches_authorize_and_token_endpoints() -> None:
     """A caller-supplied client_id is used on both the authorize GET and the token POST."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient(client_id="custom-id")
         flow = await _start_flow(client)
         _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -931,7 +931,7 @@ async def test_request_timeout_reaches_every_auth_flow_request(
 
     monkeypatch.setattr(asyncio, "timeout", _capturing_timeout)
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient(request_timeout=7.5)
         flow = await _start_flow(client)
         _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -944,7 +944,7 @@ async def test_request_timeout_reaches_every_auth_flow_request(
 async def test_submit_mfa_injected_auth_session_stays_open() -> None:
     """A successful flow never closes an injected auth session."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         async with aiohttp.ClientSession() as injected:
             client = EngieBeClient()
             flow = await _start_flow(client, auth_session=injected)
@@ -960,7 +960,7 @@ async def test_submit_mfa_state_mismatch_raises(
 ) -> None:
     """A callback echoing a foreign OAuth state is rejected and ends the flow."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(
@@ -985,7 +985,7 @@ async def test_submit_mfa_resume_to_non_callback_location_raises(
 ) -> None:
     """A resume Location that is not the callback URI is the resume-guard error."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(
@@ -1012,7 +1012,7 @@ async def test_submit_mfa_callback_prefix_without_query_raises(
 ) -> None:
     """A Location extending the callback URI without a query separator is not the callback."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(
@@ -1038,7 +1038,7 @@ async def test_submit_mfa_callback_missing_code_raises(
     created_sessions: list[aiohttp.ClientSession],
 ) -> None:
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(
@@ -1076,7 +1076,7 @@ async def test_submit_mfa_invalid_code_keeps_flow_alive_for_retry(
         fresh_state = _MFA_EMAIL_ERROR_STATE
         expected_retry_data = {"state": fresh_state, "action": "default", "code": "123456"}
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m, mfa=mfa)
+        _register_credentials_phase(m, mfa=mfa)
         client = EngieBeClient()
         flow = await _start_flow(client, mfa)
         m.post(_q(_mfa_submit_url(mfa)), status=400, body=error_page)
@@ -1101,7 +1101,7 @@ async def test_submit_mfa_same_state_back_raises_mfa_error(
 ) -> None:
     """A challenge re-render echoing the submitted state is a wrong code, even error-marker-free."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         echoed_form = (
@@ -1126,7 +1126,7 @@ async def test_submit_mfa_stateless_error_page_keeps_challenge_state(
         '<span class="ulp-input-error-message">Onjuiste code</span></form></html>'
     )
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(_q(_mfa_submit_url(MfaMethod.SMS)), status=400, body=error_page)
@@ -1148,7 +1148,7 @@ async def test_submit_mfa_formless_error_page_keeps_original_inputs(
 ) -> None:
     """A wrong-code page without any form keeps the inputs harvested at the challenge."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         error_page = '<html><span class="ulp-input-error-message">Onjuiste code</span></html>'
@@ -1171,7 +1171,7 @@ async def test_submit_mfa_unrecognized_page_is_not_a_wrong_code(
 ) -> None:
     """A body without echoed state, error marker, or fresh state is a broken flow, not MFA retry."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(_q(_mfa_submit_url(MfaMethod.SMS)), body="<html>wrong code, form returned</html>")
@@ -1187,7 +1187,7 @@ async def test_submit_mfa_token_response_missing_tokens_raises(
 ) -> None:
     """The auth-code exchange missing tokens surfaces as an auth error, not KeyError."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
 
@@ -1213,7 +1213,7 @@ async def test_abort_closes_owned_session(
     created_sessions: list[aiohttp.ClientSession],
 ) -> None:
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         assert not created_sessions[0].closed
@@ -1223,7 +1223,7 @@ async def test_abort_closes_owned_session(
 
 async def test_abort_keeps_injected_auth_session_open() -> None:
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         async with aiohttp.ClientSession() as injected:
             client = EngieBeClient()
             flow = await _start_flow(client, auth_session=injected)
@@ -1236,7 +1236,7 @@ async def test_submit_mfa_after_success_raises(
 ) -> None:
     """A second submit after a finished login raises instead of reusing the closed session."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -1252,7 +1252,7 @@ async def test_submit_mfa_after_failure_raises(
 ) -> None:
     """A submit after a non-MFA failure raises the auth error, not a bare RuntimeError."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         m.post(
@@ -1278,7 +1278,7 @@ async def test_submit_mfa_after_abort_raises(
 ) -> None:
     """A submit after an explicit abort raises instead of reusing the closed session."""
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         await flow.async_abort()
@@ -1324,7 +1324,7 @@ async def test_submit_mfa_invokes_callback() -> None:
         callback_calls.append((access, refresh))
 
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient(on_token_refresh=callback)
         flow = await _start_flow(client)
         _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -1343,7 +1343,7 @@ async def test_submit_mfa_raising_callback_is_logged_not_propagated(
         raise RuntimeError(msg)
 
     with aioresponses() as m:
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient(on_token_refresh=callback)
         flow = await _start_flow(client)
         _register_submit_shortcircuit(m, state=flow._expected_state)
@@ -1724,7 +1724,7 @@ async def test_authorize_state_read_from_location_header() -> None:
             headers={"Location": f"/u/login/identifier?state={_OAUTH_STATE}&ui_locales=nl"},
             body=_html_fixture("auth_redirect_stub_no_anchor.html"),
         )
-        _register_auth_steps_1_to_7(m)
+        _register_credentials_phase(m)
         client = EngieBeClient()
         flow = await _start_flow(client)
         await flow.async_abort()

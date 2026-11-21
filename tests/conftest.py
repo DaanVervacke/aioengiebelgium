@@ -138,8 +138,8 @@ def _mfa_submit_path(mfa: MfaMethod) -> str:
     return _mfa_submit_url(mfa).removeprefix(AUTH_BASE_URL)
 
 
-def _register_auth_steps_1_to_7(m: aioresponses, *, mfa: MfaMethod = MfaMethod.SMS) -> None:
-    """Register mocks for the credentials half of the flow (steps 1-7)."""
+def _register_credentials_phase(m: aioresponses, *, mfa: MfaMethod = MfaMethod.SMS) -> None:
+    """Register mocks for the credentials phase of the login flow."""
     m.get(_q(_AUTHORIZE_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/identifier"))
     m.get(_q(_LOGIN_IDENTIFIER_URL), body=_identifier_body(_OAUTH_STATE))
     m.post(_q(_LOGIN_IDENTIFIER_URL), body=_redirect_body(_OAUTH_STATE, "/u/login/password"))
@@ -165,7 +165,7 @@ def _register_submit_shortcircuit(
     state: str,
     mfa: MfaMethod = MfaMethod.SMS,
 ) -> None:
-    """Steps 8-13: MFA POST 302s, resume 302s to the callback URI, token exchange succeeds."""
+    """The code phase: MFA POST 302s, resume 302s to the callback URI, token exchange succeeds."""
     m.post(_q(_mfa_submit_url(mfa)), body=_redirect_body("postmfastate", "/authorize/resume"))
     m.get(
         _q(_RESUME_URL),
