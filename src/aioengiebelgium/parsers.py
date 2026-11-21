@@ -769,13 +769,13 @@ def parse_happy_hour_month_report(data: dict[str, Any]) -> HappyHourMonthReport:
     history, skipped = _parse_items_counted(
         data.get("history"), _parse_month_report_history_entry, "month report history"
     )
-    year_month = data.get("yearMonth")
+    year_month = _as_year_month(data.get("yearMonth"))
     partial_historical_data = data.get("partialHistoricalData")
     partial_year_month_data = data.get("partialYearMonthData")
     return HappyHourMonthReport(
         current=current,
         history=tuple(history),
-        year_month=year_month if isinstance(year_month, str) else None,
+        year_month=year_month,
         partial_historical_data=(
             partial_historical_data if isinstance(partial_historical_data, bool) else None
         ),
