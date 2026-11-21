@@ -7,7 +7,7 @@ from base64 import urlsafe_b64decode
 from collections import deque
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 import aiohttp
 
@@ -148,7 +148,11 @@ class TokenLifecycle:
         await self._deliver_pending()
 
     async def refresh(self) -> tuple[str, str]:
-        """Refresh tokens. Returns (new_access_token, new_refresh_token)."""
+        """Refresh tokens. Returns (new_access_token, new_refresh_token).
+
+        A caller that waited on the lock while another caller rotated
+        receives that rotated pair without a second request.
+        """
         if not self._refresh_token:
             msg = "No refresh token available"
             raise EngieBeAuthenticationError(msg)
@@ -156,12 +160,8 @@ class TokenLifecycle:
         refresh_at_entry = self._refresh_token
 
         async with self._lock:
-            if (
-                self._refresh_token != refresh_at_entry
-                and self._refresh_token is not None
-                and self._access_token is not None
-            ):
-                return self._access_token, self._refresh_token
+            if self._refresh_token != refresh_at_entry:
+                return cast("tuple[str, str]", (self._access_token, self._refresh_token))
 
             _LOGGER.debug("refresh: rotating tokens")
             access_token, refresh_token = await exchange_token(
