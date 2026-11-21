@@ -116,6 +116,16 @@ async def test_naive_datetime_raises_value_error(
             await client.async_get_epex_prices(from_dt, to_dt)
 
 
+async def test_reversed_range_raises_value_error() -> None:
+    async with aiohttp.ClientSession() as session:
+        client = EngieBeClient(session, access_token=_TOKEN)
+        with pytest.raises(ValueError, match=r"from_dt .* is after to_dt"):
+            await client.async_get_epex_prices(
+                datetime(2026, 5, 4, 22, 0, tzinfo=UTC),
+                datetime(2026, 5, 3, 22, 0, tzinfo=UTC),
+            )
+
+
 async def test_tokenless_call_omits_authorization_header(
     load_fixture: LoadFixture,
 ) -> None:

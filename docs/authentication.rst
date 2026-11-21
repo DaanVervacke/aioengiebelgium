@@ -80,10 +80,10 @@ the pair. The EPEX endpoint omits that proactive refresh.
 
 On a 401 the client refreshes and retries once. An optional-auth endpoint
 like EPEX only reaches that refresh when the token it sent was rejected:
-without a held token it sends no ``Authorization`` header, and it retries
-with no header instead of refreshing when it holds no refresh token. A 401
-on that retry raises
-:class:`~aioengiebelgium.EngieBeAuthenticationError`.
+without a held token it sends no ``Authorization`` header, and a 401 then
+raises :class:`~aioengiebelgium.EngieBeAuthenticationError` with no retry.
+A rejected held token with no refresh token retries once with no header,
+and a 401 on that retry raises the same error.
 
 Refreshes are serialized behind a lock. A request that waits on a refresh
 already in progress reuses its new tokens instead of starting another one.
