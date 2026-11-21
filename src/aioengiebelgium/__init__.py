@@ -1,12 +1,10 @@
 """Unofficial asynchronous Python library to interact with the ENGIE Belgium API."""
 
-from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
-from importlib.metadata import version as _version
-
 from ._auth import AuthFlow
 from ._slotcodes import canonicalise_slot_code
 from .client import EngieBeClient
 from .const import (
+    _LIB_VERSION,
     DEFAULT_CLIENT_ID,
     ChargeSettingMode,
     ChargingSessionSource,
@@ -158,10 +156,7 @@ from .models import (
     ean_with_delivery_point_suffix,
 )
 
-try:
-    __version__ = _version("aioengiebelgium")
-except _PackageNotFoundError:  # pragma: no cover
-    __version__ = "0.0.0"
+__version__ = _LIB_VERSION
 
 __all__ = [
     "DEFAULT_CLIENT_ID",

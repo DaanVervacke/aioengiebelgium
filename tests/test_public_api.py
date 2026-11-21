@@ -22,6 +22,11 @@ def test_all_reexports_are_identity_exports() -> None:
         )
 
 
+def test_dunder_version_is_const_lib_version() -> None:
+    """The exported version object is the one const resolved, not a second lookup."""
+    assert aioengiebelgium.__version__ is const._LIB_VERSION
+
+
 def test_all_matches_module_namespace_minus_submodules() -> None:
     """``__all__`` is exactly the public namespace, with submodules removed."""
     submodules = {name for name, value in vars(aioengiebelgium).items() if inspect.ismodule(value)}
