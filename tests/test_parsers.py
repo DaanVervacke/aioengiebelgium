@@ -47,9 +47,8 @@ from aioengiebelgium.models import (
     HappyHourEligibility,
     HappyHourServiceStatus,
     SimulatedCost,
-    SimulatedCostFlow,
     SimulatedEnergy,
-    SimulatedEnergyFlow,
+    SimulatedFlow,
     SmartChargeOutcome,
     TouCombinedSlot,
     UsageElectricityBreakdown,
@@ -436,12 +435,12 @@ def test_parse_happy_hour_month_report_energy_history(load_fixture: LoadFixture)
     assert last.electricity_injection is None
 
     assert result.simulated_energy == SimulatedEnergy(
-        electricity_offtake=SimulatedEnergyFlow(kwh=131.389),
-        electricity_injection=SimulatedEnergyFlow(kwh=708.934),
+        electricity_offtake=SimulatedFlow(value=131.389),
+        electricity_injection=SimulatedFlow(value=708.934),
     )
     assert result.simulated_cost == SimulatedCost(
-        electricity_offtake=SimulatedCostFlow(amount=10.0),
-        electricity_injection=SimulatedCostFlow(amount=10.0),
+        electricity_offtake=SimulatedFlow(value=10.0),
+        electricity_injection=SimulatedFlow(value=10.0),
         total=52.83,
     )
 
@@ -484,9 +483,9 @@ def test_parse_happy_hour_month_report_dual_fuel_gas(load_fixture: LoadFixture) 
 
     assert result.gas == EnergyCostPair(kwh=202.286, cost=25.015)
     assert result.simulated_energy is not None
-    assert result.simulated_energy.gas == SimulatedEnergyFlow(kwh=314.934)
+    assert result.simulated_energy.gas == SimulatedFlow(value=314.934)
     assert result.simulated_cost is not None
-    assert result.simulated_cost.gas == SimulatedCostFlow(amount=32.521)
+    assert result.simulated_cost.gas == SimulatedFlow(value=32.521)
     assert result.energy is not None
     assert result.energy.offtake is not None
     assert result.energy.offtake.kwh_sum == 228.792

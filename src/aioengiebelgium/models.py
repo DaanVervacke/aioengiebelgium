@@ -514,36 +514,32 @@ class MonthReportHistoryEntry:
 
 
 @dataclass(frozen=True, slots=True)
-class SimulatedEnergyFlow:
-    """A simulated kWh estimate for one flow direction."""
+class SimulatedFlow:
+    """A simulated estimate for one electricity or gas amount.
 
-    kwh: float | None = None
+    The enclosing model decides the unit.
+    """
+
+    value: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class SimulatedEnergy:
-    """Simulated (estimated) energy for the current month."""
+    """Simulated (estimated) energy in kWh for the current month."""
 
-    electricity_offtake: SimulatedEnergyFlow | None = None
-    electricity_injection: SimulatedEnergyFlow | None = None
-    gas: SimulatedEnergyFlow | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class SimulatedCostFlow:
-    """A simulated cost estimate for one flow direction."""
-
-    amount: float | None = None
+    electricity_offtake: SimulatedFlow | None = None
+    electricity_injection: SimulatedFlow | None = None
+    gas: SimulatedFlow | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class SimulatedCost:
-    """Simulated (estimated) cost for the current month."""
+    """Simulated (estimated) cost in euro for the current month."""
 
-    electricity_offtake: SimulatedCostFlow | None = None
-    electricity_injection: SimulatedCostFlow | None = None
+    electricity_offtake: SimulatedFlow | None = None
+    electricity_injection: SimulatedFlow | None = None
     total: float | None = None
-    gas: SimulatedCostFlow | None = None
+    gas: SimulatedFlow | None = None
 
 
 @dataclass(frozen=True, slots=True)

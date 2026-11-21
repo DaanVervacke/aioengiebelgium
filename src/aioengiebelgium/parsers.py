@@ -107,9 +107,8 @@ from .models import (
     ServicePointInstallation,
     ServicePointMarketDetails,
     SimulatedCost,
-    SimulatedCostFlow,
     SimulatedEnergy,
-    SimulatedEnergyFlow,
+    SimulatedFlow,
     SmartChargeOutcome,
     SolarSurplusDay,
     SolarSurplusForecasts,
@@ -677,36 +676,30 @@ def _parse_month_report_history_entry(entry: dict[str, Any]) -> MonthReportHisto
     )
 
 
-def _parse_simulated_energy_flow(raw: Any) -> SimulatedEnergyFlow | None:
+def _parse_simulated_flow(raw: Any, key: str) -> SimulatedFlow | None:
     if not isinstance(raw, dict):
         return None
-    return SimulatedEnergyFlow(kwh=_as_float_or_none(raw.get("kWh")))
+    return SimulatedFlow(value=_as_float_or_none(raw.get(key)))
 
 
 def _parse_simulated_energy(raw: Any) -> SimulatedEnergy | None:
     if not isinstance(raw, dict):
         return None
     return SimulatedEnergy(
-        electricity_offtake=_parse_simulated_energy_flow(raw.get("electricityOfftake")),
-        electricity_injection=_parse_simulated_energy_flow(raw.get("electricityInjection")),
-        gas=_parse_simulated_energy_flow(raw.get("gas")),
+        electricity_offtake=_parse_simulated_flow(raw.get("electricityOfftake"), "kWh"),
+        electricity_injection=_parse_simulated_flow(raw.get("electricityInjection"), "kWh"),
+        gas=_parse_simulated_flow(raw.get("gas"), "kWh"),
     )
-
-
-def _parse_simulated_cost_flow(raw: Any) -> SimulatedCostFlow | None:
-    if not isinstance(raw, dict):
-        return None
-    return SimulatedCostFlow(amount=_as_float_or_none(raw.get("amount")))
 
 
 def _parse_simulated_cost(raw: Any) -> SimulatedCost | None:
     if not isinstance(raw, dict):
         return None
     return SimulatedCost(
-        electricity_offtake=_parse_simulated_cost_flow(raw.get("electricityOfftake")),
-        electricity_injection=_parse_simulated_cost_flow(raw.get("electricityInjection")),
+        electricity_offtake=_parse_simulated_flow(raw.get("electricityOfftake"), "amount"),
+        electricity_injection=_parse_simulated_flow(raw.get("electricityInjection"), "amount"),
         total=_as_float_or_none(raw.get("total")),
-        gas=_parse_simulated_cost_flow(raw.get("gas")),
+        gas=_parse_simulated_flow(raw.get("gas"), "amount"),
     )
 
 

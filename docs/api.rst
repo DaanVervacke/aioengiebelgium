@@ -347,13 +347,10 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.SimulatedCost
    :members:
 
-.. autoclass:: aioengiebelgium.SimulatedCostFlow
-   :members:
-
 .. autoclass:: aioengiebelgium.SimulatedEnergy
    :members:
 
-.. autoclass:: aioengiebelgium.SimulatedEnergyFlow
+.. autoclass:: aioengiebelgium.SimulatedFlow
    :members:
 
 .. autoclass:: aioengiebelgium.SmartChargeOutcome
