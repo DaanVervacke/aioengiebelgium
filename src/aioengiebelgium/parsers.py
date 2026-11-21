@@ -1939,19 +1939,14 @@ def parse_user_invitations(data: dict[str, Any]) -> UserInvitationsResponse:
     return UserInvitationsResponse(items=items, skipped_entries=skipped)
 
 
-def _parse_invoice_document(raw: dict[str, Any]) -> InvoiceDocument | None:
-    document_id = _as_str_or_none(raw.get("documentId"))
-    if document_id is None:
-        return None
+def _parse_invoice_document(raw: dict[str, Any]) -> InvoiceDocument:
     return InvoiceDocument(
-        document_id=document_id,
+        document_id=_as_str_or_none(raw.get("documentId")),
         document_type=_as_str_or_none(raw.get("documentType")),
     )
 
 
-def _parse_invoice_billing_period(raw: dict[str, Any]) -> InvoiceBillingPeriod | None:
-    if not raw.get("division"):
-        return None
+def _parse_invoice_billing_period(raw: dict[str, Any]) -> InvoiceBillingPeriod:
     return InvoiceBillingPeriod(division=_as_str_or_none(raw.get("division")))
 
 

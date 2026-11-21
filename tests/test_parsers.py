@@ -3078,6 +3078,11 @@ _DAY_END = "2026-10-02T00:00:00+02:00"
             },
             id="meter_registers",
         ),
+        pytest.param(
+            parse_invoices,
+            {"items": [{"invoiceId": "7", "documents": [4]}]},
+            id="invoice_documents",
+        ),
     ],
 )
 def test_nested_malformed_entries_count_as_skipped(
@@ -3626,18 +3631,21 @@ def test_parse_user_invitations_passthrough_and_skip() -> None:
     assert parse_user_invitations({}).items == ()
 
 
-def test_parse_invoices_counts_nested_skips(load_fixture: LoadFixture) -> None:
+def test_parse_invoices_keeps_documents_and_periods_without_ids(load_fixture: LoadFixture) -> None:
     data = load_fixture("invoices_page.json")
-    data["items"].append({"documents": [{}]})
+    data["items"].append({})
     data["items"][0]["documents"].append({"documentType": "INVOICE"})
     data["items"][0]["billingPeriodDetails"].append({})
     page = parse_invoices(data)
     assert len(page.items) == 2
-    assert page.skipped_entries == 3
+    assert page.skipped_entries == 1
     invoice = page.items[0]
     assert invoice.invoice_id == "700000000001"
     assert invoice.amount == 102.07
-    assert invoice.documents[0].document_type == "INVOICE"
+    new_document = invoice.documents[-1]
+    assert new_document.document_id is None
+    assert new_document.document_type == "INVOICE"
+    assert invoice.billing_period_details[-1].division is None
     assert page.total_items == 46
     assert page.maximum_bulk_download_size == 50
 

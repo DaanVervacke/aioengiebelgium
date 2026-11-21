@@ -53,7 +53,7 @@ docs: |-
 
   Mirrors EngieBeClient::async_get_invoice_document.
 
-  Needs Accept: application/pdf; with the default JSON accept the API
+  Needs Accept: application/pdf. With the default JSON accept the API
   answers 406. The body is a PDF, so no JSON assertions, only status and
   content type.
 
