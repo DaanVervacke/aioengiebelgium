@@ -38,8 +38,8 @@ def _jwt_payload(token: str) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def _jwt_expiry(token: str) -> datetime | None:
-    exp = _jwt_payload(token).get("exp")
+def _jwt_expiry(payload: dict[str, Any]) -> datetime | None:
+    exp = payload.get("exp")
     if not isinstance(exp, int | float):
         return None
     try:
@@ -48,8 +48,8 @@ def _jwt_expiry(token: str) -> datetime | None:
         return None
 
 
-def _jwt_subject(token: str) -> str | None:
-    sub = _jwt_payload(token).get("sub")
+def _jwt_subject(payload: dict[str, Any]) -> str | None:
+    sub = payload.get("sub")
     return sub if isinstance(sub, str) else None
 
 
@@ -76,6 +76,14 @@ class TokenLifecycle:
         self._rotation_seq = 0
         self._pending: deque[tuple[int, str, str]] = deque()
         self._delivery: asyncio.Task[None] | None = None
+        self._expiry: datetime | None = None
+        self._subject: str | None = None
+        if access_token is not None:
+            self._cache_claims(_jwt_payload(access_token))
+
+    def _cache_claims(self, payload: dict[str, Any]) -> None:
+        self._expiry = _jwt_expiry(payload)
+        self._subject = _jwt_subject(payload)
 
     @property
     def access_token(self) -> str | None:
@@ -105,15 +113,11 @@ class TokenLifecycle:
 
     @property
     def expiry(self) -> datetime | None:
-        if self._access_token is None:
-            return None
-        return _jwt_expiry(self._access_token)
+        return self._expiry
 
     @property
     def subject(self) -> str | None:
-        if self._access_token is None:
-            return None
-        return _jwt_subject(self._access_token)
+        return self._subject
 
     def is_expired(self, now: datetime) -> bool:
         """Return True when the token's expiry is known and ``now`` is at or past it."""
@@ -187,6 +191,7 @@ class TokenLifecycle:
         """Store a rotated pair and queue its delivery (the caller holds the lock)."""
         self._access_token = access_token
         self._refresh_token = refresh_token
+        self._cache_claims(_jwt_payload(access_token))
         self._rotation_seq += 1
         if self._on_rotation is not None:
             self._pending.append((self._rotation_seq, access_token, refresh_token))

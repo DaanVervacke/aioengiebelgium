@@ -1316,6 +1316,29 @@ async def test_refresh_token_no_callback_is_fine() -> None:
     assert refresh == "new-refresh"
 
 
+async def test_refresh_rotates_the_cached_claims() -> None:
+    """A rotation replaces the cached expiry and subject with the new token's claims."""
+    exp = 1893456000
+    with aioresponses() as m:
+        m.post(
+            _q(_TOKEN_URL),
+            payload={
+                "access_token": _jwt_with_exp(exp, sub="new-subject"),
+                "refresh_token": "new-refresh",
+            },
+        )
+        client = EngieBeClient(
+            access_token=_jwt_with_exp(1000, sub="old-subject"),
+            refresh_token="old-refresh",
+        )
+        assert client.subject == "old-subject"
+        await client.async_refresh_token()
+        await client.close()
+
+    assert client.access_token_expiry == datetime.fromtimestamp(exp, tz=UTC)
+    assert client.subject == "new-subject"
+
+
 async def test_submit_mfa_invokes_callback() -> None:
     """on_token_refresh callback fires when the auth flow completes."""
     callback_calls: list[tuple[str, str]] = []
