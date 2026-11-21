@@ -20,6 +20,12 @@ _LOGGER = logging.getLogger(__name__)
 _EXPIRY_SKEW = timedelta(seconds=30)
 
 
+def _cancel_aimed_at_current_task() -> bool:
+    """Whether the running task itself is the target of the pending cancellation."""
+    task = asyncio.current_task()
+    return task is None or task.cancelling() > 0
+
+
 def _jwt_payload(token: str) -> dict[str, Any]:
     try:
         _header, payload_b64, _signature = token.split(".")
@@ -74,6 +80,24 @@ class TokenLifecycle:
     @property
     def access_token(self) -> str | None:
         return self._access_token
+
+    async def aclose(self) -> None:
+        """Wait for an in-flight delivery, so closing cannot drop queued pairs.
+
+        A close called from inside the delivery callback returns instead of
+        waiting on the callback's own task, and a delivery cancelled by
+        someone else is not re-raised onto the closer.
+        """
+        delivery = self._delivery
+        if delivery is None or asyncio.current_task() is delivery:
+            return
+        try:
+            await asyncio.shield(delivery)
+        except asyncio.CancelledError:
+            if _cancel_aimed_at_current_task():
+                raise
+        if self._delivery is delivery:
+            self._delivery = None
 
     @property
     def refresh_token(self) -> str | None:
@@ -196,8 +220,7 @@ class TokenLifecycle:
             try:
                 await on_rotation(access_token, refresh_token)
             except asyncio.CancelledError:
-                task = asyncio.current_task()
-                if task is None or task.cancelling():
+                if _cancel_aimed_at_current_task():
                     raise
                 _LOGGER.exception("on_token_refresh callback failed")
             except Exception:

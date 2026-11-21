@@ -92,6 +92,8 @@ has to log in again.
 
 The client logs an exception raised by `on_token_refresh` and continues. It does
 not re-raise it, so handle and report storage failures inside the callback.
+Closing the client waits for a delivery in flight, so a queued pair is never
+dropped by a close.
 
 ## EPEX prices
 

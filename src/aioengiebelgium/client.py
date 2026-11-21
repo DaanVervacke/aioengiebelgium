@@ -184,8 +184,13 @@ class EngieBeClient:
         return self._tokens.is_expired(now)
 
     async def close(self) -> None:
-        """Close the client. The session is closed only if this client created it."""
+        """Close the client.
+
+        Waits for an in-flight on_token_refresh delivery to finish, then
+        closes the session only if this client created it.
+        """
         self._closed = True
+        await self._tokens.aclose()
         if self._api is not None:
             await self._api.close_if_owned()
 

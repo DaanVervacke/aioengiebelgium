@@ -51,7 +51,9 @@ log in again.
 
 Deliveries to the callback are ordered and run in their own task, so
 cancelling a request does not stop them. A pair superseded before delivery
-is dropped, so the callback always ends on the newest pair.
+is dropped, so the callback always ends on the newest pair. Closing the
+client waits for a delivery in flight, so a queued pair is never dropped
+by a close.
 
 The client logs an exception raised by the callback and continues. It does
 not re-raise it, so handle and report storage failures inside the callback.

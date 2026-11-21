@@ -1456,6 +1456,114 @@ async def test_cancelling_the_delivery_task_stops_it() -> None:
         await client.close()
 
 
+async def test_close_awaits_a_stalled_token_delivery() -> None:
+    """Closing waits for an in-flight delivery instead of dropping the pair."""
+    deliveries: list[tuple[str, str]] = []
+    delivery_started = asyncio.Event()
+    release_delivery = asyncio.Event()
+
+    async def callback(access: str, refresh: str) -> None:
+        delivery_started.set()
+        await release_delivery.wait()
+        deliveries.append((access, refresh))
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=callback)
+        refresh = asyncio.ensure_future(client.async_refresh_token())
+        await delivery_started.wait()
+        closing = asyncio.ensure_future(client.close())
+        await asyncio.sleep(0)
+        assert not closing.done()
+        release_delivery.set()
+        await asyncio.wait_for(closing, timeout=5)
+        assert await asyncio.wait_for(refresh, timeout=5) == (
+            _TOKEN_RESPONSE["access_token"],
+            _TOKEN_RESPONSE["refresh_token"],
+        )
+
+    assert deliveries == [(_TOKEN_RESPONSE["access_token"], _TOKEN_RESPONSE["refresh_token"])]
+
+
+async def test_close_survives_a_delivery_cancelled_underneath(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A delivery cancelled while close waits does not push its cancel onto the closer."""
+    delivery_started = asyncio.Event()
+
+    async def callback(_access: str, _refresh: str) -> None:
+        delivery_started.set()
+        await asyncio.Event().wait()
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=callback)
+        refresh = asyncio.ensure_future(client.async_refresh_token())
+        await delivery_started.wait()
+        closing = asyncio.ensure_future(client.close())
+        await asyncio.sleep(0)
+        delivery = client._tokens._delivery
+        assert delivery is not None
+        delivery.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await refresh
+        await asyncio.wait_for(closing, timeout=5)
+
+    assert created_sessions[0].closed
+
+
+async def test_close_from_inside_the_delivery_callback_completes() -> None:
+    """A callback closing the client does not wait on its own delivery task."""
+    delivered = asyncio.Event()
+
+    async def callback(_access: str, _refresh: str) -> None:
+        await client.close()
+        delivered.set()
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=callback)
+        assert await client.async_refresh_token() == (
+            _TOKEN_RESPONSE["access_token"],
+            _TOKEN_RESPONSE["refresh_token"],
+        )
+
+        with pytest.raises(EngieBeClientClosedError):
+            await client.async_get_prices("1234567890")
+
+    assert delivered.is_set()
+
+
+async def test_cancelling_the_closer_lands_and_keeps_the_delivery() -> None:
+    """A cancel aimed at close re-raises on it, and the drain still finishes its pair."""
+    delivery_started = asyncio.Event()
+    release_delivery = asyncio.Event()
+    deliveries: list[tuple[str, str]] = []
+
+    async def callback(access: str, refresh: str) -> None:
+        delivery_started.set()
+        await release_delivery.wait()
+        deliveries.append((access, refresh))
+
+    with aioresponses() as m:
+        m.post(_q(_TOKEN_URL), payload=_TOKEN_RESPONSE)
+        client = EngieBeClient(refresh_token="old-refresh", on_token_refresh=callback)
+        refresh = asyncio.ensure_future(client.async_refresh_token())
+        await delivery_started.wait()
+        closing = asyncio.ensure_future(client.close())
+        await asyncio.sleep(0)
+        closing.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await closing
+        release_delivery.set()
+        assert await asyncio.wait_for(refresh, timeout=5) == (
+            _TOKEN_RESPONSE["access_token"],
+            _TOKEN_RESPONSE["refresh_token"],
+        )
+
+    assert deliveries == [(_TOKEN_RESPONSE["access_token"], _TOKEN_RESPONSE["refresh_token"])]
+
+
 async def test_close_closes_owned_session() -> None:
     client = EngieBeClient()
     session = client._ensure_session()
