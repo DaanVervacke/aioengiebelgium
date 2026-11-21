@@ -219,9 +219,15 @@ def _validate_positive_id(label: str, value: int) -> None:
         raise ValueError(msg)
 
 
-def _validate_date_range(start_date: date, end_date: date) -> None:
-    if start_date > end_date:
-        msg = f"start_date {start_date} is after end_date {end_date}"
+def _validate_date_range(
+    start: date,
+    end: date,
+    *,
+    start_label: str = "start_date",
+    end_label: str = "end_date",
+) -> None:
+    if start > end:
+        msg = f"{start_label} {start} is after {end_label} {end}"
         raise ValueError(msg)
 
 
@@ -495,6 +501,7 @@ class EpexArgs:
         if self.from_dt.tzinfo is None or self.to_dt.tzinfo is None:
             msg = "timezone-aware datetimes required"
             raise ValueError(msg)
+        _validate_date_range(self.from_dt, self.to_dt, start_label="from_dt", end_label="to_dt")
 
 
 def _iso_ms_z(value: datetime) -> str:

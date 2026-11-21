@@ -253,8 +253,8 @@ any request is sent:
   delivery point id must carry the suffix.
 - A month outside 1-12, a year outside 2000-2100 or a `day` outside the
   requested month.
-- A `start_date` after the `end_date`, or an EPEX datetime without a timezone.
-  The EPEX getter does not check the order of `from_dt` and `to_dt`.
+- A `start_date` after the `end_date`, an EPEX datetime without a timezone,
+  or a `from_dt` after `to_dt`.
 - A `vehicle_id` or `session_id` that is not a positive integer.
 - A negative `page_number` or a `page_size` below 1.
 - For `async_get_meter_reads`: only one of the two dates, or `latest=True`
