@@ -5,10 +5,10 @@ info:
 request:
   auth: inherit
 docs: |-
-  Auth0 PKCE + MFA login, mirroring the AuthFlow login sequence in _auth.py and
-  _run_auth_steps_8_to_13. Run 01-13 in order with the Local
-  environment selected. Step 8 needs a real code, so set MFA_CODE
-  between step 7 and step 8.
+  Auth0 PKCE + MFA login, mirroring the credentials and code phases in
+  _auth.py (start_auth_flow and AuthFlow._run_code_phase). Run 01-13 in
+  order with the Local environment selected. Step 8 needs a real code, so
+  set MFA_CODE between step 7 and step 8.
 
   Step 9 branches. See its docs: on the callback short-circuit, skip
   10-12 and go straight to 13.

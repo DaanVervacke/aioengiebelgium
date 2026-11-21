@@ -42,6 +42,6 @@ settings:
 docs: |-
   Auth step 11. Outcome B only. Declines passkey enrollment.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 11. Redirects are not
+  Mirrors the code phase in _auth.py (script step 11). Redirects are not
   followed: the chain ends at an app-scheme URL no HTTP client can
   follow, and the code is picked up by step 12 instead.

@@ -79,7 +79,7 @@ settings:
 docs: |-
   Auth step 13. Exchanges the authorization code for tokens.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 13. Needs code_verifier
+  Mirrors the code phase in _auth.py (script step 13). Needs code_verifier
   from step 1, so the whole flow must run in one session.
 
   Sets: accessToken, refreshToken. Everything in folders 03-08 reads

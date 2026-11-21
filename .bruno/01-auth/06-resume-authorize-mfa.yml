@@ -43,6 +43,6 @@ settings:
 docs: |-
   Auth step 6. Resuming the authorize transaction makes Auth0 demand MFA.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 6.
+  Mirrors the credentials phase in _auth.py (script step 6).
 
   Sets: mfaChallengeState.

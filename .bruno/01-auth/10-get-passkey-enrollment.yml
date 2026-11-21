@@ -35,4 +35,4 @@ settings:
 docs: |-
   Auth step 10. Outcome B only. Skip it if step 9 logged outcome A.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 10.
+  Mirrors the code phase in _auth.py (script step 10).

@@ -48,7 +48,7 @@ settings:
 docs: |-
   Auth step 12. Outcome B only. Yields the authorization code.
 
-  Mirrors the AuthFlow login sequence in _auth.py step 12. Uses loginState, not
+  Mirrors the code phase in _auth.py (script step 12). Uses loginState, not
   passKeyState. The code arrives in the body on some accounts and only in
   the Location header on others, so both are checked.
 

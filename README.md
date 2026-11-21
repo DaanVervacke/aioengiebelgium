@@ -162,7 +162,7 @@ finishes. A closed client raises `EngieBeClientClosedError`.
 
 | Method | Returns | Notes |
 | --- | --- | --- |
-| `async_start_authentication(username, password, mfa_method=MfaMethod.SMS, *, auth_session=None)` | `AuthFlow` | Runs login steps 1-7 and returns an `AuthFlow` awaiting the MFA code. |
+| `async_start_authentication(username, password, mfa_method=MfaMethod.SMS, *, auth_session=None)` | `AuthFlow` | Runs the credentials phase of the login and returns an `AuthFlow` awaiting the MFA code. |
 | `AuthFlow.async_submit_mfa(code)` | `tuple[str, str]` | Submits the MFA code, finishes the login and returns `(access_token, refresh_token)`. After an `EngieBeMfaError` the flow stays open, so you can submit a new code. A submit after the flow finished, including after `async_abort()`, raises `EngieBeAuthenticationError`. |
 | `AuthFlow.async_abort()` | `None` | Abandons the flow and closes the login session if the flow created it. |
 | `async with flow:` | `AuthFlow` | Calls `async_abort()` when the block exits, so an unfinished flow never leaves its login session open. |

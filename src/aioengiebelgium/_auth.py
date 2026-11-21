@@ -191,7 +191,8 @@ async def _resume_authorization(
 
 
 class AuthFlow:
-    """An in-progress login: credentials accepted (steps 1-7), MFA pending."""
+    """An in-progress login: the credentials phase is done and the MFA
+    challenge awaits the code."""
 
     def __init__(
         self,
@@ -237,7 +238,7 @@ class AuthFlow:
             msg = "The login flow already finished"
             raise EngieBeAuthenticationError(msg)
         try:
-            access_token, refresh_token = await self._run_steps_8_to_13(code)
+            access_token, refresh_token = await self._run_code_phase(code)
         except EngieBeMfaError:
             raise
         except BaseException:
@@ -255,7 +256,9 @@ class AuthFlow:
         self._finished = True
         await self._owned.close_if_owned()
 
-    async def _run_steps_8_to_13(self, mfa_code: str) -> tuple[str, str]:
+    async def _run_code_phase(self, mfa_code: str) -> tuple[str, str]:
+        """Submit the code, follow the resume redirect and trade the
+        authorization code for tokens."""
         body, mfa_headers, mfa_status = await _submit_mfa_code(
             self._session,
             self._mfa_challenge_state,
@@ -330,7 +333,7 @@ async def start_auth_flow(
     token_adopter: Callable[[str, str], Awaitable[None]],
     timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
 ) -> AuthFlow:
-    """Execute OAuth2/PKCE authorization steps 1-7 and return the pending flow."""
+    """Run the credentials phase of the OAuth2/PKCE login and return the pending flow."""
     session = owned_session.session
     state, nonce, code_verifier, code_challenge = _generate_pkce()
 
