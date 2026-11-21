@@ -145,7 +145,8 @@ keyword-only.
 
 Close the client with `await client.close()`, or use it as `async with
 EngieBeClient(...) as client:`. The session is closed only if the client created
-it. A closed client raises `EngieBeClientClosedError`.
+it. A close waits for an in-flight `on_token_refresh` delivery before it
+finishes. A closed client raises `EngieBeClientClosedError`.
 
 ### Token state
 
@@ -162,7 +163,7 @@ it. A closed client raises `EngieBeClientClosedError`.
 | Method | Returns | Notes |
 | --- | --- | --- |
 | `async_start_authentication(username, password, mfa_method=MfaMethod.SMS, *, auth_session=None)` | `AuthFlow` | Runs login steps 1-7 and returns an `AuthFlow` awaiting the MFA code. |
-| `AuthFlow.async_submit_mfa(code)` | `tuple[str, str]` | Submits the MFA code, finishes the login and returns `(access_token, refresh_token)`. After an `EngieBeMfaError` the flow stays open, so you can submit a new code. |
+| `AuthFlow.async_submit_mfa(code)` | `tuple[str, str]` | Submits the MFA code, finishes the login and returns `(access_token, refresh_token)`. After an `EngieBeMfaError` the flow stays open, so you can submit a new code. A submit after the flow finished, including after `async_abort()`, raises `EngieBeAuthenticationError`. |
 | `AuthFlow.async_abort()` | `None` | Abandons the flow and closes the login session if the flow created it. |
 | `async with flow:` | `AuthFlow` | Calls `async_abort()` when the block exits, so an unfinished flow never leaves its login session open. |
 | `async_refresh_token()` | `tuple[str, str]` | Refreshes the tokens and returns `(new_access_token, new_refresh_token)`. |
@@ -244,7 +245,7 @@ Client errors derive from `EngieBeError`, which carries an optional HTTP
 | `EngieBeTimeoutError` | `EngieBeCommunicationError` | The request timed out. Retrying a getter is safe. After a service action, check the service status before you retry. |
 | `EngieBeEpexNotPublishedError` | `EngieBeCommunicationError` | EPEX day-ahead prices are not yet published for the requested window (HTTP 404). |
 | `EngieBeInvalidResponseError` | `EngieBeError` | A response below HTTP 400 that the client cannot use: a body that is not the expected JSON object, or a status outside 2xx from a call that expects no body. |
-| `EngieBeAuthenticationError` | `EngieBeError` | Authentication errors: bad credentials, no token held, an expired or rejected token, a login page the flow cannot follow, or a token endpoint response without both tokens. |
+| `EngieBeAuthenticationError` | `EngieBeError` | Authentication errors: bad credentials, no token held, an expired or rejected token, a login page the flow cannot follow, a token endpoint response without both tokens, or an MFA submit after the flow finished. |
 | `EngieBeMfaError` | `EngieBeAuthenticationError` | MFA-related errors, such as an invalid code. |
 
 Catch a subclass before its parent. Invalid arguments raise `ValueError` before

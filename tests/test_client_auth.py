@@ -1229,6 +1229,63 @@ async def test_abort_keeps_injected_auth_session_open() -> None:
             assert not injected.closed
 
 
+async def test_submit_mfa_after_success_raises(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A second submit after a finished login raises instead of reusing the closed session."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        _register_submit_shortcircuit(m, state=flow._expected_state)
+        await flow.async_submit_mfa("123456")
+        with pytest.raises(EngieBeAuthenticationError, match="already finished"):
+            await flow.async_submit_mfa("123456")
+
+    assert created_sessions[0].closed
+
+
+async def test_submit_mfa_after_failure_raises(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A submit after a non-MFA failure raises the auth error, not a bare RuntimeError."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        m.post(
+            _q(_mfa_submit_url(MfaMethod.SMS)),
+            body=_redirect_body("postmfastate", "/authorize/resume"),
+        )
+        m.get(
+            _q(_RESUME_URL),
+            status=302,
+            headers={"Location": _callback_url(state="attacker-state")},
+            body="",
+        )
+        with pytest.raises(EngieBeAuthenticationError, match="OAuth state mismatch"):
+            await flow.async_submit_mfa("123456")
+        with pytest.raises(EngieBeAuthenticationError, match="already finished"):
+            await flow.async_submit_mfa("123456")
+
+    assert created_sessions[0].closed
+
+
+async def test_submit_mfa_after_abort_raises(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A submit after an explicit abort raises instead of reusing the closed session."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        await flow.async_abort()
+        with pytest.raises(EngieBeAuthenticationError, match="already finished"):
+            await flow.async_submit_mfa("123456")
+
+    assert created_sessions[0].closed
+
+
 async def test_refresh_token_invokes_callback() -> None:
     """on_token_refresh callback fires after successful refresh."""
     callback_calls: list[tuple[str, str]] = []

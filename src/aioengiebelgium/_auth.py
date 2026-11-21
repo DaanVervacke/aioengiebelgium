@@ -194,6 +194,7 @@ class AuthFlow:
         self._client_id = client_id
         self._token_adopter = token_adopter
         self._timeout = timeout
+        self._finished = False
 
     async def __aenter__(self) -> Self:
         return self
@@ -202,23 +203,32 @@ class AuthFlow:
         await self.async_abort()
 
     async def async_submit_mfa(self, code: str) -> tuple[str, str]:
-        """Submit the MFA code and finish the login."""
+        """Submit the MFA code and finish the login.
+
+        A submit after the flow finished raises EngieBeAuthenticationError.
+        A wrong code raises EngieBeMfaError and leaves the flow open for a
+        corrected retry.
+        """
+        if self._finished:
+            msg = "The login flow already finished"
+            raise EngieBeAuthenticationError(msg)
         try:
             access_token, refresh_token = await self._run_steps_8_to_13(code)
         except EngieBeMfaError:
             raise
         except BaseException:
-            await self._close_owned_session()
+            await self._finish()
             raise
-        await self._close_owned_session()
+        await self._finish()
         await self._token_adopter(access_token, refresh_token)
         return access_token, refresh_token
 
     async def async_abort(self) -> None:
         """Abandon the flow, closing the session if the flow created it."""
-        await self._close_owned_session()
+        await self._finish()
 
-    async def _close_owned_session(self) -> None:
+    async def _finish(self) -> None:
+        self._finished = True
         await self._owned.close_if_owned()
 
     async def _run_steps_8_to_13(self, mfa_code: str) -> tuple[str, str]:
