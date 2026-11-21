@@ -1790,8 +1790,14 @@ def parse_charging_session_details(data: dict[str, Any]) -> ChargingSessionDetai
     consumptions, skipped = _parse_items_counted(
         data.get("consumptions"), _parse_charging_session_consumption, "charging consumption"
     )
+    session = None
+    if isinstance(raw_session, dict):
+        session = _parse_charging_session(raw_session)
+    if raw_session is not None and session is None:
+        _LOGGER.debug("skipped malformed charging session: %r", raw_session)
+        skipped += 1
     return ChargingSessionDetails(
-        session=_parse_charging_session(raw_session) if isinstance(raw_session, dict) else None,
+        session=session,
         consumptions=tuple(consumptions),
         skipped_entries=skipped,
     )
