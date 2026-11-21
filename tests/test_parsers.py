@@ -1007,6 +1007,28 @@ def test_parse_service_point_missing_division_writes_no_map_log(
     assert all("energy-type" not in record.getMessage() for record in caplog.records)
 
 
+def test_parse_service_point_well_formed_energy_sharing_counts_zero() -> None:
+    payload = {
+        "division": "ELECTRICITY",
+        "marketDetails": {"installation": {"energySharingList": [{"id": "4"}]}},
+    }
+    result = parse_service_point(payload, "541448820000000001_ID1")
+    assert result.skipped_entries == 0
+
+
+def test_parse_service_point_without_market_details_counts_zero() -> None:
+    result = parse_service_point({"division": "GAS"}, "541448820000000001_ID1")
+    assert result.skipped_entries == 0
+
+
+def test_parse_service_point_malformed_market_details_counts_zero() -> None:
+    result = parse_service_point(
+        {"division": "GAS", "marketDetails": "nope"}, "541448820000000001_ID1"
+    )
+    assert result.market_details is None
+    assert result.skipped_entries == 0
+
+
 def test_parse_customer_account_relations_null_consumption_address() -> None:
     data = {
         "items": [
@@ -3106,6 +3128,35 @@ _DAY_END = "2026-10-02T00:00:00+02:00"
             {"items": [{"invoiceId": "7", "documents": [4]}]},
             id="invoice_documents",
         ),
+        pytest.param(
+            partial(parse_service_point, requested_ean="541448820000000001_ID1"),
+            {
+                "marketDetails": {
+                    "installation": {
+                        "energySharingList": [{"energySharingId": "4"}, "not-a-mapping"]
+                    }
+                }
+            },
+            id="service_point_energy_sharing",
+        ),
+        pytest.param(
+            parse_energy_contracts,
+            {
+                "items": [
+                    {
+                        "productConfiguration": {
+                            "contractItemTimeOfUseConfigurationList": [4, {"day": "MONDAY"}]
+                        }
+                    }
+                ]
+            },
+            id="contract_tou_list",
+        ),
+        pytest.param(
+            parse_account_balance,
+            {"details": {"pendingOnlinePayments": [4, {"amount": 1}]}},
+            id="pending_online_payments",
+        ),
     ],
 )
 def test_nested_malformed_entries_count_as_skipped(
@@ -3786,6 +3837,7 @@ def test_parse_service_point_installation_live(load_fixture: LoadFixture) -> Non
     assert installation.auto_producer.date_from == date(2023, 5, 1)
     assert installation.auto_producer.installation_year_before_2024 is False
     assert installation.metering_configuration is not None
+    assert sp.skipped_entries == 0
 
 
 def test_parse_usage_details_percentage_of_sum(load_fixture: LoadFixture) -> None:

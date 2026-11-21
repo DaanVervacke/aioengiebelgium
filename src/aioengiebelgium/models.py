@@ -987,6 +987,7 @@ class ServicePoint:
     ean_blocked: bool | None = None
     premises_id: str | None = None
     market_details: ServicePointMarketDetails | None = None
+    skipped_entries: int = 0
 
 
 @dataclass(frozen=True, slots=True)
