@@ -14,11 +14,11 @@ from urllib.parse import urlsplit
 import aiohttp
 
 from .exceptions import (
-    EngieBeAuthenticationError,
     EngieBeCommunicationError,
     EngieBeError,
     EngieBeInvalidResponseError,
     EngieBeTimeoutError,
+    _api_error_for,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,19 +74,8 @@ async def request(
                     response.status,
                     time.monotonic() - started,
                 )
-                if raise_on_error:
-                    if response.status == HTTPStatus.UNAUTHORIZED:
-                        msg = "Authentication failed (401)"
-                        raise EngieBeAuthenticationError(
-                            msg,
-                            status=HTTPStatus.UNAUTHORIZED,
-                        )
-                    if response.status >= HTTPStatus.BAD_REQUEST:
-                        msg = f"API error {response.status}"
-                        raise EngieBeCommunicationError(
-                            msg,
-                            status=response.status,
-                        )
+                if raise_on_error and response.status >= HTTPStatus.BAD_REQUEST:
+                    raise _api_error_for(response.status)
                 yield response
     except EngieBeError:
         raise
