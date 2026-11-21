@@ -2025,33 +2025,26 @@ def parse_asset_brands(data: dict[str, Any]) -> AssetBrandsResponse:
     return AssetBrandsResponse(items=tuple(items), skipped_entries=skipped)
 
 
-def _parse_comm_channel(raw: dict[str, Any]) -> CommunicationChannel | None:
-    channel_type = _as_str_or_none(raw.get("type"))
-    if channel_type is None:
-        return None
-    return CommunicationChannel(enabled=bool(raw.get("enabled")), type=channel_type)
+def _parse_comm_channel(raw: dict[str, Any]) -> CommunicationChannel:
+    return CommunicationChannel(
+        enabled=bool(raw.get("enabled")), type=_as_str_or_none(raw.get("type"))
+    )
 
 
-def _parse_comm_item(raw: dict[str, Any]) -> CommunicationPreferenceItem | None:
-    item_id = raw.get("itemId")
-    if isinstance(item_id, bool) or not isinstance(item_id, int):
-        return None
+def _parse_comm_item(raw: dict[str, Any]) -> CommunicationPreferenceItem:
     channels = _parse_items(raw.get("channels"), _parse_comm_channel, "communication channel")
     return CommunicationPreferenceItem(
-        item_id=item_id,
+        item_id=_as_id(raw.get("itemId")),
         item_name=_as_str_or_none(raw.get("itemName")),
         status=bool(raw.get("status")),
         channels=tuple(channels),
     )
 
 
-def _parse_comm_category(raw: dict[str, Any]) -> CommunicationCategory | None:
-    category_id = raw.get("categoryId")
-    if isinstance(category_id, bool) or not isinstance(category_id, int):
-        return None
+def _parse_comm_category(raw: dict[str, Any]) -> CommunicationCategory:
     items = _parse_items(raw.get("items"), _parse_comm_item, "communication preference item")
     return CommunicationCategory(
-        category_id=category_id,
+        category_id=_as_id(raw.get("categoryId")),
         category_name=_as_str_or_none(raw.get("categoryName")),
         status=bool(raw.get("status")),
         items=tuple(items),

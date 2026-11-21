@@ -3651,20 +3651,36 @@ def test_parse_asset_brands_skips_missing_id(load_fixture: LoadFixture) -> None:
     assert result.items[0].brand_id == 1
 
 
-def test_parse_communication_preferences_keeps_empty_categories_and_counts_skips(
+def test_parse_communication_preferences_keeps_entries_without_ids_and_counts_skips(
     load_fixture: LoadFixture,
 ) -> None:
     data = load_fixture("communication_preferences.json")
-    fixture_skips = parse_communication_preferences(data).skipped_entries
-    assert fixture_skips == 1
+    result = parse_communication_preferences(data)
+    assert result.skipped_entries == 0
+    entry = result.items[0]
+    uncategorized = next((c for c in entry.categories if c.category_id is None), None)
+    assert uncategorized is not None
+    assert uncategorized.category_name == "Uncategorized"
+    assert len(uncategorized.items) == 4
+    assert uncategorized.items[0].channels[0].type == "EMAIL"
 
     data["items"].append("not-a-dict")
-    assert parse_communication_preferences(data).skipped_entries == fixture_skips + 1
+    assert parse_communication_preferences(data).skipped_entries == 1
 
-    data["items"][-1] = {"categories": [{"categoryName": "NO_ID"}]}
+    data["items"][-1] = {
+        "categories": [
+            {
+                "categoryId": "77",
+                "categoryName": "STRING_ID",
+                "items": [{"itemId": "7", "itemName": "WRONG_TYPE", "channels": []}],
+            }
+        ]
+    }
     result = parse_communication_preferences(data)
-    assert result.skipped_entries == fixture_skips + 1
-    assert len(result.items) == 2
+    assert result.skipped_entries == 0
+    appended = result.items[1]
+    assert appended.categories[0].category_id is None
+    assert appended.categories[0].items[0].item_id is None
 
     data["items"][-1] = {
         "categories": [],
@@ -3672,14 +3688,8 @@ def test_parse_communication_preferences_keeps_empty_categories_and_counts_skips
         "pausedChannels": [{"type": "EMAIL"}, "broken"],
     }
     result = parse_communication_preferences(data)
-    assert result.skipped_entries == fixture_skips + 1
+    assert result.skipped_entries == 1
     assert len(result.items) == 2
-    entry = result.items[0]
-    category = entry.categories[0]
-    assert category.category_name == "REMINDER_MESSAGES"
-    item = category.items[0]
-    assert item.channels[0].type == "PUSH_NOTIFICATION"
-    assert item.channels[0].enabled is True
     empty = result.items[1]
     assert empty.categories == ()
     assert empty.all_communications_paused is True

@@ -1138,12 +1138,63 @@
             ),
             status=True,
           ),
+          CommunicationCategory(
+            category_id=None,
+            category_name='Uncategorized',
+            items=tuple(
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=1702,
+                item_name='EV_DOUBLE_CONFIRMATION_MAIL',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=7553,
+                item_name='CAPTAR.PEAK_WEEK1',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='PUSH_NOTIFICATION',
+                  ),
+                ),
+                item_id=7554,
+                item_name='CAPTAR.PEAK_WEEK2TO4',
+                status=True,
+              ),
+              CommunicationPreferenceItem(
+                channels=tuple(
+                  CommunicationChannel(
+                    enabled=True,
+                    type='EMAIL',
+                  ),
+                ),
+                item_id=5852,
+                item_name='PS.SMARTBATTERY_REWARD',
+                status=True,
+              ),
+            ),
+            status=True,
+          ),
         ),
         paused_channels=tuple(
         ),
       ),
     ),
-    skipped_entries=1,
+    skipped_entries=0,
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[customer_account_detail]
