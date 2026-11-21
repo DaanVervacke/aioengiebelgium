@@ -76,7 +76,14 @@ Pass a stored token pair to the constructor to skip the login entirely:
 
 ``persist_tokens`` is the callback from :doc:`quickstart`. A refresh token
 on its own also skips the login: the first authenticated request refreshes
-the pair. The public EPEX endpoint does not trigger that refresh.
+the pair. The EPEX endpoint omits that proactive refresh.
+
+On a 401 the client refreshes and retries once. An optional-auth endpoint
+like EPEX only reaches that refresh when the token it sent was rejected:
+without a held token it sends no ``Authorization`` header, and it retries
+with no header instead of refreshing when it holds no refresh token. A 401
+on that retry raises
+:class:`~aioengiebelgium.EngieBeAuthenticationError`.
 
 Refreshes are serialized behind a lock. A request that waits on a refresh
 already in progress reuses its new tokens instead of starting another one.

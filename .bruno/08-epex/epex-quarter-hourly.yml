@@ -100,11 +100,8 @@ docs: |-
   Mirrors EngieBeClient::async_get_epex_prices.
 
   The client sends a bearer token and treats 401 and 403 as a trigger
-  for reauth, and its docstring says the endpoint requires
-  authentication. It does not: both granularities answer 200 with
-  no Authorization header at all, at least from a Belgian consumer
-  connection (observed 2026-07-28). The request sends the token
-  anyway, because that costs nothing and matches the integration.
+  for reauth. The endpoint requires a valid bearer: a tokenless call
+  gets a 401.
 
   from and to must be ISO-8601 UTC with millisecond precision and a
   literal Z, e.g. 2026-05-04T00:00:00.000Z. Other shapes are rejected.

@@ -8,6 +8,5 @@ docs: |-
   EPEX day-ahead wholesale prices, for dynamic-tariff customers.
 
   These two requests take no BAN, because the market data is identical
-  for every customer. Both still send a bearer token, though the
-  endpoint does not appear to require one. See either request for the
-  detail.
+  for every customer. Both send a bearer token: the endpoint rejects
+  a tokenless call with a 401. See either request for the detail.

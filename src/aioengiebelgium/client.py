@@ -659,13 +659,18 @@ class EngieBeClient:
         """Make a JSON request, refreshing proactively then on 401.
 
         Optional-auth endpoints skip the proactive refresh and send no token when none is held.
-        Only errors of the request itself go through ``raise_error``, never refresh errors.
+        When their held token meets a 401 and no refresh token exists, they retry once with
+        no Authorization header. Only errors of the request itself go through ``raise_error``,
+        never refresh errors.
         """
         self._raise_if_closed()
         if not wire.optional_auth:
             await self._tokens.ensure_fresh()
+        drop_auth = False
         for attempt in range(2):
-            with_auth = not wire.optional_auth or self._tokens.access_token is not None
+            with_auth = not drop_auth and (
+                not wire.optional_auth or self._tokens.access_token is not None
+            )
             headers = self._build_headers(
                 wire.user_agent, wire.extra_headers, wire.accept, with_auth=with_auth
             )
@@ -685,6 +690,10 @@ class EngieBeClient:
             except EngieBeAuthenticationError as err:
                 if attempt or not with_auth:
                     raise
+                if wire.optional_auth and self._tokens.refresh_token is None:
+                    _LOGGER.debug("request unauthorized (401): retrying without authorization")
+                    drop_auth = True
+                    continue
                 _LOGGER.debug("request unauthorized (401): refreshing tokens and retrying")
                 try:
                     await self.async_refresh_token()
@@ -701,8 +710,11 @@ class EngieBeClient:
         self._raise_if_closed()
         if not wire.optional_auth:
             await self._tokens.ensure_fresh()
+        drop_auth = False
         for attempt in range(2):
-            with_auth = not wire.optional_auth or self._tokens.access_token is not None
+            with_auth = not drop_auth and (
+                not wire.optional_auth or self._tokens.access_token is not None
+            )
             headers = self._build_headers(
                 wire.user_agent, wire.extra_headers, wire.accept, with_auth=with_auth
             )
@@ -720,6 +732,10 @@ class EngieBeClient:
             except EngieBeAuthenticationError as err:
                 if attempt or not with_auth:
                     raise
+                if wire.optional_auth and self._tokens.refresh_token is None:
+                    _LOGGER.debug("request unauthorized (401): retrying without authorization")
+                    drop_auth = True
+                    continue
                 _LOGGER.debug("request unauthorized (401): refreshing tokens and retrying")
                 try:
                     await self.async_refresh_token()
