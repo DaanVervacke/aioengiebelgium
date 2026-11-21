@@ -2058,10 +2058,8 @@ def _parse_comm_category(raw: dict[str, Any]) -> CommunicationCategory | None:
     )
 
 
-def _parse_comm_preferences(raw: dict[str, Any]) -> CommunicationPreferences | None:
+def _parse_comm_preferences(raw: dict[str, Any]) -> CommunicationPreferences:
     categories = _parse_items(raw.get("categories"), _parse_comm_category, "communication category")
-    if not categories:
-        return None
     paused, paused_skipped = _parse_raw_mappings(raw.get("pausedChannels"))
     _record_nested_skips(paused_skipped)
     return CommunicationPreferences(

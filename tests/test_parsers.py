@@ -3651,19 +3651,39 @@ def test_parse_asset_brands_skips_missing_id(load_fixture: LoadFixture) -> None:
     assert result.items[0].brand_id == 1
 
 
-def test_parse_communication_preferences_skips(load_fixture: LoadFixture) -> None:
+def test_parse_communication_preferences_keeps_empty_categories_and_counts_skips(
+    load_fixture: LoadFixture,
+) -> None:
     data = load_fixture("communication_preferences.json")
-    data["items"].append({"categories": [{"categoryName": "NO_ID"}]})
-    data["items"].append({"categories": []})
+    fixture_skips = parse_communication_preferences(data).skipped_entries
+    assert fixture_skips == 1
+
+    data["items"].append("not-a-dict")
+    assert parse_communication_preferences(data).skipped_entries == fixture_skips + 1
+
+    data["items"][-1] = {"categories": [{"categoryName": "NO_ID"}]}
     result = parse_communication_preferences(data)
-    assert len(result.items) == 1
-    assert result.skipped_entries == 4
+    assert result.skipped_entries == fixture_skips + 1
+    assert len(result.items) == 2
+
+    data["items"][-1] = {
+        "categories": [],
+        "allCommunicationsPaused": True,
+        "pausedChannels": [{"type": "EMAIL"}, "broken"],
+    }
+    result = parse_communication_preferences(data)
+    assert result.skipped_entries == fixture_skips + 1
+    assert len(result.items) == 2
     entry = result.items[0]
     category = entry.categories[0]
     assert category.category_name == "REMINDER_MESSAGES"
     item = category.items[0]
     assert item.channels[0].type == "PUSH_NOTIFICATION"
     assert item.channels[0].enabled is True
+    empty = result.items[1]
+    assert empty.categories == ()
+    assert empty.all_communications_paused is True
+    assert empty.paused_channels == ({"type": "EMAIL"},)
 
 
 def test_parse_reward_balance_and_payouts() -> None:
