@@ -1,3 +1,9 @@
+"""Constants for the ENGIE wire and login flow.
+
+The callback scheme in REDIRECT_URI uses dots and the authorize app
+scheme in APP_SCHEME uses hyphens. Both are real wire values and must
+stay as they are."""
+
 from enum import StrEnum
 from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
 from importlib.metadata import version as _pkg_version
@@ -22,6 +28,7 @@ REWARDS_BASE_URL = "https://api.engie.be/engie/ms/rewards/customer/v1"
 
 DEFAULT_CLIENT_ID = "R0PQyUdjO5B2tBaRnltgitVnnUmjGyld"
 REDIRECT_URI = "be.engie.smart://login-callback/nl"
+APP_SCHEME = "be-engie-smart"
 OAUTH_SCOPES = "openid profile roles offline_access"
 OAUTH_AUDIENCE = "customer"
 

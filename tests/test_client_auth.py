@@ -492,6 +492,8 @@ async def test_authorize_request_carries_pkce_and_oauth_params() -> None:
     int(params["nonce"], 16)
     assert params["client_id"] == DEFAULT_CLIENT_ID
     assert params["redirect_uri"] == REDIRECT_URI
+    assert params["app_scheme"] == "be-engie-smart"
+    assert params["cancel_redirect"] == "be-engie-smart://cancel-registration-redirect"
     assert params["response_type"] == "code"
     assert params["scope"] == OAUTH_SCOPES
     assert params["audience"] == OAUTH_AUDIENCE
