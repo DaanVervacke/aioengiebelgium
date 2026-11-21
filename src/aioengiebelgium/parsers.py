@@ -153,11 +153,17 @@ def _as_int(value: Any) -> int:
 
 
 def _as_float_or_none(value: Any) -> float | None:
-    return _as_float(value) if value is not None else None
+    try:
+        return float(value)
+    except ValueError, TypeError:
+        return None
 
 
 def _as_int_or_none(value: Any) -> int | None:
-    return _as_int(value) if value is not None else None
+    try:
+        return int(value)
+    except ValueError, TypeError:
+        return None
 
 
 def _as_bool_or_none(value: Any) -> bool | None:
@@ -363,8 +369,8 @@ def parse_customer_account_relations(data: dict[str, Any]) -> CustomerAccountRel
 def _parse_price_slot(s: dict[str, Any]) -> PriceSlot:
     return PriceSlot(
         time_of_use_slot_code=_as_str(s.get("timeOfUseSlotCode")),
-        price_value=_as_float(s.get("priceValue")),
-        price_value_excl_vat=_as_float(s.get("priceValueExclVAT")),
+        price_value=_as_float_or_none(s.get("priceValue")),
+        price_value_excl_vat=_as_float_or_none(s.get("priceValueExclVAT")),
         price_value_in_euro_per_kwh=_as_float_or_none(s.get("priceValueInEuroPerKWH")),
         price_value_in_eurocent_per_kwh=_as_float_or_none(s.get("priceValueInEurocentPerKWH")),
         price_value_excl_vat_in_euro_per_kwh=_as_float_or_none(
@@ -386,7 +392,7 @@ def _parse_price_period(period: dict[str, Any]) -> PricePeriod:
     return PricePeriod(
         valid_from=_as_date(period.get("from")),
         valid_to=_as_date(period.get("to")),
-        vat_tariff=_as_float(period.get("vatTariff")),
+        vat_tariff=_as_float_or_none(period.get("vatTariff")),
         offtake=_parse_price_slots(configs.get("offtake")),
         injection=_parse_price_slots(configs.get("injection")),
     )
@@ -457,8 +463,8 @@ def _parse_peak(data: dict[str, Any]) -> Peak | None:
     if start is None or end is None:
         return None
     return Peak(
-        peak_kw=_as_float(data.get("peakKW")),
-        peak_kwh=_as_float(data.get("peakKWh")),
+        peak_kw=_as_float_or_none(data.get("peakKW")),
+        peak_kwh=_as_float_or_none(data.get("peakKWh")),
         start=start,
         end=end,
     )
@@ -471,8 +477,8 @@ def _parse_optional_peak(data: Any) -> Peak | None:
 def parse_monthly_peaks(data: dict[str, Any]) -> MonthlyPeaks:
     daily, skipped = _parse_items_counted(data.get("dailyPeaks"), _parse_peak, "daily peak")
     return MonthlyPeaks(
-        year=_as_int(data.get("year")),
-        month=_as_int(data.get("month")),
+        year=_as_int_or_none(data.get("year")),
+        month=_as_int_or_none(data.get("month")),
         peak_of_the_month=_parse_optional_peak(data.get("peakOfTheMonth")),
         daily_peaks=tuple(daily),
         skipped_entries=skipped,
@@ -483,8 +489,8 @@ def parse_monthly_peaks(data: dict[str, Any]) -> MonthlyPeaks:
 def _parse_financial_transaction(tx: dict[str, Any]) -> FinancialTransaction:
     return FinancialTransaction(
         type=tx.get("type"),
-        due_amount=_as_float(tx.get("dueAmount")),
-        open_amount=_as_float(tx.get("openAmount")),
+        due_amount=_as_float_or_none(tx.get("dueAmount")),
+        open_amount=_as_float_or_none(tx.get("openAmount")),
         due_date=_as_date(tx.get("dueDate")),
         invoice_type=tx.get("invoiceType"),
     )
@@ -494,13 +500,13 @@ def parse_account_balance(data: dict[str, Any]) -> AccountBalance:
     overview_raw = data.get("overview")
     overview = (
         BillingOverview(
-            total_amount=_as_float(overview_raw.get("totalAmount")),
-            open_amount=_as_float(overview_raw.get("openAmount")),
-            due_amount=_as_float(overview_raw.get("dueAmount")),
-            pending_online_payments_amount=_as_float(
+            total_amount=_as_float_or_none(overview_raw.get("totalAmount")),
+            open_amount=_as_float_or_none(overview_raw.get("openAmount")),
+            due_amount=_as_float_or_none(overview_raw.get("dueAmount")),
+            pending_online_payments_amount=_as_float_or_none(
                 overview_raw.get("pendingOnlinePaymentsAmount")
             ),
-            installment_plan_amount=_as_float(overview_raw.get("installmentPlanAmount")),
+            installment_plan_amount=_as_float_or_none(overview_raw.get("installmentPlanAmount")),
         )
         if isinstance(overview_raw, dict)
         else None
@@ -638,16 +644,18 @@ def _parse_happy_hour_data(raw: dict[str, Any]) -> HappyHourMonthData:
     comp_raw = raw.get("comparisonToPreviousMonth")
     if isinstance(comp_raw, dict):
         comparison = HappyHourComparison(
-            consumption_kwh_pct_change=_as_float(comp_raw.get("consumptionKWhPercentageChange")),
-            eligible_hours_pct_change=_as_float(
+            consumption_kwh_pct_change=_as_float_or_none(
+                comp_raw.get("consumptionKWhPercentageChange")
+            ),
+            eligible_hours_pct_change=_as_float_or_none(
                 comp_raw.get("numberOfEligibleHappyHoursPercentageChange")
             ),
-            reward_euros_pct_change=_as_float(comp_raw.get("rewardEurosPercentageChange")),
+            reward_euros_pct_change=_as_float_or_none(comp_raw.get("rewardEurosPercentageChange")),
         )
     return HappyHourMonthData(
-        consumption_kwh=_as_float(raw.get("consumptionKWh")),
-        eligible_hours=_as_int(raw.get("numberOfEligibleHappyHours")),
-        reward_euros=_as_float(raw.get("rewardEuros")),
+        consumption_kwh=_as_float_or_none(raw.get("consumptionKWh")),
+        eligible_hours=_as_int_or_none(raw.get("numberOfEligibleHappyHours")),
+        reward_euros=_as_float_or_none(raw.get("rewardEuros")),
         is_calculation_ongoing=bool(raw.get("isCalculationOngoing", False)),
         comparison=comparison,
     )
@@ -1006,7 +1014,7 @@ def _parse_usage_tou_parts(
             return None
         return UsageTouPart(
             slot_code=slot_code,
-            value=_as_float(part.get(value_key)),
+            value=_as_float_or_none(part.get(value_key)),
             percentage_of_sum=_as_float_or_none(part.get("percentageOfSum")),
             has_volume_simulation_percentage=_as_bool_or_none(
                 part.get("hasVolumeSimulationPercentage")
@@ -1027,7 +1035,7 @@ def _parse_usage_tou_cross_parts(data: Any, *, value_key: str) -> tuple[UsageTou
         return UsageTouCrossPart(
             supplier_slot_code=supplier_code,
             distribution_slot_code=distribution_code,
-            value=_as_float(part.get(value_key)),
+            value=_as_float_or_none(part.get(value_key)),
             percentage_of_sum=_as_float_or_none(part.get("percentageOfSum")),
         )
 
@@ -1039,7 +1047,7 @@ def _parse_usage_energy_direction(data: Any) -> UsageDirectionBreakdown | None:
         return None
     sum_raw = data.get("kWhSum")
     return UsageDirectionBreakdown(
-        kwh_sum=_as_float(sum_raw) if sum_raw is not None else None,
+        kwh_sum=_as_float_or_none(sum_raw),
         parts=_parse_usage_tou_cross_parts(data.get("parts"), value_key="kWh"),
         supplier_parts=_parse_usage_tou_parts(
             data.get("supplierParts"), "timeOfUseTimeSlotCode", value_key="kWh"
@@ -1055,7 +1063,7 @@ def _parse_usage_cost_direction(data: Any) -> UsageDirectionBreakdown | None:
         return None
     sum_raw = data.get("amountSum")
     return UsageDirectionBreakdown(
-        amount_sum=_as_float(sum_raw) if sum_raw is not None else None,
+        amount_sum=_as_float_or_none(sum_raw),
         parts=_parse_usage_tou_cross_parts(data.get("parts"), value_key="amount"),
         supplier_parts=_parse_usage_tou_parts(
             data.get("supplierParts"), "timeOfUseTimeSlotCode", value_key="amount"
@@ -1965,8 +1973,8 @@ def _parse_invoice(raw: dict[str, Any]) -> Invoice | None:
         type_group=_as_str_or_none(raw.get("typeGroup")),
         status=_as_str_or_none(raw.get("status")),
         status_group=_as_str_or_none(raw.get("statusGroup")),
-        amount=_as_float(raw.get("amount")),
-        open_amount=_as_float(raw.get("openAmount")),
+        amount=_as_float_or_none(raw.get("amount")),
+        open_amount=_as_float_or_none(raw.get("openAmount")),
         due_date=_as_date(raw.get("dueDate")),
         online_payment_status=_as_str_or_none(raw.get("onlinePaymentStatus")),
         available_in_zoomit=bool(raw.get("availableInZoomit")),
@@ -2077,8 +2085,8 @@ def parse_communication_preferences(data: dict[str, Any]) -> CommunicationPrefer
 def parse_reward_balance(data: dict[str, Any]) -> RewardBalanceDetails:
     """Parse the reward-balance-details response."""
     return RewardBalanceDetails(
-        open_amount=_as_float(data.get("openAmount")),
-        payout_threshold=_as_float(data.get("payoutThreshold")),
+        open_amount=_as_float_or_none(data.get("openAmount")),
+        payout_threshold=_as_float_or_none(data.get("payoutThreshold")),
     )
 
 

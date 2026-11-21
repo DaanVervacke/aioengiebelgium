@@ -221,6 +221,7 @@ def test_earliest_due_date_no_open_transactions() -> None:
         financial_transactions=(
             FinancialTransaction(open_amount=0.0, due_date=date(2026, 6, 15)),
             FinancialTransaction(open_amount=-5.0, due_date=date(2026, 5, 20)),
+            FinancialTransaction(open_amount=None, due_date=date(2026, 5, 22)),
         ),
     )
     balance = AccountBalance(details=details)
