@@ -232,8 +232,13 @@ class AuthFlow:
         )
         _LOGGER.debug("auth step: MFA code submitted (%s)", self._mfa_method.value)
 
-        echoed = _harvest_hidden_inputs(body).get("state")
-        if echoed == self._mfa_challenge_state or _FIELD_ERROR_MARKER in body:
+        error_inputs = _harvest_hidden_inputs(body)
+        error_state = error_inputs.get("state")
+        if error_state == self._mfa_challenge_state or _FIELD_ERROR_MARKER in body:
+            if error_inputs:
+                self._mfa_form_inputs = error_inputs
+            if error_state:
+                self._mfa_challenge_state = error_state
             msg = "Invalid MFA code"
             raise EngieBeMfaError(msg)
 

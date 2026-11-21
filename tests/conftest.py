@@ -108,6 +108,16 @@ def _mfa_email_body(state: str) -> str:
     )
 
 
+def _mfa_email_error_body(state: str) -> str:
+    """Email challenge re-rendered with Auth0's field error marker and a rotated state."""
+    return (
+        '<html><form data-form-primary="true" method="POST">'
+        f"{_hidden_inputs({'state': state})}"
+        '<span class="ulp-input-error-message" data-error-code="invalid-code">Onjuiste code</span>'
+        "</form></html>"
+    )
+
+
 def _mfa_login_options_body(state: str) -> str:
     return (
         f'<html><form data-form-primary="true" method="POST">'
@@ -121,6 +131,11 @@ def _callback_url(code: str = _AUTH_CODE, state: str = _OAUTH_STATE) -> str:
 
 def _mfa_submit_url(mfa: MfaMethod) -> str:
     return f"{AUTH_BASE_URL}/u/mfa-{mfa.value}-challenge"
+
+
+def _mfa_submit_path(mfa: MfaMethod) -> str:
+    """The path of _mfa_submit_url, for recorded-call assertions."""
+    return _mfa_submit_url(mfa).removeprefix(AUTH_BASE_URL)
 
 
 def _register_auth_steps_1_to_7(m: aioresponses, *, mfa: MfaMethod = MfaMethod.SMS) -> None:
