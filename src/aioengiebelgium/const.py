@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum
+from enum import StrEnum
 from importlib.metadata import version as _pkg_version
 
 AUTH_BASE_URL = "https://account.engie.be"
@@ -126,16 +126,16 @@ class ChargeSettingMode(StrEnum):
     NATIVE = "native"
 
 
-class EpexGranularity(Enum):
-    """Granularity options for EPEX market data, valued in minutes."""
+class EpexGranularity(StrEnum):
+    """Granularity options for EPEX market data."""
 
-    HOURLY = 60
-    QUARTER_HOURLY = 15
+    HOURLY = "HOURLY"
+    QUARTER_HOURLY = "QUARTER_HOURLY"
 
     @property
-    def wire_value(self) -> str:
-        """The granularity string the EPEX endpoint expects."""
-        return self.name
+    def minutes(self) -> int:
+        """The slot length of this granularity in minutes."""
+        return 60 if self is EpexGranularity.HOURLY else 15
 
 
 class UsageGranularity(StrEnum):
