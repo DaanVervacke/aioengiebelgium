@@ -26,8 +26,8 @@ from .const import (
 )
 from .exceptions import (
     EngieBeAuthenticationError,
-    EngieBeCommunicationError,
     EngieBeMfaError,
+    _api_error_for,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -419,10 +419,9 @@ async def start_auth_flow(
 
 
 def _raise_for_non_auth_error(status: int) -> None:
-    """Raise EngieBeCommunicationError for an HTTP error status other than 401."""
+    """Raise EngieBeCommunicationError for an HTTP status of 400 or higher other than 401."""
     if status >= HTTPStatus.BAD_REQUEST and status != HTTPStatus.UNAUTHORIZED:
-        msg = f"API error {status}"
-        raise EngieBeCommunicationError(msg, status=status)
+        raise _api_error_for(status)
 
 
 async def _prime_mfa_challenge(

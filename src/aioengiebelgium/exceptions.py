@@ -48,3 +48,15 @@ class EngieBeMfaError(EngieBeAuthenticationError):
 
 class EngieBeClientClosedError(EngieBeError):
     """The client was closed. Create a new EngieBeClient."""
+
+
+def _api_error_for(status: int) -> EngieBeError:
+    """Build the exception for an HTTP error status.
+
+    Authentication at 401, communication for every other error status.
+    """
+    if status == HTTPStatus.UNAUTHORIZED:
+        msg = "Authentication failed (401)"
+        return EngieBeAuthenticationError(msg, status=status)
+    msg = f"API error {status}"
+    return EngieBeCommunicationError(msg, status=status)
