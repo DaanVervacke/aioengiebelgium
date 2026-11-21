@@ -217,6 +217,24 @@ def test_parse_monthly_peaks_single_day_keeps_month_peaks(load_fixture: LoadFixt
     assert result.previous_peak_of_the_month is not None
 
 
+def test_parse_monthly_peaks_missing_numbers_stay_none() -> None:
+    result = parse_monthly_peaks(
+        {
+            "dailyPeaks": [
+                {
+                    "start": "2026-04-01T00:00:00+02:00",
+                    "end": "2026-04-01T00:15:00+02:00",
+                },
+            ],
+        }
+    )
+
+    assert result.year is None
+    assert result.month is None
+    assert result.daily_peaks[0].peak_kw is None
+    assert result.daily_peaks[0].peak_kwh is None
+
+
 def test_parse_monthly_peaks_drops_naive_datetimes() -> None:
     result = parse_monthly_peaks(
         {
@@ -2396,7 +2414,7 @@ _MALFORMED_CASES = [
         },
         lambda r: (
             r.start_date is None
-            and r.already_used_amount == 0.0
+            and r.already_used_amount is None
             and len(r.payments) == 1
             and r.payments[0].status is None
             and r.skipped_entries == 3
@@ -2414,7 +2432,7 @@ _MALFORMED_CASES = [
         lambda r: (
             r.start_date is None
             and r.end_date is None
-            and r.used_amount == 0.0
+            and r.used_amount is None
             and r.used_amount_failure_reason is None
         ),
         id="billing_period_usage",
@@ -2435,12 +2453,12 @@ _MALFORMED_CASES = [
         },
         lambda r: (
             r.plan is not None
-            and r.plan.remaining_slices == 0
+            and r.plan.remaining_slices is None
             and len(r.plan.payment_slices) == 1
             and r.update_limits is None
             and r.proposal is not None
             and len(r.proposal.evaluation_context) == 1
-            and r.proposal.evaluation_context[0].weight == 0.0
+            and r.proposal.evaluation_context[0].weight is None
             and len(r.contract_periods) == 1
             and r.contract_periods[0].proposal is None
             and r.contract_periods[0].plan is not None
@@ -2537,7 +2555,7 @@ _MALFORMED_CASES = [
         lambda r: (
             r.departure_times == DepartureTimes(wednesday=time(7, 30))
             and r.battery_reserve is None
-            and r.target_battery_level == ChargeSettingValue(current_value=0)
+            and r.target_battery_level == ChargeSettingValue(current_value=None)
             and r.smart_charging_enabled is None
         ),
         id="vehicle_charge_settings",
@@ -2582,7 +2600,7 @@ _MALFORMED_CASES = [
     pytest.param(
         parse_charging_session_charge_settings,
         {"targetBatteryLevel": "high", "departureTimeOverride": "2025-08-07T05:00:00", "direct": 0},
-        lambda r: r == ChargingSessionChargeSettings(target_battery_level=0),
+        lambda r: r == ChargingSessionChargeSettings(),
         id="charging_session_charge_settings",
     ),
     pytest.param(
@@ -2607,7 +2625,7 @@ _MALFORMED_CASES = [
                 ChargingSessionsSummaryEntry(
                     start=datetime(2025, 7, 1, tzinfo=timezone(timedelta(hours=2))),
                     session_count=11,
-                    cost=0.0,
+                    cost=None,
                 ),
             )
             and r.skipped_entries == 1
@@ -3652,6 +3670,9 @@ def test_parse_reward_balance_and_payouts() -> None:
     balance = parse_reward_balance({"openAmount": 0.5, "payoutThreshold": 5})
     assert balance.open_amount == 0.5
     assert balance.payout_threshold == 5.0
+    missing = parse_reward_balance({})
+    assert missing.open_amount is None
+    assert missing.payout_threshold is None
     payouts = parse_reward_payouts({"items": [{"id": 1}]})
     assert payouts.items == ({"id": 1},)
     assert parse_reward_payouts({"items": "nope"}).skipped_entries == 1

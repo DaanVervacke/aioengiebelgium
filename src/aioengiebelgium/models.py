@@ -126,8 +126,8 @@ class PriceSlot:
     """
 
     time_of_use_slot_code: str
-    price_value: float
-    price_value_excl_vat: float
+    price_value: float | None = None
+    price_value_excl_vat: float | None = None
     price_value_in_euro_per_kwh: float | None = None
     price_value_in_eurocent_per_kwh: float | None = None
     price_value_excl_vat_in_euro_per_kwh: float | None = None
@@ -140,7 +140,7 @@ class PricePeriod:
 
     valid_from: date | None
     valid_to: date | None
-    vat_tariff: float
+    vat_tariff: float | None = None
     offtake: tuple[PriceSlot, ...] = ()
     injection: tuple[PriceSlot, ...] = ()
 
@@ -156,7 +156,7 @@ class ActiveTouPrice:
     """The price that applies right now on a supplier time-of-use schedule.
 
     The price fields are ``None`` when no price slot matches the current
-    schedule slot.
+    schedule slot or the matching slot carries no price on the wire.
     """
 
     slot_code: str
@@ -186,8 +186,9 @@ class EanPrices:
 
         Returns ``None`` when the direction has no switching schedule or when
         no schedule slot covers ``now``. When no price period covers ``now``
-        or no price slot matches the current schedule slot, the current price
-        fields are ``None`` and ``next_transition`` still points at the next
+        or no price slot matches the current schedule slot, or the matching
+        slot carries no price on the wire, the current price fields are
+        ``None`` and ``next_transition`` still points at the next
         slot or period boundary. ``next_transition`` is set even when no
         price slot matches the next code, in which case the ``next_*`` price
         fields stay ``None``. When a price period ends or starts before the
@@ -341,18 +342,18 @@ class EnergyContractsResponse:
 class Peak:
     """A single capacity tariff peak measurement."""
 
-    peak_kw: float
-    peak_kwh: float
     start: datetime
     end: datetime
+    peak_kw: float | None = None
+    peak_kwh: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class MonthlyPeaks:
     """Response from the monthly peaks endpoint."""
 
-    year: int
-    month: int
+    year: int | None = None
+    month: int | None = None
     peak_of_the_month: Peak | None = None
     daily_peaks: tuple[Peak, ...] = ()
     skipped_entries: int = 0
@@ -365,8 +366,8 @@ class FinancialTransaction:
     """A single financial transaction."""
 
     type: str | None = None
-    due_amount: float = 0.0
-    open_amount: float = 0.0
+    due_amount: float | None = None
+    open_amount: float | None = None
     due_date: date | None = None
     invoice_type: str | None = None
 
@@ -375,11 +376,11 @@ class FinancialTransaction:
 class BillingOverview:
     """Billing overview with aggregated amounts."""
 
-    total_amount: float = 0.0
-    open_amount: float = 0.0
-    due_amount: float = 0.0
-    pending_online_payments_amount: float = 0.0
-    installment_plan_amount: float = 0.0
+    total_amount: float | None = None
+    open_amount: float | None = None
+    due_amount: float | None = None
+    pending_online_payments_amount: float | None = None
+    installment_plan_amount: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -407,7 +408,7 @@ class AccountBalance:
             return None
         earliest: date | None = None
         for tx in self.details.financial_transactions:
-            if tx.open_amount <= 0 or tx.due_date is None:
+            if (tx.open_amount or 0.0) <= 0 or tx.due_date is None:
                 continue
             if earliest is None or tx.due_date < earliest:
                 earliest = tx.due_date
@@ -478,18 +479,18 @@ class HappyHourEvent:
 class HappyHourComparison:
     """Month-over-month comparison for happy hours."""
 
-    consumption_kwh_pct_change: float = 0.0
-    eligible_hours_pct_change: float = 0.0
-    reward_euros_pct_change: float = 0.0
+    consumption_kwh_pct_change: float | None = None
+    eligible_hours_pct_change: float | None = None
+    reward_euros_pct_change: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class HappyHourMonthData:
     """Happy hour stats for a single month."""
 
-    consumption_kwh: float = 0.0
-    eligible_hours: int = 0
-    reward_euros: float = 0.0
+    consumption_kwh: float | None = None
+    eligible_hours: int | None = None
+    reward_euros: float | None = None
     is_calculation_ongoing: bool = False
     comparison: HappyHourComparison | None = None
 
@@ -861,7 +862,7 @@ class UsageTouPart:
     """
 
     slot_code: str
-    value: float = 0.0
+    value: float | None = None
     percentage_of_sum: float | None = None
     has_volume_simulation_percentage: bool | None = None
 
@@ -876,7 +877,7 @@ class UsageTouCrossPart:
 
     supplier_slot_code: str
     distribution_slot_code: str
-    value: float = 0.0
+    value: float | None = None
     percentage_of_sum: float | None = None
 
 
@@ -1635,8 +1636,8 @@ class Invoice:
     type_group: str | None = None
     status: str | None = None
     status_group: str | None = None
-    amount: float = 0.0
-    open_amount: float = 0.0
+    amount: float | None = None
+    open_amount: float | None = None
     due_date: date | None = None
     online_payment_status: str | None = None
     available_in_zoomit: bool = False
@@ -1731,8 +1732,8 @@ class CommunicationPreferencesResponse:
 class RewardBalanceDetails:
     """Response from the reward-balance-details endpoint."""
 
-    open_amount: float = 0.0
-    payout_threshold: float = 0.0
+    open_amount: float | None = None
+    payout_threshold: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
