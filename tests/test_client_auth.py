@@ -61,7 +61,9 @@ from tests.conftest import (
     _USERNAME,
     _callback_url,
     _identifier_body,
+    _mfa_email_error_body,
     _mfa_sms_body,
+    _mfa_submit_path,
     _mfa_submit_url,
     _password_body,
     _q,
@@ -1053,30 +1055,43 @@ async def test_submit_mfa_callback_missing_code_raises(
     assert created_sessions[0].closed
 
 
+_MFA_EMAIL_ERROR_STATE = "rotatedmfaemail01xxxxxxxxxxxxxxxxx"
+
+
 @pytest.mark.parametrize("mfa", MfaMethod)
 async def test_submit_mfa_invalid_code_keeps_flow_alive_for_retry(
     mfa: MfaMethod,
     created_sessions: list[aiohttp.ClientSession],
 ) -> None:
     """The real wrong-code trace raises EngieBeMfaError, keeps the session open for a retry."""
+    if mfa is MfaMethod.SMS:
+        error_page = _html_fixture("auth_wrong_mfa_code.html")
+        fresh_state = "FAKESTATE01xxxxxxxxxxxxxxxxxxxx"
+        assert _harvest_hidden_inputs(error_page)["state"] == fresh_state
+        expected_retry_data = {"state": fresh_state, "code": "123456"}
+    else:
+        error_page = _mfa_email_error_body(_MFA_EMAIL_ERROR_STATE)
+        fresh_state = _MFA_EMAIL_ERROR_STATE
+        expected_retry_data = {"state": fresh_state, "action": "default", "code": "123456"}
     with aioresponses() as m:
         _register_auth_steps_1_to_7(m, mfa=mfa)
         client = EngieBeClient()
         flow = await _start_flow(client, mfa)
-        m.post(
-            _q(_mfa_submit_url(mfa)),
-            status=400,
-            body=_html_fixture("auth_wrong_mfa_code.html"),
-        )
+        m.post(_q(_mfa_submit_url(mfa)), status=400, body=error_page)
         with pytest.raises(EngieBeMfaError):
             await flow.async_submit_mfa("000000")
         assert not created_sessions[0].closed
 
         _register_submit_shortcircuit(m, state=flow._expected_state, mfa=mfa)
         access, _refresh = await flow.async_submit_mfa("123456")
+        submits = _recorded(m, "POST", _mfa_submit_path(mfa))
 
     assert access == "new-access"
     assert created_sessions[0].closed
+    assert len(submits) == 2
+    assert submits[0].kwargs["params"]["state"] == _MFA_STATE
+    assert submits[1].kwargs["params"]["state"] == fresh_state
+    assert submits[1].kwargs["data"] == expected_retry_data
 
 
 async def test_submit_mfa_same_state_back_raises_mfa_error(
@@ -1097,6 +1112,56 @@ async def test_submit_mfa_same_state_back_raises_mfa_error(
             await flow.async_submit_mfa("000000")
         assert not created_sessions[0].closed
         await flow.async_abort()
+
+
+async def test_submit_mfa_stateless_error_page_keeps_challenge_state(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A wrong-code page without a state input refreshes the form fields, not the state."""
+    error_page = (
+        '<html><form data-form-primary="true" method="POST">'
+        '<input type="hidden" name="action" value="default"/>'
+        '<span class="ulp-input-error-message">Onjuiste code</span></form></html>'
+    )
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), status=400, body=error_page)
+        with pytest.raises(EngieBeMfaError):
+            await flow.async_submit_mfa("000000")
+        assert not created_sessions[0].closed
+
+        _register_submit_shortcircuit(m, state=flow._expected_state)
+        await flow.async_submit_mfa("123456")
+        submits = _recorded(m, "POST", _mfa_submit_path(MfaMethod.SMS))
+
+    assert len(submits) == 2
+    assert submits[1].kwargs["params"]["state"] == _MFA_STATE
+    assert submits[1].kwargs["data"] == {"action": "default", "code": "123456"}
+
+
+async def test_submit_mfa_formless_error_page_keeps_original_inputs(
+    created_sessions: list[aiohttp.ClientSession],
+) -> None:
+    """A wrong-code page without any form keeps the inputs harvested at the challenge."""
+    with aioresponses() as m:
+        _register_auth_steps_1_to_7(m)
+        client = EngieBeClient()
+        flow = await _start_flow(client)
+        error_page = '<html><span class="ulp-input-error-message">Onjuiste code</span></html>'
+        m.post(_q(_mfa_submit_url(MfaMethod.SMS)), status=400, body=error_page)
+        with pytest.raises(EngieBeMfaError):
+            await flow.async_submit_mfa("000000")
+        assert not created_sessions[0].closed
+
+        _register_submit_shortcircuit(m, state=flow._expected_state)
+        await flow.async_submit_mfa("123456")
+        submits = _recorded(m, "POST", _mfa_submit_path(MfaMethod.SMS))
+
+    assert len(submits) == 2
+    assert submits[1].kwargs["params"]["state"] == _MFA_STATE
+    assert submits[1].kwargs["data"] == {"state": _MFA_STATE, "code": "123456"}
 
 
 async def test_submit_mfa_unrecognized_page_is_not_a_wrong_code(
