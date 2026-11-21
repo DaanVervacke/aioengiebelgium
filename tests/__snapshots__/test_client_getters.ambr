@@ -2549,26 +2549,26 @@
     partial_historical_data=False,
     partial_year_month_data=False,
     simulated_cost=SimulatedCost(
-      electricity_injection=SimulatedCostFlow(
-        amount=7.451,
+      electricity_injection=SimulatedFlow(
+        value=7.451,
       ),
-      electricity_offtake=SimulatedCostFlow(
-        amount=63.836,
+      electricity_offtake=SimulatedFlow(
+        value=63.836,
       ),
-      gas=SimulatedCostFlow(
-        amount=32.521,
+      gas=SimulatedFlow(
+        value=32.521,
       ),
       total=88.906,
     ),
     simulated_energy=SimulatedEnergy(
-      electricity_injection=SimulatedEnergyFlow(
-        kwh=138.958,
+      electricity_injection=SimulatedFlow(
+        value=138.958,
       ),
-      electricity_offtake=SimulatedEnergyFlow(
-        kwh=256.981,
+      electricity_offtake=SimulatedFlow(
+        value=256.981,
       ),
-      gas=SimulatedEnergyFlow(
-        kwh=314.934,
+      gas=SimulatedFlow(
+        value=314.934,
       ),
     ),
     skipped_entries=0,
@@ -2754,21 +2754,21 @@
     partial_historical_data=True,
     partial_year_month_data=True,
     simulated_cost=SimulatedCost(
-      electricity_injection=SimulatedCostFlow(
-        amount=10.0,
+      electricity_injection=SimulatedFlow(
+        value=10.0,
       ),
-      electricity_offtake=SimulatedCostFlow(
-        amount=10.0,
+      electricity_offtake=SimulatedFlow(
+        value=10.0,
       ),
       gas=None,
       total=52.83,
     ),
     simulated_energy=SimulatedEnergy(
-      electricity_injection=SimulatedEnergyFlow(
-        kwh=708.934,
+      electricity_injection=SimulatedFlow(
+        value=708.934,
       ),
-      electricity_offtake=SimulatedEnergyFlow(
-        kwh=131.389,
+      electricity_offtake=SimulatedFlow(
+        value=131.389,
       ),
       gas=None,
     ),
