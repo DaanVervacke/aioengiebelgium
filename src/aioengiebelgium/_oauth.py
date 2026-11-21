@@ -65,10 +65,9 @@ async def exchange_token(
         result = await json_object(response)
     access_token = result.get("access_token")
     refresh_token = result.get("refresh_token")
-    if not (isinstance(access_token, str) and access_token):
-        msg = "Token endpoint response missing tokens"
-        raise EngieBeAuthenticationError(msg)
-    if not (isinstance(refresh_token, str) and refresh_token):
+    if not (isinstance(access_token, str) and access_token) or not (
+        isinstance(refresh_token, str) and refresh_token
+    ):
         msg = "Token endpoint response missing tokens"
         raise EngieBeAuthenticationError(msg)
     return access_token, refresh_token
