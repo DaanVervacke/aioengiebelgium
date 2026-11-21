@@ -416,6 +416,8 @@ def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
     pc = None
     if isinstance(pc_raw, dict):
         tou_raw = pc_raw.get("contractItemTimeOfUseConfigurationList")
+        tou_items, tou_skipped = _parse_raw_mappings(tou_raw)
+        _record_nested_skips(tou_skipped)
         pc = ProductConfiguration(
             energy_product=pc_raw.get("energyProduct"),
             type=pc_raw.get("type"),
@@ -424,9 +426,8 @@ def _parse_energy_contract(item: dict[str, Any]) -> EnergyContract:
             care_level=_as_str_or_none(pc_raw.get("careLevel")),
             duration=_as_str_or_none(pc_raw.get("duration")),
             service_component=_as_str_or_none(pc_raw.get("serviceComponent")),
-            contract_item_time_of_use_configuration_list=_parse_raw_mappings(tou_raw)[0],
+            contract_item_time_of_use_configuration_list=tou_items,
         )
-        _record_nested_skips(_parse_raw_mappings(tou_raw)[1])
     return EnergyContract(
         business_agreement_number=_as_str(item.get("businessAgreementNumber")),
         service_point_number=_as_str(item.get("servicePointNumber")),
@@ -522,12 +523,13 @@ def parse_account_balance(data: dict[str, Any]) -> AccountBalance:
             "financial transaction",
         )
         pending_raw = details_raw.get("pendingOnlinePayments")
+        pending, pending_skipped = _parse_raw_mappings(pending_raw)
         details = BillingDetails(
             financial_transactions=tuple(txns),
             invoice_structured_communication=details_raw.get("invoiceStructuredCommunication"),
-            pending_online_payments=_parse_raw_mappings(pending_raw)[0],
+            pending_online_payments=pending,
         )
-        skipped += _parse_raw_mappings(pending_raw)[1]
+        skipped += pending_skipped
 
     refund_raw = data.get("refundBlocked")
     if isinstance(refund_raw, bool):
@@ -1192,6 +1194,8 @@ def _parse_service_point_installation(sub: Any) -> ServicePointInstallation | No
     if not isinstance(sub, dict):
         return None
     sharing_raw = sub.get("energySharingList")
+    sharing, sharing_skipped = _parse_raw_mappings(sharing_raw)
+    _record_nested_skips(sharing_skipped)
     return ServicePointInstallation(
         installation_id=_as_str_or_none(sub.get("installationId")),
         rtp_component_id=_as_str_or_none(sub.get("RTPComponentID")),
@@ -1199,7 +1203,7 @@ def _parse_service_point_installation(sub: Any) -> ServicePointInstallation | No
         budget_meter_from_date=_as_date(sub.get("budgetMeterFromDate")),
         service_component=_as_str_or_none(sub.get("serviceComponent")),
         auto_producer=_parse_auto_producer(sub.get("autoProducer")),
-        energy_sharing_list=_parse_raw_mappings(sharing_raw)[0],
+        energy_sharing_list=sharing,
         gas_conversion_coefficient=_as_float_or_none(sub.get("gasConversionCoefficient")),
         metering_configuration=_parse_metering_configuration(sub.get("meteringConfiguration")),
     )
@@ -1224,6 +1228,8 @@ def parse_service_point(data: dict[str, Any], requested_ean: str) -> ServicePoin
     division = _as_str_or_none(data.get("division"))
     ean = _as_str_or_none(data.get("ean"))
     ean_map = {} if division is None else {bare_ean(ean or requested_ean): division}
+    with _tally_nested_skips() as nested:
+        market_details = _parse_service_point_market_details(data.get("marketDetails"))
     return ServicePoint(
         ean_energy_types=MappingProxyType(ean_map),
         ean=ean,
@@ -1232,7 +1238,8 @@ def parse_service_point(data: dict[str, Any], requested_ean: str) -> ServicePoin
         charging_station=bool(data.get("chargingStation")),
         ean_blocked=_as_bool_or_none(data.get("eanBlocked")),
         premises_id=_as_str_or_none(data.get("premisesId")),
-        market_details=_parse_service_point_market_details(data.get("marketDetails")),
+        market_details=market_details,
+        skipped_entries=nested.count,
     )
 
 
