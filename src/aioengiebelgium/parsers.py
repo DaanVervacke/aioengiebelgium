@@ -170,6 +170,20 @@ def _as_bool_or_none(value: Any) -> bool | None:
     return value if isinstance(value, bool) else None
 
 
+def _as_bool(value: Any) -> bool:
+    """Parse a wire boolean sent as a bool or as a true/false string,
+    ignoring capitalization. Anything else parses as False."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.lower()
+        if lowered == "false":
+            return False
+        if lowered == "true":
+            return True
+    return False
+
+
 def _as_object(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
@@ -531,19 +545,11 @@ def parse_account_balance(data: dict[str, Any]) -> AccountBalance:
         )
         skipped += pending_skipped
 
-    refund_raw = data.get("refundBlocked")
-    if isinstance(refund_raw, bool):
-        refund_blocked = refund_raw
-    elif isinstance(refund_raw, str):
-        refund_blocked = refund_raw.lower() == "true"
-    else:
-        refund_blocked = False
-
     return AccountBalance(
         status=data.get("status"),
         overview=overview,
         details=details,
-        refund_blocked=refund_blocked,
+        refund_blocked=_as_bool(data.get("refundBlocked")),
         skipped_entries=skipped,
     )
 

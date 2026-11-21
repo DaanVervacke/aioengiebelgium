@@ -275,12 +275,18 @@ def test_parse_account_balance_missing_details() -> None:
     [
         pytest.param(True, True, id="bool_true"),
         pytest.param("true", True, id="string_true"),
+        pytest.param("TRUE", True, id="string_true_uppercase"),
+        pytest.param("True", True, id="string_true_capitalized"),
         pytest.param("false", False, id="string_false"),
+        pytest.param("FALSE", False, id="string_false_uppercase"),
         pytest.param(False, False, id="bool_false"),
+        pytest.param("junk", False, id="unrecognized_string"),
+        pytest.param(1, False, id="number_stays_false"),
+        pytest.param(None, False, id="none_stays_false"),
     ],
 )
 def test_parse_account_balance_refund_blocked(
-    refund_blocked_value: bool | str,  # noqa: FBT001
+    refund_blocked_value: Any,
     expected: bool,  # noqa: FBT001
 ) -> None:
     data = {
