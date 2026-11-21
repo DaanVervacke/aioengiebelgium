@@ -115,6 +115,7 @@ from .models import (
     HappyHourMonthReport,
     HappyHourServiceStatus,
     InvoicesPage,
+    MeteringServicePointsResponse,
     MeterReadsResponse,
     MonthlyBilledBudget,
     MonthlyPeaks,
@@ -122,7 +123,6 @@ from .models import (
     RewardBalanceDetails,
     RewardsPayoutsResponse,
     ServicePoint,
-    ServicePointsResponse,
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
@@ -334,7 +334,7 @@ class EngieBeClient:
     async def async_get_service_points(
         self,
         business_agreement_number: str,
-    ) -> ServicePointsResponse:
+    ) -> MeteringServicePointsResponse:
         """Fetch the service points of a business agreement with their metering data sources."""
         return await self._call(SERVICE_POINTS, BanArgs(ban=business_agreement_number))
 

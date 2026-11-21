@@ -63,6 +63,7 @@ from .models import (
     HappyHourMonthReport,
     HappyHourServiceStatus,
     InvoicesPage,
+    MeteringServicePointsResponse,
     MeterReadsResponse,
     MonthlyBilledBudget,
     MonthlyPeaks,
@@ -70,7 +71,6 @@ from .models import (
     RewardBalanceDetails,
     RewardsPayoutsResponse,
     ServicePoint,
-    ServicePointsResponse,
     SolarSurplusForecasts,
     TouSchedulesResponse,
     UsageDetailsResponse,
@@ -651,7 +651,7 @@ ACCOUNT_BALANCE: Endpoint[BanArgs, AccountBalance] = Endpoint(
     parse=lambda raw, _a: parse_account_balance(raw),
 )
 
-SERVICE_POINTS: Endpoint[BanArgs, ServicePointsResponse] = Endpoint(
+SERVICE_POINTS: Endpoint[BanArgs, MeteringServicePointsResponse] = Endpoint(
     name="service_points",
     method="GET",
     url=lambda a: f"{HAPPY_HOUR_BASE_URL}/business-agreements/{a.ban}/service-points",

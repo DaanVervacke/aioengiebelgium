@@ -1043,7 +1043,7 @@ class MeteringServicePoint:
 
 
 @dataclass(frozen=True, slots=True)
-class ServicePointsResponse:
+class MeteringServicePointsResponse:
     """Response from the business-agreement service-points endpoint."""
 
     items: tuple[MeteringServicePoint, ...] = ()

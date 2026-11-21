@@ -287,6 +287,9 @@ and counts once. A non-zero count means the response is incomplete.
 .. autoclass:: aioengiebelgium.MeteringServicePoint
    :members:
 
+.. autoclass:: aioengiebelgium.MeteringServicePointsResponse
+   :members:
+
 .. autoclass:: aioengiebelgium.MeterRead
    :members:
 
@@ -339,9 +342,6 @@ and counts once. A non-zero count means the response is incomplete.
    :members:
 
 .. autoclass:: aioengiebelgium.ServicePointMarketDetails
-   :members:
-
-.. autoclass:: aioengiebelgium.ServicePointsResponse
    :members:
 
 .. autoclass:: aioengiebelgium.SimulatedCost

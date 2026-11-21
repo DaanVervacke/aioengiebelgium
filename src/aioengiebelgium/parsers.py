@@ -87,6 +87,7 @@ from .models import (
     MeteringDataSource,
     MeteringDataSources,
     MeteringServicePoint,
+    MeteringServicePointsResponse,
     MeterRead,
     MeterReadsResponse,
     MeterRegisterRead,
@@ -105,7 +106,6 @@ from .models import (
     ServicePoint,
     ServicePointInstallation,
     ServicePointMarketDetails,
-    ServicePointsResponse,
     SimulatedCost,
     SimulatedCostFlow,
     SimulatedEnergy,
@@ -1289,11 +1289,11 @@ def _parse_metering_service_point(item: dict[str, Any]) -> MeteringServicePoint 
     )
 
 
-def parse_service_points(data: dict[str, Any]) -> ServicePointsResponse:
+def parse_service_points(data: dict[str, Any]) -> MeteringServicePointsResponse:
     items, skipped = _parse_items_counted(
         data.get("items"), _parse_metering_service_point, "service point"
     )
-    return ServicePointsResponse(items=tuple(items), skipped_entries=skipped)
+    return MeteringServicePointsResponse(items=tuple(items), skipped_entries=skipped)
 
 
 def _parse_meter_register_read(raw: dict[str, Any]) -> MeterRegisterRead | None:
