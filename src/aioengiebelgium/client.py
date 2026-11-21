@@ -3,7 +3,7 @@
 import logging
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
-from typing import Any, NoReturn, Self
+from typing import Self
 
 import aiohttp
 
@@ -646,27 +646,53 @@ class EngieBeClient:
         return headers
 
     async def _call[ArgsT, ModelT](self, endpoint: Endpoint[ArgsT, ModelT], args: ArgsT) -> ModelT:
-        def raise_error(err: EngieBeCommunicationError) -> NoReturn:
-            endpoint.raise_error(err, args)
-
         wire = endpoint.build(args)
         if endpoint.binary:
-            raw_bytes = await self._request_bytes_authenticated(wire, raise_error)
+            raw_bytes = await self._request_authenticated(
+                endpoint,
+                args,
+                wire,
+                lambda headers: _transport.request_bytes(
+                    self._ensure_session(),
+                    method=wire.method,
+                    url=wire.url,
+                    headers=headers,
+                    params=wire.params,
+                    timeout=self._request_timeout,
+                ),
+            )
             return endpoint.parse(raw_bytes, args)
-        raw = await self._request_json_authenticated(wire, raise_error)
+        raw = await self._request_authenticated(
+            endpoint,
+            args,
+            wire,
+            lambda headers: _transport.request_json(
+                self._ensure_session(),
+                method=wire.method,
+                url=wire.url,
+                headers=headers,
+                params=wire.params,
+                json_body=wire.json_body,
+                timeout=self._request_timeout,
+                expect_body=wire.expect_body,
+            ),
+        )
         return endpoint.parse(raw, args)
 
-    async def _request_json_authenticated(
+    async def _request_authenticated[ArgsT, ModelT, ResultT](
         self,
+        endpoint: Endpoint[ArgsT, ModelT],
+        args: ArgsT,
         wire: WireRequest,
-        raise_error: Callable[[EngieBeCommunicationError], NoReturn],
-    ) -> dict[str, Any]:
-        """Make a JSON request, refreshing proactively then on 401.
+        perform: Callable[[dict[str, str]], Awaitable[ResultT]],
+    ) -> ResultT:
+        """Make an authenticated request, refreshing proactively then on 401.
 
-        Optional-auth endpoints skip the proactive refresh and send no token when none is held.
-        When their held token meets a 401 and no refresh token exists, they retry once with
-        no Authorization header. Only errors of the request itself go through ``raise_error``,
-        never refresh errors.
+        Optional-auth endpoints skip the proactive refresh and send no token
+        when none is held. When their held token meets a 401 and no refresh
+        token exists, they retry once with no Authorization header. Only
+        errors of the request itself go through endpoint.raise_error, never
+        refresh errors.
         """
         self._raise_if_closed()
         if not wire.optional_auth:
@@ -680,60 +706,9 @@ class EngieBeClient:
                 wire.user_agent, wire.extra_headers, wire.accept, with_auth=with_auth
             )
             try:
-                return await _transport.request_json(
-                    self._ensure_session(),
-                    method=wire.method,
-                    url=wire.url,
-                    headers=headers,
-                    params=wire.params,
-                    json_body=wire.json_body,
-                    timeout=self._request_timeout,
-                    expect_body=wire.expect_body,
-                )
+                return await perform(headers)
             except EngieBeCommunicationError as err:
-                raise_error(err)
-            except EngieBeAuthenticationError as err:
-                if attempt or not with_auth:
-                    raise
-                if wire.optional_auth and self._tokens.refresh_token is None:
-                    _LOGGER.debug("request unauthorized (401): retrying without authorization")
-                    drop_auth = True
-                    continue
-                _LOGGER.debug("request unauthorized (401): refreshing tokens and retrying")
-                try:
-                    await self.async_refresh_token()
-                except EngieBeError as refresh_err:
-                    raise refresh_err from err
-        raise AssertionError  # pragma: no cover
-
-    async def _request_bytes_authenticated(
-        self,
-        wire: WireRequest,
-        raise_error: Callable[[EngieBeCommunicationError], NoReturn],
-    ) -> bytes:
-        """Make a binary request, refreshing on 401 like the JSON path."""
-        self._raise_if_closed()
-        if not wire.optional_auth:
-            await self._tokens.ensure_fresh()
-        drop_auth = False
-        for attempt in range(2):
-            with_auth = not drop_auth and (
-                not wire.optional_auth or self._tokens.access_token is not None
-            )
-            headers = self._build_headers(
-                wire.user_agent, wire.extra_headers, wire.accept, with_auth=with_auth
-            )
-            try:
-                return await _transport.request_bytes(
-                    self._ensure_session(),
-                    method=wire.method,
-                    url=wire.url,
-                    headers=headers,
-                    params=wire.params,
-                    timeout=self._request_timeout,
-                )
-            except EngieBeCommunicationError as err:
-                raise_error(err)
+                endpoint.raise_error(err, args)
             except EngieBeAuthenticationError as err:
                 if attempt or not with_auth:
                     raise
