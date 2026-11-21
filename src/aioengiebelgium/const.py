@@ -1,4 +1,5 @@
 from enum import StrEnum
+from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 
 AUTH_BASE_URL = "https://account.engie.be"
@@ -34,7 +35,10 @@ FEATURE_FLAG_PLATFORM = "android"
 FEATURE_FLAG_PLATFORM_VERSION = "16"
 FEATURE_FLAG_APP_VERSION = "5.1.0.1288"
 
-_LIB_VERSION = _pkg_version("aioengiebelgium")
+try:
+    _LIB_VERSION = _pkg_version("aioengiebelgium")
+except _PackageNotFoundError:
+    _LIB_VERSION = "0.0.0"
 
 USER_AGENT_BROWSER = (
     "Mozilla/5.0 (Linux; Android 10; K) "

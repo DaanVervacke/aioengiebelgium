@@ -117,6 +117,9 @@ source = ["src"]
 show_missing = true
 skip_covered = true
 fail_under = 98
+exclude_also = [
+    "except _PackageNotFoundError:",
+]
 
 [tool.mypy]
 python_version = "3.14"
