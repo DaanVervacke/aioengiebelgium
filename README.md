@@ -169,11 +169,12 @@ Persist every rotated pair via `on_token_refresh`. See [Token rotation](#token-r
 
 ### Data getters
 
-Response models that hold lists carry `skipped_entries`, the number of malformed
-entries the parser dropped. The count includes entries dropped from nested lists,
-such as the business agreements of an account or the registers of a meter read.
-A meter read whose registers are all malformed is dropped and counts once.
-A non-zero count means the response is incomplete.
+Response models that hold lists carry `skipped_entries`, the number of
+entries the parser dropped. The count includes entries dropped from nested
+lists, such as the business agreements of an account or the registers of a
+meter read. A meter read whose registers are all malformed is dropped and
+counts once. On `EpexPayload` the count also includes slots dropped for a
+duplicate start time. A non-zero count means the response is incomplete.
 
 | Getter | Returns | Description |
 | --- | --- | --- |

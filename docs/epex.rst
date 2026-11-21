@@ -42,7 +42,8 @@ day-ahead prices. It carries an aware start and end plus a value in
 €/kWh, converted from the API's €/MWh. A slot ends at the next slot's
 start, capped at the most common spacing between slot starts. A response
 with a single slot falls back to the requested granularity. Slots with a
-duplicate start time are dropped.
+duplicate start time are dropped, and each dropped duplicate counts in
+``skipped_entries``.
 
 :class:`~aioengiebelgium.EpexGranularity` selects the market-time-unit
 length:

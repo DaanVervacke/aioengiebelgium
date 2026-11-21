@@ -1546,6 +1546,7 @@ def test_parse_epex_prices_drops_duplicate_period() -> None:
     }
     result = parse_epex_prices(data, granularity_minutes=60)
     assert len(result.slots) == 3
+    assert result.skipped_entries == 1
     assert result.slot_duration == timedelta(hours=1)
     assert all(slot.end > slot.start for slot in result.slots)
     assert result.slots[-1].end == datetime.fromisoformat("2026-05-04T03:00:00+02:00")
