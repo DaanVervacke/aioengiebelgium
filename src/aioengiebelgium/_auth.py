@@ -150,6 +150,33 @@ async def _auth_request(
     )
 
 
+async def _form_post(
+    session: aiohttp.ClientSession,
+    path: str,
+    state: str,
+    data: dict[str, str],
+    *,
+    timeout: float = DEFAULT_TIMEOUT,  # noqa: ASYNC109
+) -> tuple[str, Mapping[str, str], int]:
+    """POST one browser form without raising on error status.
+
+    The login flow reads the page content and the status to decide what
+    happened, so error statuses do not raise here.
+    """
+    async with request(
+        session,
+        method="POST",
+        url=f"{AUTH_BASE_URL}{path}",
+        params={"state": state, "ui_locales": "nl"},
+        headers=_BROWSER_HEADERS,
+        data=data,
+        allow_redirects=False,
+        raise_on_error=False,
+        timeout=timeout,
+    ) as response:
+        return await response.text(), response.headers, response.status
+
+
 async def _resume_authorization(
     session: aiohttp.ClientSession,
     login_state: str,
@@ -360,20 +387,13 @@ async def start_auth_flow(
     )
     password_inputs = _harvest_hidden_inputs(password_body)
 
-    async with request(
+    body, password_headers, password_status = await _form_post(
         session,
-        method="POST",
-        url=f"{AUTH_BASE_URL}/u/login/password",
-        params={"state": authorize_state, "ui_locales": "nl"},
-        headers=_BROWSER_HEADERS,
-        data={**password_inputs, "username": username, "password": password},
-        allow_redirects=False,
-        raise_on_error=False,
+        "/u/login/password",
+        authorize_state,
+        {**password_inputs, "username": username, "password": password},
         timeout=timeout,
-    ) as response:
-        password_status = response.status
-        password_headers = response.headers
-        body = await response.text()
+    )
 
     if password_status >= HTTPStatus.INTERNAL_SERVER_ERROR:
         _LOGGER.debug(
@@ -462,18 +482,7 @@ async def _submit_mfa_code(
         case MfaMethod.EMAIL:
             path = "/u/mfa-email-challenge"
             data = {**mfa_form_inputs, "code": mfa_code, "action": "default"}
-    async with request(
-        session,
-        method="POST",
-        url=f"{AUTH_BASE_URL}{path}",
-        params={"state": challenge_state, "ui_locales": "nl"},
-        headers=_BROWSER_HEADERS,
-        data=data,
-        allow_redirects=False,
-        raise_on_error=False,
-        timeout=timeout,
-    ) as response:
-        return await response.text(), response.headers, response.status
+    return await _form_post(session, path, challenge_state, data, timeout=timeout)
 
 
 async def _switch_to_email_mfa(
