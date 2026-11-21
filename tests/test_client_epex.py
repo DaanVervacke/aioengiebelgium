@@ -116,10 +116,10 @@ async def test_naive_datetime_raises_value_error(
             await client.async_get_epex_prices(from_dt, to_dt)
 
 
-async def test_works_without_authentication(
+async def test_tokenless_call_omits_authorization_header(
     load_fixture: LoadFixture,
 ) -> None:
-    """The EPEX endpoint is public (verified 2026-07-31): no tokens needed."""
+    """A tokenless client sends no Authorization header and parses the response."""
     fixture = load_fixture("epex_24h.json")
     with aioresponses() as m:
         m.get(_EPEX_URL, payload=fixture)
@@ -138,7 +138,7 @@ async def test_works_without_authentication(
 
 
 async def test_tokenless_401_propagates_without_token_refresh() -> None:
-    """A 401 on the public EPEX endpoint with no tokens raises at once, no refresh attempt."""
+    """A 401 on a tokenless EPEX call raises at once, with no refresh attempt."""
     with aioresponses() as m:
         m.get(_EPEX_URL, status=401)
         async with aiohttp.ClientSession() as session:
@@ -149,6 +149,85 @@ async def test_tokenless_401_propagates_without_token_refresh() -> None:
                     datetime(2026, 5, 4, 22, 0, tzinfo=UTC),
                 )
         assert all("oauth/token" not in str(url) for _method, url in m.requests)
+
+
+async def test_stale_token_401_retries_once_without_authorization(
+    load_fixture: LoadFixture,
+) -> None:
+    """A stale bearer on the EPEX endpoint is dropped for one retry, with no refresh."""
+    fixture = load_fixture("epex_24h.json")
+    with aioresponses() as m:
+        m.get(_EPEX_URL, status=401)
+        m.get(_EPEX_URL, payload=fixture)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token="stale-token")
+            result = await client.async_get_epex_prices(
+                datetime(2026, 5, 3, 22, 0, tzinfo=UTC),
+                datetime(2026, 5, 4, 22, 0, tzinfo=UTC),
+            )
+
+        calls = [call for values in m.requests.values() for call in values]
+        assert len(calls) == 2
+        first, retry = calls
+    assert first.kwargs["headers"]["authorization"] == "Bearer stale-token"
+    assert "authorization" not in retry.kwargs["headers"]
+    assert all("oauth/token" not in str(url) for _method, url in m.requests)
+    assert result.slots
+
+
+async def test_stale_token_401_on_unauthenticated_retry_raises() -> None:
+    """A 401 on the unauthenticated retry still surfaces as an auth error."""
+    with aioresponses() as m:
+        m.get(_EPEX_URL, status=401)
+        m.get(_EPEX_URL, status=401)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token="stale-token")
+            with pytest.raises(EngieBeAuthenticationError):
+                await client.async_get_epex_prices(
+                    datetime(2026, 5, 3, 22, 0, tzinfo=UTC),
+                    datetime(2026, 5, 4, 22, 0, tzinfo=UTC),
+                )
+
+        calls = [call for values in m.requests.values() for call in values]
+    assert len(calls) == 2
+    assert all("oauth/token" not in str(url) for _method, url in m.requests)
+
+
+async def test_stale_token_401_refreshes_and_retries_with_fresh_token(
+    load_fixture: LoadFixture,
+) -> None:
+    """A stale bearer with a held refresh token rotates and retries with the new one."""
+    fixture = load_fixture("epex_24h.json")
+    with aioresponses() as m:
+        m.get(_EPEX_URL, status=401)
+        m.post(
+            f"{AUTH_BASE_URL}/oauth/token",
+            payload={
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "token_type": "Bearer",
+            },
+        )
+        m.get(_EPEX_URL, payload=fixture)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(
+                session, access_token="stale-token", refresh_token="stored-refresh"
+            )
+            result = await client.async_get_epex_prices(
+                datetime(2026, 5, 3, 22, 0, tzinfo=UTC),
+                datetime(2026, 5, 4, 22, 0, tzinfo=UTC),
+            )
+
+        calls = [
+            call
+            for (_method, url), values in m.requests.items()
+            for call in values
+            if str(url).startswith(EPEX_BASE_URL)
+        ]
+    assert len(calls) == 2
+    assert calls[0].kwargs["headers"]["authorization"] == "Bearer stale-token"
+    assert calls[1].kwargs["headers"]["authorization"] == "Bearer new-access"
+    assert result.slots
 
 
 async def test_server_error_reraises_communication_error() -> None:

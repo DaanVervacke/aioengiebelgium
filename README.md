@@ -93,20 +93,30 @@ has to log in again.
 The client logs an exception raised by `on_token_refresh` and continues. It does
 not re-raise it, so handle and report storage failures inside the callback.
 
-## EPEX prices (no login required)
+## EPEX prices
 
-The EPEX day-ahead market endpoint is public. It works on a client with no
-tokens and no login. A logged-in client can call it too and sends its token.
+The EPEX day-ahead endpoint rejects a call without a valid access token
+with a 401. A tokenless client sends no Authorization header and surfaces
+that 401 as `EngieBeAuthenticationError`, so load the stored token pair
+first. The example reuses `tokens.json` from the usage section above.
 
 ```python
 import asyncio
+import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from aioengiebelgium import EngieBeClient
 
+_TOKEN_FILE = Path("tokens.json")
+
 
 async def main() -> None:
-    async with EngieBeClient() as client:
+    tokens = json.loads(_TOKEN_FILE.read_text())
+    async with EngieBeClient(
+        access_token=tokens["access"],
+        refresh_token=tokens["refresh"],
+    ) as client:
         now = datetime.now(UTC)
         prices = await client.async_get_epex_prices(now, now + timedelta(days=1))
         print(prices)
@@ -195,7 +205,7 @@ A non-zero count means the response is incomplete.
 | `async_get_charging_sessions(customer_account_number, start_date, end_date, *, page_number=0, page_size=20)` | `ChargingSessionsPage` | One page of the charging sessions in a date range, newest first, with the total number of sessions and pages. `page_number` is 0-based. |
 | `async_get_charging_session(session_id)` | `ChargingSessionDetails` | One charging session with the energy charged per interval. Smart Charge sessions also carry whether they reached their target. |
 | `async_get_charging_sessions_summary(customer_account_number, start_date, end_date)` | `ChargingSessionsSummary` | Charging totals per calendar month: session count, energy of `smart_charging` sessions and of `public` sessions, cost and reward. |
-| `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. Works without login. |
+| `async_get_epex_prices(from_dt, to_dt, *, granularity=EpexGranularity.HOURLY)` | `EpexPayload` | EPEX day-ahead market prices. The endpoint rejects a tokenless call with a 401, so pass stored tokens. |
 | `async_get_customer_account(customer_account_number)` | `CustomerAccountDetail` | Profile and contact details of a customer account. The customer account number comes from `CustomerAccount.customer_account_number`. |
 | `async_get_user_invitations()` | `UserInvitationsResponse` | User invitations of the authenticated user. |
 | `async_get_customer_account_user_invitations(customer_account_number)` | `UserInvitationsResponse` | User invitations scoped to one customer account. |

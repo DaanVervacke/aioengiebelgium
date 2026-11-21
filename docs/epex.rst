@@ -1,20 +1,32 @@
 EPEX prices
 ===========
 
-The EPEX day-ahead endpoint is public. It works on a client with no tokens
-and no login, and then the request carries no ``Authorization`` header. A
-logged-in client can call it too and sends its token.
+The EPEX day-ahead endpoint rejects a call without a valid access token
+with a 401. The client omits the ``Authorization`` header when it holds no
+token, so a tokenless call surfaces that 401 as
+:class:`~aioengiebelgium.EngieBeAuthenticationError`. A logged-in client
+sends its token and gets the prices.
+
+The example loads the token pair stored by the :doc:`quickstart` example.
 
 .. code-block:: python
 
    import asyncio
+   import json
    from datetime import UTC, datetime, timedelta
+   from pathlib import Path
 
    from aioengiebelgium import EngieBeClient
 
+   _TOKEN_FILE = Path("tokens.json")
+
 
    async def main() -> None:
-       async with EngieBeClient() as client:
+       stored = json.loads(_TOKEN_FILE.read_text())
+       async with EngieBeClient(
+           access_token=stored["access"],
+           refresh_token=stored["refresh"],
+       ) as client:
            now = datetime.now(UTC)
            prices = await client.async_get_epex_prices(now, now + timedelta(days=1))
            print(prices)

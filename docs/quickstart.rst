@@ -74,8 +74,8 @@ Where to go next
 
 - :doc:`authentication` covers the MFA login flow and the token-rotation
   contract.
-- :doc:`epex` covers the public day-ahead endpoint that works without a
-  login.
+- :doc:`epex` covers the day-ahead endpoint, which now needs a logged-in
+  client.
 - :doc:`api` lists the constructor, every getter, and the exception
   taxonomy.
 

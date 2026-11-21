@@ -1900,6 +1900,71 @@ async def test_invoice_document_401_retry_returns_bytes() -> None:
     assert gets[1].kwargs["headers"]["authorization"] == "Bearer new-access"
 
 
+_PROBE_URL = f"{PREMISES_BASE_URL}/probe"
+_BINARY_OPTIONAL_ENDPOINT = Endpoint[None, bytes](
+    name="synthetic_binary_optional",
+    method="GET",
+    url=_PROBE_URL,
+    parse=lambda raw, _args: raw,
+    optional_auth=True,
+    binary=True,
+)
+
+
+async def test_binary_optional_auth_401_retries_once_without_authorization() -> None:
+    """The bytes path drops a stale bearer for one retry when no refresh token exists."""
+    with aioresponses() as m:
+        m.get(_any_query(_PROBE_URL), status=HTTPStatus.UNAUTHORIZED)
+        m.get(_any_query(_PROBE_URL), body=b"payload", content_type="application/octet-stream")
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token="stale-token")
+            result = await client._call(_BINARY_OPTIONAL_ENDPOINT, None)
+    gets = m.requests["GET", URL(_PROBE_URL)]
+    assert result == b"payload"
+    assert len(gets) == 2
+    assert gets[0].kwargs["headers"]["authorization"] == "Bearer stale-token"
+    assert "authorization" not in gets[1].kwargs["headers"]
+
+
+async def test_binary_optional_auth_401_on_unauthenticated_retry_raises() -> None:
+    """The bytes path raises the auth error when the retry also meets a 401."""
+    with aioresponses() as m:
+        m.get(_any_query(_PROBE_URL), status=HTTPStatus.UNAUTHORIZED)
+        m.get(_any_query(_PROBE_URL), status=HTTPStatus.UNAUTHORIZED)
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(session, access_token="stale-token")
+            with pytest.raises(EngieBeAuthenticationError):
+                await client._call(_BINARY_OPTIONAL_ENDPOINT, None)
+    gets = m.requests["GET", URL(_PROBE_URL)]
+    assert len(gets) == 2
+    assert "authorization" not in gets[1].kwargs["headers"]
+
+
+async def test_binary_optional_auth_401_refreshes_and_retries_with_fresh_token() -> None:
+    """The bytes path rotates a held refresh token and retries with the new bearer."""
+    with aioresponses() as m:
+        m.get(_any_query(_PROBE_URL), status=HTTPStatus.UNAUTHORIZED)
+        m.post(
+            _TOKEN_URL,
+            payload={
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "token_type": "Bearer",
+            },
+        )
+        m.get(_any_query(_PROBE_URL), body=b"payload", content_type="application/octet-stream")
+        async with aiohttp.ClientSession() as session:
+            client = EngieBeClient(
+                session, access_token="stale-token", refresh_token="stored-refresh"
+            )
+            result = await client._call(_BINARY_OPTIONAL_ENDPOINT, None)
+    gets = m.requests["GET", URL(_PROBE_URL)]
+    assert result == b"payload"
+    assert len(gets) == 2
+    assert gets[0].kwargs["headers"]["authorization"] == "Bearer stale-token"
+    assert gets[1].kwargs["headers"]["authorization"] == "Bearer new-access"
+
+
 _UPDATE_URL = f"{EV_V2_BASE_URL}/vehicles/{_VEHICLE_ID}/charging-sessions/latest/charge-settings"
 
 
