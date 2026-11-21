@@ -508,7 +508,7 @@ def _epex_params(args: EpexArgs) -> dict[str, str]:
     return {
         "from": _iso_ms_z(args.from_dt),
         "to": _iso_ms_z(args.to_dt),
-        "granularity": args.granularity.wire_value,
+        "granularity": str(args.granularity),
     }
 
 
@@ -822,7 +822,7 @@ EPEX_PRICES: Endpoint[EpexArgs, EpexPayload] = Endpoint(
     user_agent=USER_AGENT_BROWSER,
     optional_auth=True,
     not_found_error=_epex_not_published,
-    parse=lambda raw, a: parse_epex_prices(raw, granularity_minutes=a.granularity.value),
+    parse=lambda raw, a: parse_epex_prices(raw, granularity_minutes=a.granularity.minutes),
 )
 
 CUSTOMER_ACCOUNT_DETAIL: Endpoint[CanArgs, CustomerAccountDetail] = Endpoint(
