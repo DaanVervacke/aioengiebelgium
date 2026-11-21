@@ -552,7 +552,9 @@ class HappyHourMonthReport:
 
     current: HappyHourMonthData | None = None
     history: tuple[MonthReportHistoryEntry, ...] = ()
-    year_month: str | None = None
+    year_month: date | None = None
+    """The month of the report, first day of that month."""
+
     partial_historical_data: bool | None = None
     partial_year_month_data: bool | None = None
     simulated_energy: SimulatedEnergy | None = None

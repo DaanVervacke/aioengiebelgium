@@ -419,7 +419,7 @@ def test_parse_happy_hour_month_report_energy_history(load_fixture: LoadFixture)
     data = load_fixture("happy_hour_month_report_energy.json")
     result = parse_happy_hour_month_report(data)
     assert result.current is None
-    assert result.year_month == "2026-08"
+    assert result.year_month == date(2026, 8, 1)
     assert result.partial_historical_data is True
     assert result.partial_year_month_data is True
     assert len(result.history) == 13

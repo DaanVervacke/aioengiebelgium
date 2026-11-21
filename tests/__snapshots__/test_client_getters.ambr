@@ -2572,7 +2572,7 @@
       ),
     ),
     skipped_entries=0,
-    year_month='2024-09',
+    year_month=datetime.date(2024, 9, 1),
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_energy]
@@ -2773,7 +2773,7 @@
       gas=None,
     ),
     skipped_entries=0,
-    year_month='2026-08',
+    year_month=datetime.date(2026, 8, 1),
   )
 # ---
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_service_active]
