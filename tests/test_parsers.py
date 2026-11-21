@@ -2595,8 +2595,14 @@ _MALFORMED_CASES = [
     pytest.param(
         parse_charging_session_details,
         {"session": {"id": "200001"}, "consumptions": "none"},
-        lambda r: r == ChargingSessionDetails(),
+        lambda r: r == ChargingSessionDetails(skipped_entries=1),
         id="charging_session_details_bad_session_id",
+    ),
+    pytest.param(
+        parse_charging_session_details,
+        {"session": "200001", "consumptions": "none"},
+        lambda r: r == ChargingSessionDetails(skipped_entries=1),
+        id="charging_session_details_non_dict_session",
     ),
     pytest.param(
         parse_charging_session_charge_settings,
