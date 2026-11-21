@@ -1,3 +1,5 @@
+"""Data models for the parsed ENGIE API payloads and the EAN helpers."""
+
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -813,7 +815,7 @@ class TouScheduleItem:
         return _schedule_has_tou(self.primary_meter(), source="dgo_tgo")
 
     def has_tou(self) -> bool:
-        """Shape probe. True when supplier OR network TOU exists on the primary meter."""
+        """True when the primary meter has a supplier or network time-of-use schedule."""
         return self.has_supplier_tou() or self.has_network_tou()
 
 

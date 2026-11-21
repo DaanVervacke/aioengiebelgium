@@ -1,3 +1,5 @@
+"""HTTP transport: the raw request helpers and session ownership."""
+
 import asyncio
 import logging
 import socket
