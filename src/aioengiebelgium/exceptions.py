@@ -1,3 +1,5 @@
+"""Exception hierarchy for the ENGIE Belgium API client."""
+
 from http import HTTPStatus
 
 

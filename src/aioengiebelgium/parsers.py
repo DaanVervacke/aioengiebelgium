@@ -1,3 +1,5 @@
+"""Parsers that turn the raw ENGIE API payloads into the data models."""
+
 import logging
 from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping
