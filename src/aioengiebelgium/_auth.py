@@ -16,6 +16,7 @@ import aiohttp
 from ._oauth import exchange_token
 from ._transport import DEFAULT_TIMEOUT, OwnedSession, request, request_text
 from .const import (
+    APP_SCHEME,
     AUTH_BASE_URL,
     OAUTH_AUDIENCE,
     OAUTH_SCOPES,
@@ -321,8 +322,8 @@ async def start_auth_flow(
         "code_challenge": code_challenge,
         "code_challenge_method": "S256",
         "audience": OAUTH_AUDIENCE,
-        "app_scheme": "be-engie-smart",
-        "cancel_redirect": "be-engie-smart://cancel-registration-redirect",
+        "app_scheme": APP_SCHEME,
+        "cancel_redirect": f"{APP_SCHEME}://cancel-registration-redirect",
     }
     body, authorize_headers = await request_text(
         session,
