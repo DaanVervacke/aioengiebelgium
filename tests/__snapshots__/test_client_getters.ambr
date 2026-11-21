@@ -2218,6 +2218,7 @@
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report]
   HappyHourMonthReport(
     costs=None,
+    costs_total=None,
     current=HappyHourMonthData(
       comparison=HappyHourComparison(
         consumption_kwh_pct_change=10.0,
@@ -2244,15 +2245,76 @@
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_dual_fuel]
   HappyHourMonthReport(
     costs=UsageElectricityBreakdown(
-      injection=None,
+      injection=UsageDirectionBreakdown(
+        amount_sum=11.364,
+        distribution_parts=tuple(
+        ),
+        kwh_sum=None,
+        parts=tuple(
+        ),
+        supplier_parts=tuple(
+          UsageTouPart(
+            has_volume_simulation_percentage=False,
+            percentage_of_sum=1.0,
+            slot_code='TOTAL_HOURS',
+            value=11.364,
+          ),
+        ),
+      ),
       netto=None,
-      offtake=None,
+      offtake=UsageDirectionBreakdown(
+        amount_sum=59.492,
+        distribution_parts=tuple(
+        ),
+        kwh_sum=None,
+        parts=tuple(
+        ),
+        supplier_parts=tuple(
+          UsageTouPart(
+            has_volume_simulation_percentage=False,
+            percentage_of_sum=1.0,
+            slot_code='TOTAL_HOURS',
+            value=59.492,
+          ),
+        ),
+      ),
     ),
+    costs_total=73.143,
     current=None,
     energy=UsageElectricityBreakdown(
-      injection=None,
+      injection=UsageDirectionBreakdown(
+        amount_sum=None,
+        distribution_parts=tuple(
+        ),
+        kwh_sum=155.217,
+        parts=tuple(
+        ),
+        supplier_parts=tuple(
+          UsageTouPart(
+            has_volume_simulation_percentage=None,
+            percentage_of_sum=1.0,
+            slot_code='TOTAL_HOURS',
+            value=155.217,
+          ),
+        ),
+      ),
       netto=None,
-      offtake=None,
+      offtake=UsageDirectionBreakdown(
+        amount_sum=None,
+        distribution_parts=tuple(
+        ),
+        kwh_sum=228.792,
+        parts=tuple(
+        ),
+        supplier_parts=tuple(
+          UsageTouPart(
+            has_volume_simulation_percentage=None,
+            percentage_of_sum=1.0,
+            slot_code='TOTAL_HOURS',
+            value=228.792,
+          ),
+        ),
+      ),
     ),
     gas=EnergyCostPair(
       cost=25.015,
@@ -2516,6 +2578,7 @@
 # name: test_getter_parses_payload_and_sends_expected_request[happy_hour_month_report_energy]
   HappyHourMonthReport(
     costs=None,
+    costs_total=None,
     current=None,
     energy=UsageElectricityBreakdown(
       injection=None,
