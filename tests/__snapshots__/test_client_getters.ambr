@@ -7700,7 +7700,7 @@
           ),
         ),
         electricity=ElectricityUsage(
-          injection_kwh=0.0,
+          injection_kwh=None,
           netto_kwh=1580.05,
           offtake_kwh=1580.05,
         ),

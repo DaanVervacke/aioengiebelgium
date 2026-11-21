@@ -833,18 +833,22 @@ class TouSchedulesResponse:
 
 @dataclass(frozen=True, slots=True)
 class ElectricityUsage:
-    """Electricity usage breakdown."""
+    """Flat electricity sums of one usage period.
 
-    offtake_kwh: float = 0.0
-    injection_kwh: float = 0.0
-    netto_kwh: float = 0.0
+    Each field matches its direction in the ``energy`` breakdown of the same
+    usage period and is ``None`` when the payload omits the value.
+    """
+
+    offtake_kwh: float | None = None
+    injection_kwh: float | None = None
+    netto_kwh: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class GasUsage:
-    """Gas usage data."""
+    """Gas usage of one usage period, ``None`` when the payload omits the value."""
 
-    kwh: float = 0.0
+    kwh: float | None = None
     cost: float | None = None
 
 

@@ -1098,7 +1098,7 @@ def _parse_usage_gas(energy: Any, costs: Any) -> GasUsage | None:
     gas_raw = energy.get("gas") if isinstance(energy, dict) else None
     if not isinstance(gas_raw, dict):
         return None
-    return GasUsage(kwh=_as_float(gas_raw.get("kWh")), cost=_usage_cost_value(costs, "gas"))
+    return GasUsage(kwh=_as_float_or_none(gas_raw.get("kWh")), cost=_usage_cost_value(costs, "gas"))
 
 
 def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:
@@ -1106,27 +1106,32 @@ def _parse_usage_item(raw: dict[str, Any]) -> UsageItem | None:
     end = _as_aware_datetime(raw.get("end"))
     if start is None or end is None:
         return None
-    electricity = None
     energy = raw.get("energy")
     elec = _usage_electricity_block(energy)
-    if isinstance(elec, dict):
-        offtake = elec.get("offtake")
-        injection = elec.get("injection")
-        electricity = ElectricityUsage(
-            offtake_kwh=_as_float(offtake.get("kWhSum") if isinstance(offtake, dict) else 0),
-            injection_kwh=_as_float(injection.get("kWhSum") if isinstance(injection, dict) else 0),
-            netto_kwh=_as_float(elec.get("netto")),
-        )
+    month_energy = _parse_usage_electricity_energy(elec)
     costs = raw.get("costs")
     simulated_energy = raw.get("simulatedEnergy")
     simulated_costs = raw.get("simulatedCosts")
+    electricity = (
+        ElectricityUsage(
+            offtake_kwh=(
+                month_energy.offtake.kwh_sum if month_energy.offtake is not None else None
+            ),
+            injection_kwh=(
+                month_energy.injection.kwh_sum if month_energy.injection is not None else None
+            ),
+            netto_kwh=month_energy.netto,
+        )
+        if month_energy is not None
+        else None
+    )
     return UsageItem(
         start=start,
         end=end,
         partial_data=bool(raw.get("partialData", False)),
         electricity=electricity,
         gas=_parse_usage_gas(energy, costs),
-        energy=_parse_usage_electricity_energy(elec),
+        energy=month_energy,
         costs=_parse_usage_electricity_costs(_usage_electricity_block(costs)),
         simulated_energy=_parse_usage_electricity_energy(
             _usage_electricity_block(simulated_energy)
