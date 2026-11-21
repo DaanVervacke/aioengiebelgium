@@ -26,7 +26,9 @@ once you receive the code.
 A failed code raises
 :class:`~aioengiebelgium.EngieBeMfaError`. The flow stays open after that
 error, so you can call ``async_submit_mfa`` again with a new code. Any
-other error closes the login session if the flow created it. Call
+other error closes the login session if the flow created it. After a
+finished login, such an error or an abort, a further ``async_submit_mfa``
+raises :class:`~aioengiebelgium.EngieBeAuthenticationError`. Call
 ``async_abort`` to give up. It closes the login session if the flow created
 it. Use the flow as ``async with flow:`` to call ``async_abort`` when the
 block exits, including on cancellation. Bad credentials or an expired token raise
